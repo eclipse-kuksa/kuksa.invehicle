@@ -1,0 +1,3 @@
+# This section is automatically added by AGL KUKSA scripts
+BBLAYERS =+ "@LAYER_PATH@"
+# End of automatically added section

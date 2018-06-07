@@ -1,0 +1,26 @@
+# ******************************************************************************
+# Copyright (c) 2018 Dortmund University of Applied Sciences and Arts
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v2.0
+# which accompanies this distribution, and is available at
+# https://www.eclipse.org/org/documents/epl-2.0/index.php
+#
+#  Contributors:
+#      Pedro Cuadra - initial build system and tooling
+# *****************************************************************************
+
+# Define required cmake version
+cmake_minimum_required(VERSION 2.8)
+
+include(ExternalProject)
+
+ExternalProject_Add(
+  @repo_name@
+  GIT_REPOSITORY "@repo_url@"
+  GIT_TAG "@repo_tag@"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND test -L "@repo_path@" || ln -sf
+    "${CMAKE_BINARY_DIR}/@repo_name@-prefix/src/@repo_name@"
+    "@repo_path@")
