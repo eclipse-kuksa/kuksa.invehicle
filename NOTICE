@@ -1,0 +1,55 @@
+# Notices for Eclipse Kuksa
+
+This content is produced and maintained by the Eclipse Kuksa project.
+
+* Project home: https://projects.eclipse.org/projects/iot.kuksa
+
+## Trademarks
+
+Eclipse Kuksa is a trademark of the Eclipse Foundation.
+
+## Copyright
+
+All content is the property of the respective authors or their employers. For
+more information regarding authorship of content, please consult the listed
+source code repository logs.
+
+## Declared Project Licenses
+
+This program and the accompanying materials are made available under the terms
+of the Eclipse Public License v. 2.0 which is available at
+http://www.eclipse.org/legal/epl-2.0.
+
+SPDX-License-Identifier: EPL-2.0
+
+## Source Code
+
+The project maintains the following source code repositories:
+
+* https://github.com/eclipse/kuksa.apps
+* https://github.com/eclipse/kuksa.cloud
+* https://github.com/eclipse/kuksa.ide
+* https://github.com/eclipse/kuksa.integration
+* https://github.com/eclipse/kuksa.invehicle
+* https://github.com/eclipse/kuksa.website
+* http://git.eclipse.org/c/kuksa/kuksa.git
+* http://git.eclipse.org/c/kuksa/www.git
+
+## Third-party Content
+
+This project leverages the following third party content.
+
+Simple-WebSocket-Server_V27.06.2018 (27.06.2018)
+
+* License: MIT
+* Project: https://gitlab.com/eidheim/Simple-WebSocket-Server/tree/master
+* Source: https://gitlab.com/eidheim/Simple-WebSocket-Server/tree/master
+
+## Cryptography
+
+Content may contain encryption software. The country in which you are currently
+may have restrictions on the import, possession, and use, and/or re-export to
+another country, of encryption software. BEFORE using any encryption software,
+please check the country's laws, regulations and policies concerning the import,
+possession, or use, and re-export of encryption software, to see if this is
+permitted.
