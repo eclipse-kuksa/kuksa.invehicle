@@ -16,7 +16,7 @@
 # AGL URL
 set(AGL_URL
  "https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo")
-set(AGL_VERSION "4.0.0")
+set(AGL_VERSION "4.0.3")
 set(AGL_RELEASE "dab")
 
 
@@ -25,14 +25,8 @@ set(AGL_RELEASE "dab")
 ##########################################################################
 # meta-kuksa repo
 set(META_KUKSA_URL
-"ssh://git@gitlab.idial.institute:2222/appstacle/meta-kuksa.git")
-set(META_KUKSA_VERSION "0.0.4")
+"ssh://git@github.com:rai20/kuksa.invehicle.git")
+set(META_KUKSA_VERSION "0.0.1")
 
-# meta-kuksa-dev repo
-set(META_KUKSA_DEV_URL
- "ssh://git@gitlab.idial.institute:2222/appstacle/meta-kuksa-dev.git")
-set(META_KUKSA_DEV_VERSION "0.0.2")
 
-# meta-rover repo
-set(META_ROVER_URL "https://github.com/meta-rover/meta-rover")
-set(META_ROVER_VERSION "0.1.3")
+

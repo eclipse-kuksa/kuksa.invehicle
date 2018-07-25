@@ -14,13 +14,19 @@
 cmake_minimum_required(VERSION 2.8)
 project(w3c-visserver)
 
+# Set this variable to ON build an exe
+set(BUILD_EXE OFF)
+
+#set this variable to ON to build the testclient
+set(BUILD_TEST_CLIENT OFF)
+
 #Flag for csv implementation.
 add_definitions(-DWITHCSV)
 add_compile_options(-std=c++11 -pthread)
 
 
 add_library(simple-websocket-server INTERFACE)
-target_include_directories(simple-websocket-server INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(simple-websocket-server INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/jsoncons)
 
 find_package(Threads REQUIRED)
 target_link_libraries(simple-websocket-server INTERFACE ${CMAKE_THREAD_LIBS_INIT})
@@ -45,6 +51,16 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 file(GLOB_RECURSE SRC_FILES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
-
-add_library(${PROJECT_NAME} ${SRC_FILES})
+if(NOT BUILD_EXE)
+   add_library(${PROJECT_NAME} ${SRC_FILES})
+else() 
+   add_executable(${PROJECT_NAME} ${SRC_FILES})
+endif(NOT EXE)
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
+
+if(BUILD_TEST_CLIENT)
+   add_executable(testclient ${CMAKE_CURRENT_SOURCE_DIR}/test/testclient.cpp)
+   target_link_libraries(testclient  simple-websocket-server)
+   target_include_directories(testclient PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/jsoncons)
+endif(BUILD_TEST_CLIENT)
+   
