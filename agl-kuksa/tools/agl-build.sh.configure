@@ -21,7 +21,7 @@ export LAYERS_LIST="@LAYERS_LIST@"
 source meta-agl/scripts/aglsetup.sh
 
 # Build the target
-bitbake agl-demo-platform-crosssdk
+bitbake agl-demo-platform
 
-# Copy sdk to build directory
-cp -r @AGL_ROOT@/build/tmp/deploy/sdk/* @SDK_PATH@
+# Copy images to build directory
+cp -r @AGL_ROOT@/build/tmp/deploy/images/* @IMAGE_PATH@
