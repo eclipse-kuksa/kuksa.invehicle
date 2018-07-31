@@ -41,25 +41,22 @@ file(MAKE_DIRECTORY "${GIT_ROOT_PATH}")
 
 
 # Clone meta-kuksa repo
-set(META_KUKSA_PATH "${GIT_ROOT_PATH}/meta-kuksa")
-git_clone(meta-kuksa
-  "${META_KUKSA_URL}"
-  "${META_KUKSA_VERSION}"
-  "${META_KUKSA_PATH}")
+set(META_KUKSA_PATH "${CMAKE_SOURCE_DIR}/meta-kuksa")
+
 
 # Clone meta-kuksa-dev repo
-set(META_KUKSA_DEV_PATH "${GIT_ROOT_PATH}/meta-kuksa-dev")
-git_clone(meta-kuksa-dev
-  "${META_KUKSA_DEV_URL}"
-  "${META_KUKSA_DEV_VERSION}"
-  "${META_KUKSA_DEV_PATH}")
+#set(META_KUKSA_DEV_PATH "${GIT_ROOT_PATH}/meta-kuksa-dev")
+#git_clone(meta-kuksa-dev
+#  "${META_KUKSA_DEV_URL}"
+#  "${META_KUKSA_DEV_VERSION}"
+#  "${META_KUKSA_DEV_PATH}")
 
 # Clone meta-rover repo
-set(META_ROVER_PATH "${GIT_ROOT_PATH}/meta-rover")
-git_clone(meta-rover
-  "${META_ROVER_URL}"
-  "${META_ROVER_VERSION}"
-  "${META_ROVER_PATH}")
+#set(META_ROVER_PATH "${GIT_ROOT_PATH}/meta-rover")
+#git_clone(meta-rover
+#  "${META_ROVER_URL}"
+#  "${META_ROVER_VERSION}"
+#  "${META_ROVER_PATH}")
 
 
 # Prepare output directories
@@ -87,16 +84,3 @@ add_custom_target(agl-kuksa
   DEPENDS agl-kuksa-config
   WORKING_DIRECTORY "${AGL_ROOT}")
 
-add_custom_target(agl-rover-config
-  COMMAND bash "${AGL_BUILD_TMP_PATH}/agl-rover-configure.sh"
-  WORKING_DIRECTORY "${AGL_ROOT}")
-
-add_custom_target(agl-rover-build
-  COMMAND bash "${AGL_BUILD_TMP_PATH}/agl-rover-build.sh"
-  WORKING_DIRECTORY "${AGL_ROOT}")
-
-# Add agl-rover target
-add_custom_target(agl-rover
-  COMMAND bash "${AGL_BUILD_TMP_PATH}/agl-rover-build.sh"
-  DEPENDS agl-rover-config
-  WORKING_DIRECTORY "${AGL_ROOT}")
