@@ -57,4 +57,3 @@ Enter the same vss path as above and fuction as get. You should receive the prev
 | Secure WebSocket  | :heavy_check_mark: |   
 | Authentification  | :heavy_multiplication_x: |
 
-
