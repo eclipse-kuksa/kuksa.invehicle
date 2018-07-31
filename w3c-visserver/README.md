@@ -7,6 +7,7 @@ The implementation at the moment is in a nacent state and includes only the basi
 1. [Simple-WebSocket-Server](https://gitlab.com/eidheim/Simple-WebSocket-Server) which is under MIT license.
 2. [jsoncons](https://github.com/danielaparker/jsoncons) which is under Boost Software License.
 
+
 # How to build
 w3c-visserver can be built as a library which could be used in another application. Eg: could be found in the vehicle2cloud app.
 ```
