@@ -195,22 +195,6 @@ macro(agl_build_configure)
     "${AGL_BUILD_TMP_PATH}/agl-kuksa-configure.sh"
     @ONLY)
 
-  # Add meta-rover layer
-  config_layer(meta-rover "${META_ROVER_PATH}")
-
-  # Add distribution
-  # set(POKY_DISTRO "kuksa-rover")
-
-  # For agl-rover target
-  configure_file("${CMAKE_SOURCE_DIR}/tools/agl-build.sh.configure"
-    "${AGL_BUILD_TMP_PATH}/agl-rover-build.sh"
-    @ONLY)
-
-  configure_file("${CMAKE_SOURCE_DIR}/tools/agl-configure.sh.configure"
-    "${AGL_BUILD_TMP_PATH}/agl-rover-configure.sh"
-    @ONLY)
-
-
 endmacro(agl_build_configure)
 
 # Source for creating the
