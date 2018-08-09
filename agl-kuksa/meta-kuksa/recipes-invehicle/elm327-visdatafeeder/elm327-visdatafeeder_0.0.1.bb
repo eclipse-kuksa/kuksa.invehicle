@@ -25,4 +25,4 @@ SRC_URI = "git://github.com/eclipse/kuksa.invehicle.git;protocol=https"
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
 EXTRA_OECMAKE += "-Dpkg_config_libdir=${libdir} -DCMAKE_BUILD_TYPE=Release"
 
-S = "${WORKDIR}/git/elm327_visdatafeeder"
+S = "${WORKDIR}/git/elm327-visdatafeeder"
