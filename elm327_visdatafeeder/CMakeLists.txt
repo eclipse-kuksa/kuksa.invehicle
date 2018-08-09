@@ -46,4 +46,4 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 
 
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
-
+install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327_visdatafeeder)

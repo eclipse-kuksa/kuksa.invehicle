@@ -52,6 +52,6 @@ target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
 
 # uncomment lines below while building AGL image.
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin)
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
 #install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.csv DESTINATION /usr/bin)
 #install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.json DESTINATION /usr/bin)
