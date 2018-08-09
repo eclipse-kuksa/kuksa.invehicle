@@ -12,7 +12,7 @@
 # *****************************************************************************
 
 cmake_minimum_required(VERSION 2.8)
-project(elm327_visdatafeeder)
+project(elm327-visdatafeeder)
 
 #add_definitions(-DDEBUG)
 add_compile_options(-std=c++11)
@@ -46,4 +46,4 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 
 
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
-install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327_visdatafeeder)
+install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327-visdatafeeder)

@@ -9,4 +9,4 @@ This is a simple data feeder to w3c-visserver service that reads OBD II data for
 * ssh into the raspi 3 with root.
 * create self-signed cerificates using steps mentioned [here](https://kb.op5.com/pages/viewpage.action?pageId=19073746#sthash.GHsaFkZe.dpbs) and rename the files to Client.key, Client.pem and CA.pem. Make sure you use the same CA while creating Server certificates.
 * Then copy the Client.key, Client.pem and CA.pem to /usr/bin/elm327-visdatafeeder using a ssh connection.
-* Launch the app. Using command `./usr/bin/elm327_visdatafeeder/elm327_visdatafeeder 'ELM-PORT'`
+* Launch the app. Using command `./usr/bin/elm327-visdatafeeder/elm327-visdatafeeder 'ELM-PORT'`
