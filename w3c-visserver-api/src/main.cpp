@@ -36,7 +36,7 @@ using WssServer = SimpleWeb::SocketServer<SimpleWeb::WSS>;
 uint16_t connections[MAX_CLIENTS + 1] = {0};
 
 std::string query;
-WssServer server("server.crt", "server.key");
+WssServer server("Server.pem", "Server.key");
 
 
 struct node mainNode;
@@ -63,7 +63,7 @@ void* startWSServer(void * arg) {
 
    cout<<"starting secure WS server"<<endl;
            
-   server.config.port = 9000;
+   server.config.port = 8090;
 
    auto &vssEndpoint = server.endpoint["^/vss/?$"];
 

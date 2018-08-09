@@ -10,21 +10,28 @@
 #  Contributors:
 #      Robert Bosch GmbH - initial API and functionality
 # *****************************************************************************
+
 cmake_minimum_required(VERSION 2.8)
+project(w3c-visserver)
 
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../w3c-visserver ${CMAKE_CURRENT_SOURCE_DIR}/../w3c-visserver/build)
 
-project(vehicle2cloud)
+# Set this variable to ON build an exe
+set(BUILD_EXE ON)
 
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+#set this variable to ON to build the testclient
+set(BUILD_TEST_CLIENT OFF)
 
-add_compile_options(-std=c++11 )
 
-add_executable(${PROJECT_NAME}  "src/main.cpp" "src/honoHTTP.cpp")
-#target_link_libraries(${PROJECT_NAME} w3c-visserver)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jsoncons)
+
+#Flag for csv implementation.
+add_definitions(-DDEBUG)
+add_compile_options(-std=c++11 -pthread)
+
 
 add_library(simple-websocket-server INTERFACE)
+
+target_include_directories(simple-websocket-server INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jsoncons)
+
 
 find_package(Threads REQUIRED)
 target_link_libraries(simple-websocket-server INTERFACE ${CMAKE_THREAD_LIBS_INIT})
@@ -46,12 +53,22 @@ target_link_libraries(simple-websocket-server INTERFACE ${OPENSSL_LIBRARIES})
 target_include_directories(simple-websocket-server INTERFACE ${OPENSSL_INCLUDE_DIR})
 message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 
+file(GLOB_RECURSE SRC_FILES
+${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+)
 
+if(NOT BUILD_EXE)
+   add_library(${PROJECT_NAME} ${SRC_FILES})
+else() 
+   add_executable(${PROJECT_NAME} ${SRC_FILES})
+endif(NOT EXE)
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
+if(BUILD_TEST_CLIENT)
+   add_executable(testclient ${CMAKE_CURRENT_SOURCE_DIR}/test/testclient.cpp)
+   target_link_libraries(testclient  simple-websocket-server)
+   target_include_directories(testclient PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/jsoncons)
+endif(BUILD_TEST_CLIENT)
 
+install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/w3c-visserver)
 
-# uncomment lines below while building AGL image.
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
-#install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.csv DESTINATION /usr/bin)
-#install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.json DESTINATION /usr/bin)

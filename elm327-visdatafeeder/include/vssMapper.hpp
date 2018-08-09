@@ -11,10 +11,9 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include "vss.hpp"
 #include <string>
 
 using namespace std;
 
-void setRPM();
-void setVehicleSpeed();
+string setRPM();
+string setVehicleSpeed();
