@@ -3,6 +3,7 @@
 
 #include "crypto.hpp"
 #include "utility.hpp"
+#include "wschannel.hpp"
 
 #include <array>
 #include <atomic>
@@ -108,7 +109,7 @@ namespace SimpleWeb {
 
       CaseInsensitiveMultimap header;
 
-      uint32_t connectionID;
+      wschannel channel;
 
       regex::smatch path_match;
 
