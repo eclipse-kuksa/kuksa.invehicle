@@ -33,6 +33,8 @@ int  honoPort;
 char honoDevice[256];
 char honoPassword[256];
 
+char TOKEN[2048];
+
 const string DEFAULT_TENANT = "DEFAULT_TENANT";
 
 std::string query;
@@ -47,6 +49,17 @@ void sendToHono( string resp) {
     cout << "Response >> " << resp << endl;
     json root;
     root = json::parse(resp);
+    string action = root["action"].as<string>();
+    
+    if( action == "authorize") {
+        return;
+    } else if ( root.has_key("error")) {
+        cout << " Error response from server " <<  root["error"].as<string>() << endl;
+        return;
+    }
+
+     
+      
     std::string value = root["value"].as<string>();
     int val = stoi(value, nullptr, 10);   
     int reqID = root["requestId"].as<int>();
@@ -73,6 +86,18 @@ void* honoConnectRun (void* arg) {
   // wait for 10 seconds.
   usleep(1000000);
   auto send_stream = make_shared<WssClient::SendStream>();
+
+  // send Authorize request.
+   json authreq;
+   authreq["requestId"] = rand() % 99999;
+   authreq["action"]= "authorize";
+   authreq["tokens"] = string(TOKEN);
+   stringstream ss; 
+   ss << pretty_print(authreq);
+   *send_stream << ss.str();
+   connection->send(send_stream); 
+
+   usleep(1000000);
 
   // send data to hono instance.
   while(1) {
@@ -145,15 +170,16 @@ void* startWSClient(void * arg) {
 int main(int argc, char* argv[])
 {
 
-        if(argc == 5) {
+        if(argc == 6) {
            strcpy(honoAddress , argv[1]);
            char honoPortStr[16];
            strcpy(honoPortStr , argv[2]);
            honoPort = stoi(honoPortStr, nullptr, 10); 
            strcpy(honoPassword , argv[3]); 
            strcpy(honoDevice , argv[4]);
+           strcpy(TOKEN, argv[5]);
         } else {
-           cerr<<"Usage ./vehicle2cloud <HONO IP-ADDR> <HONO PORT> <HONO-PASSWORD> <HONO-DEVICE NAME>"<<endl;
+           cerr<<"Usage ./vehicle2cloud <HONO IP-ADDR> <HONO PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
            return -1; 
         }
 
