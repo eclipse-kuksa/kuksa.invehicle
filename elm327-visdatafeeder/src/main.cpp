@@ -25,7 +25,7 @@ using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 int connectionHandle = -1;
 
 char PORT[128];
-char TOKEN[2048];
+char TOKEN[8096];
 
 string url = "localhost:8090/vss";
 

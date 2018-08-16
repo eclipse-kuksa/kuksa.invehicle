@@ -89,7 +89,7 @@ void* honoConnectRun (void* arg) {
 
   // send Authorize request.
    json authreq;
-   authreq["requestId"] = rand() % 99999;
+   authreq["requestId"] = rand() % 999999;
    authreq["action"]= "authorize";
    authreq["tokens"] = string(TOKEN);
    stringstream ss; 
