@@ -13,9 +13,6 @@
 #
 
 import sys, getopt
-
-#from typing import List, Any
-
 from optparse import OptionParser
 import time
 from pathlib import Path
@@ -25,8 +22,6 @@ import sys
 import binascii
 from importlib import reload
 
-
-reload(sys)
 if sys.version[0] == '2':
     reload(sys)
     sys.setdefaultencoding("utf-8")
@@ -52,11 +47,6 @@ class BindClass:
 
 
     def buildingModel(self,pkt):
-
-        total = 0
-        minTimestamp = 0
-        maxTimestamp = 0
-
 
         msg_id=[]
 
@@ -120,16 +110,6 @@ class BindClass:
 
     #Anomaly detection
     def anomalyDetection(self,pkt):
-
-        minTimestamp = 0
-        maxTimestamp = 0
-        counter=0
-
-        has_anomaly = False
-        anomaly_counter = 0
-
-        dos_threshold = 1 #number of packets seen with time interval < 0.2 ms to raise a DOS attack alert
-        dos_counter = 0
 
         new_packet = pkt.getlayer(Raw).load
         can_id = bytes(new_packet[0])
