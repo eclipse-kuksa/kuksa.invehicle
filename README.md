@@ -27,6 +27,7 @@ Contributors:
 * *kuksa-hawkbit* - API for connecting with Hawkbit.
 * *w3c-visserver_api* - W3C Vehicle Information Specification API.
 * *vehicle2cloud* - Example app that sends data from the vehicle to Eclipse an Hono instance.
+* *netIDS* - Network IDS instance that processes in-vehicle data and detect anomalies from them.
 
 
 ## How to build AGL-Kuksa
