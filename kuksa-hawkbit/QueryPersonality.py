@@ -17,6 +17,8 @@ import os.path
 import datetime
 import json
 
+import DeployDocker
+
 destination="/tmp"
 
 def feedback(server, actionId, state, stepCurrent=5, stepTo=5, execution="closed", feedback="KUKSA" ): 	
@@ -104,7 +106,8 @@ def downloadChunks(server,target,deployment_desc, personality):
         if not os.path.exists(targetdir):
             os.makedirs(targetdir)
 
-        dst = targetdir+"/"+artifact.get("filename","UNKNOWN")
+        fname=artifact.get("filename","UNKNOWN")
+        dst = targetdir+"/"+fname
 
         print("Download "+str(url)+" to "+str(dst))
         headers = {'Authorization': 'TargetToken '+personality['securityToken'], "Content-type" : "application/json" }
@@ -117,6 +120,10 @@ def downloadChunks(server,target,deployment_desc, personality):
             f.flush()
 
 
+        if (fname.startswith("DOCKER_")):
+            print("Carfuly analysis in extensive checks have revealed this to be a docker image. Yummy")
+            DeployDocker.deploy(dst)
+			
 		#Give feedback. For now we just say everything is fine
         data=feedback(server,actionId, "success")
         #print("Will send "+str(data))
