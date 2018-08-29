@@ -18,6 +18,7 @@ import datetime
 import json
 
 import DeployDocker
+import DeployCopyStart
 
 destination="/tmp"
 
@@ -121,8 +122,12 @@ def downloadChunks(server,target,deployment_desc, personality):
 
 
         if (fname.startswith("DOCKER_")):
-            print("Carfuly analysis in extensive checks have revealed this to be a docker image. Yummy")
+            print("Carful analysis in extensive checks have revealed this to be a docker image. Yummy")
             DeployDocker.deploy(dst)
+        elif (fname.startswith("SIMPLE_")):
+            print("Carful analysis in extensive checks have revealed this to be a boring app. Starting anyway")
+            DeployCopyStart.deploy(dst)
+            
 			
 		#Give feedback. For now we just say everything is fine
         data=feedback(server,actionId, "success")
