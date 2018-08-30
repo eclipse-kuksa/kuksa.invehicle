@@ -25,6 +25,7 @@ using namespace std;
 
 using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 using namespace jsoncons;
+using jsoncons::json;
 
 bool honoConnect = true;
 
@@ -57,9 +58,21 @@ void sendToHono( string resp) {
         cout << " Error response from server " <<  root["error"].as<string>() << endl;
         return;
     }
+  
+    if( !root.has_key("value")) {
+        cout << " No value from server found" <<endl;
+        return;
+    } else if ( root["value"].as<string>() == "---") {
+        cout << " No value set !! . server ahs returned --- for"<< root["path"].as<string>() <<endl;
+        return;
+    }    
 
-     
-      
+    if( !root.has_key("value")) {
+        cout << " No value returned from server"<< endl;
+        return;
+    } 
+
+
     std::string value = root["value"].as<string>();
     int val = stoi(value, nullptr, 10);   
     int reqID = root["requestId"].as<int>();
@@ -69,9 +82,9 @@ void sendToHono( string resp) {
     } else if (reqID == 1235) {
        signal = "SPEED";
     } 
-
-   // int status = sendTelemetryDataToHonoInstance (honoAddress, honoPort, (char*) DEFAULT_TENANT.c_str(), honoDevice, honoPassword, (char*)signal.c_str(), val);
-      int status = 1;
+    //  int status = 1;
+    int status = sendTelemetryDataToHonoInstance (honoAddress, honoPort, (char*) DEFAULT_TENANT.c_str(), honoDevice, honoPassword, (char*)signal.c_str(), val);
+      
     if (status == 1) {
         cout << "Message accepted by HONO"<< endl;
     } else {
@@ -97,12 +110,11 @@ void* honoConnectRun (void* arg) {
    *send_stream << ss.str();
    connection->send(send_stream); 
 
-   usleep(1000000);
 
   // send data to hono instance.
   while(1) {
     
-    string rpm_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.EngineSpeed\", \"requestId\": 1234 }";
+    string rpm_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.RPM\", \"requestId\": 1234 }";
 
     
     *send_stream << rpm_req;
@@ -194,8 +206,7 @@ int main(int argc, char* argv[])
          return 1;
 
         }
-
-   getchar();
+while (1) { usleep (1000000); };
 }
 
 

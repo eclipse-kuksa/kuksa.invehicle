@@ -12,19 +12,13 @@
  * *****************************************************************************
  */
 
-#include"accesschecker.hpp"
+#ifndef __VISCONF_H__
+#define __VISCONF_H__
 
-accesschecker::accesschecker(class  authenticator* vdator) {
-   tokenValidator = vdator;
-}
+#define CLIENT_MASK 100000000
+#define MAX_CLIENTS 20
+#define MAX_SIGNALS 2000
+#define MAX_TREENODES 1024
+#define MAX_PARENT_BRANCHES 10
 
-bool accesschecker::checkAccess(class wschannel& channel , string path) {
- 
-  /* if (channel.isAuthorized() ) {
-       return tokenValidator->isStillValid (channel); 
-   } else {
-       return false;
-   }*/
-
-   return true;
-} 
+#endif

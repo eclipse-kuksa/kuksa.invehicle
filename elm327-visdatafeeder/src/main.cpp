@@ -87,14 +87,7 @@ void* startWSClient(void * arg) {
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
     cout << "Connection wirh server at " << url << " opened" << endl;
     connection = conn;
-       pthread_t ELMRun_thread;
-    /* create test run thread which updates the tree */
-        if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
-
-         cout << "Error creating test run thread"<<endl;
-         return 1;
-
-        }
+    
   };
 
   client.on_close = [](shared_ptr<WssClient::Connection> /*connection*/, int status, const string & /*reason*/) {
@@ -121,6 +114,18 @@ int main(int argc, char* argv[])
            cerr<<"Usage ./elm327_visfeeder <ELM327-PORT>  <JWT TOKEN>"<<endl;
            return -1; 
         }
+
+        
+       pthread_t ELMRun_thread;
+        /* create test run thread which updates the tree */
+        if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
+
+         cout << "Error creating test run thread"<<endl;
+         return 1;
+
+        }
+
+         usleep(1000000);
 
         pthread_t startWSClient_thread;
 

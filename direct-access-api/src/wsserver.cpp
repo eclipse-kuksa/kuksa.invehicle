@@ -12,10 +12,10 @@
  * *****************************************************************************
  */
 #include "wsserver.hpp"
-#include "vsscommandprocessor.hpp"
+#include "directAccessProcessor.hpp"
 #include "visconf.hpp"
 
-#define PORT 8090
+#define PORT 9000
  
 
 uint16_t connections[MAX_CLIENTS + 1] = {0};
@@ -46,10 +46,8 @@ wsserver::wsserver(int port, bool secure) {
      insecureServer->config.port = port;
   }
   
-  tokenValidator =  new authenticator("appstacle", "RS256");
-  subHandler = new subscriptionhandler(this, tokenValidator);
-  database = new vssdatabase(subHandler);
-  cmdProcessor = new vsscommandprocessor(database, tokenValidator, subHandler);
+  tokenValidator =  new authenticator("appstacle", "HS256");
+  cmdProcessor = new directAccessProcessor(tokenValidator);
   wserver = this;
 }
 
@@ -61,7 +59,7 @@ wsserver::~wsserver() {
 
 static void onMessage (shared_ptr<WssServer::Connection> connection, string message) {
   #ifdef DEBUG
-      cout << "main::onMessage: Message received: \"" << message << "\" from " << connection->remote_endpoint_address() << endl;
+      //cout << "main::onMessage: Message received: \"" << message << "\" from " << connection->remote_endpoint_address() << endl;
   #endif
       string response = wserver->cmdProcessor->processQuery(message, connection->channel);
      
@@ -73,7 +71,7 @@ static void onMessage (shared_ptr<WssServer::Connection> connection, string mess
 
 static void onMessage (shared_ptr<WsServer::Connection> connection, string message) {
   #ifdef DEBUG
-      cout << "main::onMessage: Message received: \"" << message << "\" from " << connection->remote_endpoint_address() << endl;
+      //cout << "main::onMessage: Message received: \"" << message << "\" from " << connection->remote_endpoint_address() << endl;
   #endif
       string response = wserver->cmdProcessor->processQuery(message, connection->channel);
      
@@ -199,7 +197,7 @@ int main(int argc, char* argv[])
 {
  
         wsserver server(PORT, false);
-        server.database->initJsonTree();
+       
         pthread_t startWSServer_thread;
         
         
