@@ -11,7 +11,7 @@
 #      SecurityMatters - network IDS first version
 # *****************************************************************************
 
-SUMMARY = "ELM 327 VIS Data feeder"
+SUMMARY = "Network IDS initial contribution"
 DESCRIPTION = "Network IDS for in-vehicle"
 HOMEPAGE = ""
 LICENSE = "EPL-2.0"
