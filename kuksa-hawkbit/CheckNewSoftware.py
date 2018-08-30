@@ -8,6 +8,8 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
+# Contributors: Robert Bosch GmbH
+
 
 import configparser
 import sys
