@@ -68,7 +68,7 @@ The output images can be seen at `<agl-kuksa-root>/build/images` and the SDKs at
 
 Execute
 
-`sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc- multilib build-essential chrpath socat libsdl1.2-dev xterm cpio curl`
+`sudo apt-get install gawk wget git-core diffstat unzip texinfo gcc-multilib build-essential chrpath socat libsdl1.2-dev xterm cpio curl`
 
 This will install the necessary packages.
 

@@ -11,18 +11,30 @@
 # Contributors: Robert Bosch GmbH
 #
 
-
-
 import requests
 import os.path
 import datetime
 import json
-
 import DeployDocker
 import DeployCopyStart
 import HawkbitUtil
 
 destination="/tmp"
+
+def feedback(server, actionId, state, stepCurrent=5, stepTo=5, execution="closed", feedback="KUKSA" ): 	
+    reply= {}
+    reply['id'] = actionId
+    reply['time'] = datetime.datetime.utcnow().isoformat()
+    reply['status'] = {}
+    reply['status']['result'] = {}
+    progress= { "of" : stepTo, "cnt": stepCurrent }
+    reply['status']['result']['progress']=progress 
+    reply['status']['result']['finished']=state 
+    reply['status']['execution'] =  execution 
+    reply['status']['details'] = [ feedback ]
+    
+    
+    return json.dumps(reply)
 
 
 
@@ -60,7 +72,6 @@ def queryHawkbit(server, personality, dst):
 
     response = r.json()
     #print(str(r.json()))
-    
     dd['chunks']=r.json()
     downloadChunks(dd)
 
