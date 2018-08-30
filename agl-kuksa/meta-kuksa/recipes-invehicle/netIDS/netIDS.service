@@ -3,7 +3,11 @@ Description = Network IDS application
 
 [Service]
 Environment = "ARGS = 5 vcan0 true"
-ExecStart = python3 /usr/bin/netIDS/TimeIntervals.py $ARGS
+ExecStart = /usr/bin/python3 -u /usr/bin/netIDS/TimeIntervals.py $ARGS
+RestartSec=5
+Restart=always
+StandardOutput=journal
+
 
 [Install]
 WantedBy = multi-user.target
