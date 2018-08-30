@@ -10,9 +10,13 @@
 #
 # Contributors: Robert Bosch GmbH
 #
-
-# Just copy and start
-
+# This is just an example for a deployment method. It expects a tar.bz2
+# archive. The archis extrated to /usr/apps/<random_uuid> (make sure
+# /usr/apps exists) and start.sh, which is expected to be at the top
+# level of the archive is executed.
+#
+# This deployment module does not take care of starting the deployed 
+# software during boot, but start.sh might take care of this
 
 import subprocess
 import uuid

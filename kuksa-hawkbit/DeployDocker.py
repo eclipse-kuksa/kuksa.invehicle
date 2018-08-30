@@ -10,8 +10,12 @@
 #
 # Contributors: Robert Bosch GmbH
 #
-
-#Experimental docker deployment without magic
+#
+# This is an experimental docker deployment stub without magic
+# it expects a tar.bz2 archive which should contain an saved docker
+# image that can be imported with docker load
+# 
+# the deployment module just "load" and "runs" the image. 
 
 
 import subprocess
