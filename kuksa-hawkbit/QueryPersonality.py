@@ -96,7 +96,6 @@ def downloadChunks(dd):
                 return
 
 
-
         #create dir for target
         targetdir=str(destination)+"/"+str(dd['personality']['target'])
         if not os.path.exists(targetdir):
@@ -117,18 +116,17 @@ def downloadChunks(dd):
 
 
         if (fname.startswith("DOCKER_")):
-            print("Carful analysis in extensive checks have revealed this to be a docker image. Yummy")
+            print("Careful analysis and extensive checks have revealed this to be a docker image. Yummy")
             DeployDocker.deploy(dst)
         elif (fname.startswith("SIMPLE_")):
-            print("Carful analysis in extensive checks have revealed this to be a boring app. Starting anyway")
+            print("Careful analysis and extensive checks have revealed this to be a boring app. Starting anyway")
             DeployCopyStart.deploy(dst)
         else:
+            print("I do not quite know what to do with this, so I will just download")
             print("Download only")
             
 			
 		#Give feedback. For now we just say everything is fine
-        #data=feedback(dd['server'],actionId, "success")
         HawkbitUtil.feedback(dd, "success");
-        #print("Will send "+str(data))
        
         print("Done: "+str(r.status_code))
