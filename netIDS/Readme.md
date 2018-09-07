@@ -2,7 +2,7 @@
 
 Network IDS first version
 
-Current version is has support for both CAN and Ethernet-layered protocols
+Current version has support for both CAN and Ethernet-layered protocols
 
 ## Requirements
 
