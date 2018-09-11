@@ -92,7 +92,7 @@ bool connectOBD(int timeout)
    SerialPortSettings.c_cc[VMIN]  = 10; /* Read 10 characters */
    SerialPortSettings.c_cc[VTIME] = 10; // wait for val/10 seconds between each byte received.
 
-   connectionHandle = open(PORT, O_RDWR | O_NOCTTY | O_NDELAY);
+   connectionHandle = open("/dev/rfcomm0", O_RDWR | O_NOCTTY | O_NDELAY);
    // set the comm parameters for ELM 327 with Bluetooth.
    cfsetispeed(&SerialPortSettings,BAUD_RATE);
    cfsetospeed(&SerialPortSettings,BAUD_RATE);

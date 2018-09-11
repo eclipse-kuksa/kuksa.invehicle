@@ -8,15 +8,21 @@
  * https://www.eclipse.org/org/documents/epl-2.0/index.php
  *
  *  Contributors:
- *      Pratheek Rai (Robert Bosch GmbH) - initial API and functionality
+ *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
 
-#include "vss.hpp"
-#include <string>
-#include <stdint.h>
-using namespace std;
+#include"accesschecker.hpp"
 
+accesschecker::accesschecker(class  authenticator* vdator) {
+   tokenValidator = vdator;
+}
 
-string serializeSignal(signal sig,uint32_t request_id);
-
+bool accesschecker::checkAccess(class wschannel& channel , string path) {
+ 
+   if (channel.isAuthorized() ) {
+       return tokenValidator->isStillValid (channel); 
+   } else {
+       return false;
+   }
+} 

@@ -12,14 +12,14 @@
 # *****************************************************************************
 
 cmake_minimum_required(VERSION 2.8)
-project(w3c-visserver)
+project(direct-access)
 
 
 # Set this variable to ON build an exe
 set(BUILD_EXE ON)
 
 #set this variable to ON to build the testclient
-set(BUILD_TEST_CLIENT ON)
+set(BUILD_TEST_CLIENT OFF)
 
 
 
@@ -61,7 +61,7 @@ if(NOT BUILD_EXE)
    add_library(${PROJECT_NAME} ${SRC_FILES})
 else() 
    add_executable(${PROJECT_NAME} ${SRC_FILES})
-endif(NOT EXE)
+endif(NOT BUILD_EXE)
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
 if(BUILD_TEST_CLIENT)
@@ -70,5 +70,5 @@ if(BUILD_TEST_CLIENT)
    target_include_directories(testclient PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/jsoncons)
 endif(BUILD_TEST_CLIENT)
 
-install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/w3c-visserver)
+#install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/w3c-visserver)
 

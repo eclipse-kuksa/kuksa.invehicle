@@ -25,6 +25,7 @@ using namespace std;
 
 using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 using namespace jsoncons;
+using jsoncons::json;
 
 bool honoConnect = true;
 
@@ -32,6 +33,8 @@ char honoAddress[256];
 int  honoPort;
 char honoDevice[256];
 char honoPassword[256];
+
+char TOKEN[2048];
 
 const string DEFAULT_TENANT = "DEFAULT_TENANT";
 
@@ -47,6 +50,29 @@ void sendToHono( string resp) {
     cout << "Response >> " << resp << endl;
     json root;
     root = json::parse(resp);
+    string action = root["action"].as<string>();
+    
+    if( action == "authorize") {
+        return;
+    } else if ( root.has_key("error")) {
+        cout << " Error response from server " <<  root["error"].as<string>() << endl;
+        return;
+    }
+  
+    if( !root.has_key("value")) {
+        cout << " No value from server found" <<endl;
+        return;
+    } else if ( root["value"].as<string>() == "---") {
+        cout << " No value set !! . server ahs returned --- for"<< root["path"].as<string>() <<endl;
+        return;
+    }    
+
+    if( !root.has_key("value")) {
+        cout << " No value returned from server"<< endl;
+        return;
+    } 
+
+
     std::string value = root["value"].as<string>();
     int val = stoi(value, nullptr, 10);   
     int reqID = root["requestId"].as<int>();
@@ -56,9 +82,9 @@ void sendToHono( string resp) {
     } else if (reqID == 1235) {
        signal = "SPEED";
     } 
-
-   // int status = sendTelemetryDataToHonoInstance (honoAddress, honoPort, (char*) DEFAULT_TENANT.c_str(), honoDevice, honoPassword, (char*)signal.c_str(), val);
-      int status = 1;
+    //  int status = 1;
+    int status = sendTelemetryDataToHonoInstance (honoAddress, honoPort, (char*) DEFAULT_TENANT.c_str(), honoDevice, honoPassword, (char*)signal.c_str(), val);
+      
     if (status == 1) {
         cout << "Message accepted by HONO"<< endl;
     } else {
@@ -74,10 +100,21 @@ void* honoConnectRun (void* arg) {
   usleep(1000000);
   auto send_stream = make_shared<WssClient::SendStream>();
 
+  // send Authorize request.
+   json authreq;
+   authreq["requestId"] = rand() % 999999;
+   authreq["action"]= "authorize";
+   authreq["tokens"] = string(TOKEN);
+   stringstream ss; 
+   ss << pretty_print(authreq);
+   *send_stream << ss.str();
+   connection->send(send_stream); 
+
+
   // send data to hono instance.
   while(1) {
     
-    string rpm_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.EngineSpeed\", \"requestId\": 1234 }";
+    string rpm_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.RPM\", \"requestId\": 1234 }";
 
     
     *send_stream << rpm_req;
@@ -145,15 +182,16 @@ void* startWSClient(void * arg) {
 int main(int argc, char* argv[])
 {
 
-        if(argc == 5) {
+        if(argc == 6) {
            strcpy(honoAddress , argv[1]);
            char honoPortStr[16];
            strcpy(honoPortStr , argv[2]);
            honoPort = stoi(honoPortStr, nullptr, 10); 
            strcpy(honoPassword , argv[3]); 
            strcpy(honoDevice , argv[4]);
+           strcpy(TOKEN, argv[5]);
         } else {
-           cerr<<"Usage ./vehicle2cloud <HONO IP-ADDR> <HONO PORT> <HONO-PASSWORD> <HONO-DEVICE NAME>"<<endl;
+           cerr<<"Usage ./vehicle2cloud <HONO IP-ADDR> <HONO PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
            return -1; 
         }
 
@@ -168,8 +206,7 @@ int main(int argc, char* argv[])
          return 1;
 
         }
-
-   getchar();
+while (1) { usleep (1000000); };
 }
 
 

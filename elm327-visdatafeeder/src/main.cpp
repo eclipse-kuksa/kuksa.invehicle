@@ -25,28 +25,38 @@ using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 int connectionHandle = -1;
 
 char PORT[128];
+char TOKEN[8096];
 
 string url = "localhost:8090/vss";
 
 shared_ptr<WssClient::Connection> connection = NULL;
 
 void sendRequest(string command) {
-
-cout << "Send << " << command <<endl;
-           
-       auto send_stream = make_shared<WssClient::SendStream>();
-       *send_stream << command;
-       connection->send(send_stream);
-
+   cout << "Send << " << command <<endl;     
+   auto send_stream = make_shared<WssClient::SendStream>();
+   *send_stream << command;
+   connection->send(send_stream);
 }
 
 // Thread that updates the tree.
 void* elmRun (void* arg) {
- connectOBD(10);
+   connectOBD(10);
+   usleep(1000000);
+   // Punp the data into the tree.
 
-  usleep(1000000);
-  // Punp the data into the tree.
- while(1) {
+   // send Authorize request.
+   json authreq;
+   authreq["requestId"] = rand() % 99999;
+   authreq["action"]= "authorize";
+   authreq["tokens"] = string(TOKEN);
+   stringstream ss; 
+   ss << pretty_print(authreq);
+   sendRequest(ss.str());
+
+   usleep(1000000);
+    
+   
+   while(1) {
     // sleep 1 sec
     usleep(1000000);
     if( connection != NULL) {
@@ -66,11 +76,6 @@ void* elmRun (void* arg) {
 }
 
 
-
-
-
-
-
 void* startWSClient(void * arg) {
 
   WssClient client(url , true ,"Client.pem", "Client.key","CA.pem");
@@ -82,14 +87,7 @@ void* startWSClient(void * arg) {
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
     cout << "Connection wirh server at " << url << " opened" << endl;
     connection = conn;
-       pthread_t ELMRun_thread;
-    /* create test run thread which updates the tree */
-        if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
-
-         cout << "Error creating test run thread"<<endl;
-         return 1;
-
-        }
+    
   };
 
   client.on_close = [](shared_ptr<WssClient::Connection> /*connection*/, int status, const string & /*reason*/) {
@@ -109,12 +107,25 @@ client.start();
 int main(int argc, char* argv[])
 {
 
-        if(argc == 2) {
+        if(argc == 3) {
            strcpy(PORT , argv[1]);
+           strcpy(TOKEN , argv[2]);
         } else {
-           cerr<<"Usage ./elm327_visfeeder <ELM327-PORT>"<<endl;
+           cerr<<"Usage ./elm327_visfeeder <ELM327-PORT>  <JWT TOKEN>"<<endl;
            return -1; 
         }
+
+        
+       pthread_t ELMRun_thread;
+        /* create test run thread which updates the tree */
+        if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
+
+         cout << "Error creating test run thread"<<endl;
+         return 1;
+
+        }
+
+         usleep(1000000);
 
         pthread_t startWSClient_thread;
 

@@ -84,7 +84,7 @@ string setRPM() {
  
   cout << "RPMread from the vehicle = "<< value << endl;
 
-  json req = setRequest("Signal.OBD.EngineSpeed"); 
+  json req = setRequest("Signal.OBD.RPM"); 
   req["value"] = value;
   stringstream ss; 
   ss << pretty_print(req);
@@ -127,6 +127,6 @@ string setVehicleSpeed() {
   stringstream ss; 
   ss << pretty_print(req);
   string resp = ss.str();
-  cout << resp << endl;
+  cout << resp << endl; 
   return resp;
 }

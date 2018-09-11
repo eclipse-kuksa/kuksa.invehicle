@@ -16,32 +16,25 @@
 
 #include <string>
 #include "wschannel.hpp"
-#include "vssdatabase.hpp"
-#include "subscriptionhandler.hpp"
 #include "accesschecker.hpp"
+#include <jsoncons/json.hpp>
 using namespace std;
 using namespace jsoncons;
-using namespace jsoncons::jsonpath;
 using jsoncons::json;
 
 
-class vsscommandprocessor {
+class directAccessProcessor {
 
 private:
-   class  vssdatabase* database = NULL;
-   class  subscriptionhandler* subHandler = NULL;
    class  authenticator* tokenValidator = NULL;
    class  accesschecker* accessValidator = NULL;
 
-   string processGet(uint32_t request_id, string path);
-   string processSet(uint32_t request_id, string path, json value);
-   string processSubscribe(uint32_t request_id, string path, uint32_t connectionID);
-   string processUnsubscribe(uint32_t request_id, uint32_t subscribeID);
-   string processGetMetaData(uint32_t request_id, string path); 
-   string processAuthorize (uint32_t request_id, string token ,class wschannel& channel);
+   string processCreate(class wschannel& channel, string rchannel);
+   string processDelete(string vchannel);
+   string processAuthorize (string token ,class wschannel& channel);
 
 public:
-   vsscommandprocessor(class vssdatabase* database, class  authenticator* vdator , class subscriptionhandler* subhandler);
+   directAccessProcessor( class  authenticator* vdator);
    string processQuery(string req_json , class wschannel& channel);
 };
 
