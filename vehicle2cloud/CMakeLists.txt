@@ -57,8 +57,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.
 
 # uncomment lines below while building AGL image.
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
-install(TARGETS CA.pem DESTINATION /usr/bin/vehicle2cloud)
-install(TARGETS Client.pem DESTINATION /usr/bin/vehicle2cloud)
-install(TARGETS Client.key DESTINATION /usr/bin/vehicle2cloud)
-#install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.csv DESTINATION /usr/bin)
-#install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.json DESTINATION /usr/bin)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/vehicle2cloud)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/vehicle2cloud)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/vehicle2cloud)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh DESTINATION /usr/bin/vehicle2cloud)
+

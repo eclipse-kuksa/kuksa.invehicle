@@ -52,6 +52,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.
 
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327-visdatafeeder)
 
-install(TARGETS CA.pem DESTINATION /usr/bin/elm327-visdatafeeder)
-install(TARGETS Client.pem DESTINATION /usr/bin/elm327-visdatafeeder)
-install(TARGETS Client.key DESTINATION /usr/bin/elm327-visdatafeeder)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/elm327-visdatafeeder)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/elm327-visdatafeeder)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/elm327-visdatafeeder)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh DESTINATION /usr/bin/elm327-visdatafeeder)
