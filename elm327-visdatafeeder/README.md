@@ -2,11 +2,20 @@
 
 This is a simple data feeder to w3c-visserver service that reads OBD II data form a ELM 327 Bluetooth/USB dongle and pushes the data into the w3c-vis tree. At the moment reads very limited number of OBDII ( mode 1) values.
 
+# Builing with CMake
+* Go to the folder elm327-visdatafeeder and create a new directory build using `mkdir build`
+* Change directory using `cd build`
+* Execure cmake using `cmake ..`
+* Build using the command `make`
+* Execute using command `.start.sh`. This will start the app using demo certificates and JWT Token found in the example/demo-certificates folder.
+
 ## Running on AGL on Raspberry Pi 3
 
 * Create an AGL image using the instructions in `agl-kuksa` project.
 * Burn the image on to an SD card and boot the image on a Raspi 3.
 * ssh into the raspi 3 with root.
-* create self-signed cerificates using steps mentioned [here](https://kb.op5.com/pages/viewpage.action?pageId=19073746#sthash.GHsaFkZe.dpbs) and rename the files to Client.key, Client.pem and CA.pem. Make sure you use the same CA while creating Server certificates.
-* Then copy the Client.key, Client.pem and CA.pem to /usr/bin/elm327-visdatafeeder using a ssh connection.
-* Launch the app. Using command `./usr/bin/elm327-visdatafeeder/elm327-visdatafeeder 'ELM-PORT'`
+* Go to `/usr/bin/elm327-visdatafeeder` using the ssh connection.
+* Launch the app. Using command `./start.sh`
+
+## Creating own certificates and JWT Tokens
+Refer to the readme in w3c-visserver-api under how to section.

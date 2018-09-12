@@ -85,8 +85,14 @@ void* startWSClient(void * arg) {
   };
 
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
-    cout << "Connection wirh server at " << url << " opened" << endl;
+    cout << "Connection with server at " << url << " opened" << endl;
     connection = conn;
+    pthread_t ELMRun_thread;
+    /* create test run thread which updates the tree */
+    if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
+      cout << "Error creating test run thread"<<endl;
+      return 1;
+    }
     
   };
 
@@ -115,18 +121,6 @@ int main(int argc, char* argv[])
            return -1; 
         }
 
-        
-       pthread_t ELMRun_thread;
-        /* create test run thread which updates the tree */
-        if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
-
-         cout << "Error creating test run thread"<<endl;
-         return 1;
-
-        }
-
-         usleep(1000000);
-
         pthread_t startWSClient_thread;
 
         /* create the web socket client thread. */
@@ -137,6 +131,6 @@ int main(int argc, char* argv[])
 
         }
 
-   getchar();
+       while (1) { usleep (1000000); };
 
 }

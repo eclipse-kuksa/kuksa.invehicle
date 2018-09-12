@@ -49,9 +49,16 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
+configure_file(start.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 
 # uncomment lines below while building AGL image.
 install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
+install(TARGETS CA.pem DESTINATION /usr/bin/vehicle2cloud)
+install(TARGETS Client.pem DESTINATION /usr/bin/vehicle2cloud)
+install(TARGETS Client.key DESTINATION /usr/bin/vehicle2cloud)
 #install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.csv DESTINATION /usr/bin)
 #install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/w3c-visserver/vss_rel_1.0.json DESTINATION /usr/bin)

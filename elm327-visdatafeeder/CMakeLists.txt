@@ -43,7 +43,15 @@ target_include_directories(simple-websocket-server INTERFACE ${OPENSSL_INCLUDE_D
 message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 
 
-
-
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
-install( TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327-visdatafeeder)
+
+configure_file(start.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327-visdatafeeder)
+
+install(TARGETS CA.pem DESTINATION /usr/bin/elm327-visdatafeeder)
+install(TARGETS Client.pem DESTINATION /usr/bin/elm327-visdatafeeder)
+install(TARGETS Client.key DESTINATION /usr/bin/elm327-visdatafeeder)
