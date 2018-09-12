@@ -63,7 +63,7 @@ void sendToHono( string resp) {
         cout << " No value from server found" <<endl;
         return;
     } else if ( root["value"].as<string>() == "---") {
-        cout << " No value set !! . server ahs returned --- for"<< root["path"].as<string>() <<endl;
+        cout << " No value set !! server has returned --- for"<< root["path"].as<string>() <<endl;
         return;
     }    
 
