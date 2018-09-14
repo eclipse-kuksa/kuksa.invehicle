@@ -1,4 +1,28 @@
 #!/bin/bash
+
+# Enter the MAC-ADDR of your bluetooth elm327 adapter here.
+#MACID='00:11:03:01:04:35'
+MACID='00:19:6D:36:7B:ED'
+# Enter the pair key of your elm327 adapter here.
+PAIRID='1234'
+
+
+echo " Configure bluetooth connection with ELM Adapter "
+coproc bluetoothctl
+echo $output
+echo -e "agent on\n scan on\n"  >&"${COPROC[1]}" 
+sleep 25s  
+echo -e "pair $MACID\n"  >&"${COPROC[1]}"
+sleep 20s
+echo -e "$PAIRID\n exit\n"  >&"${COPROC[1]}"
+output=$(cat <&"${COPROC[0]}")
+echo $output
+sleep 5s
+rfcomm unbind 0
+rfcomm bind 0 $MACID
+
+echo " Configured $MACID with rfcomm0"
+
 echo " Starting ELM 327 app"
 
 
