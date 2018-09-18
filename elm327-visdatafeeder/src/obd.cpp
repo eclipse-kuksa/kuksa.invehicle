@@ -112,7 +112,7 @@ bool connectOBD(int timeout)
 
    resetELM();
    
-   usleep(1000000);
+   usleep(200000);
       
    setProtocol(0);
 

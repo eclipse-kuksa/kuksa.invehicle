@@ -6,20 +6,28 @@ MACID='00:19:6D:36:7B:ED'
 # Enter the pair key of your elm327 adapter here.
 PAIRID='1234'
 
-
-echo " Configure bluetooth connection with ELM Adapter "
 coproc bluetoothctl
-echo $output
-echo -e "agent on\n scan on\n"  >&"${COPROC[1]}" 
-sleep 25s  
-echo -e "pair $MACID\n"  >&"${COPROC[1]}"
-sleep 20s
-echo -e "$PAIRID\n exit\n"  >&"${COPROC[1]}"
-output=$(cat <&"${COPROC[0]}")
-echo $output
-sleep 5s
-rfcomm unbind 0
-rfcomm bind 0 $MACID
+echo -e "devices\n exit\n"  >&"${COPROC[1]}" 
+devices=$(cat <&"${COPROC[0]}")
+if [ `echo $devices | grep -c "$MACID"` -gt 0 ]
+then
+   echo "Device $MACID already paired"
+   rfcomm unbind 0
+   rfcomm bind 0 $MACID
+else
+   echo " Configure bluetooth connection with ELM Adapter "
+   coproc bluetoothctl
+   echo -e "agent on\n scan on\n"  >&"${COPROC[1]}" 
+   sleep 25s  
+   echo -e "pair $MACID\n"  >&"${COPROC[1]}"
+   sleep 20s
+   echo -e "$PAIRID\n exit\n"  >&"${COPROC[1]}"
+   output=$(cat <&"${COPROC[0]}")
+   echo $output
+   sleep 5s
+   rfcomm unbind 0
+   rfcomm bind 0 $MACID
+fi
 
 echo " Configured $MACID with rfcomm0"
 

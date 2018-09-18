@@ -1,6 +1,7 @@
 [Unit]
 Description = OBDII data feeder thLM 327 for w3c-visserver
-
+After = w3c-visserver.service
+ 
 [Service]
 WorkingDirectory=/usr/bin/elm327-visdatafeeder
 ExecStart =/usr/bin/elm327-visdatafeeder/start.sh
