@@ -15,7 +15,7 @@ then
    rfcomm unbind 0
    rfcomm bind 0 $MACID
 else
-   echo " Configure bluetooth connection with ELM Adapter "
+   echo "Configure new bluetooth connection with ELM Adapter "
    coproc bluetoothctl
    echo -e "agent on\n scan on\n"  >&"${COPROC[1]}" 
    sleep 25s  
@@ -29,9 +29,8 @@ else
    rfcomm bind 0 $MACID
 fi
 
-echo " Configured $MACID with rfcomm0"
-
-echo " Starting ELM 327 app"
+echo "Configured $MACID with rfcomm0"
+echo "Starting ELM 327 app"
 
 
 SERIAL='/dev/rfcomm0'
