@@ -1,7 +1,7 @@
 #!/bin/bash
 echo " Starting vehicle2cloud app"
 
-HONOIP='13.80.41.35'
+HONOIP='11.11.11.111' # enter HONO-HTTP-Adapter IP here
 HONOPORT='8080'
 HONODEVICE='sensor1'
 HONOPW='hono-secret'
