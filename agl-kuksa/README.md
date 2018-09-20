@@ -142,7 +142,7 @@ This would take a few minutes to execute and at the end of the process the boota
 
 `$HOME/workspace_agl/build/tmp/deploy/images/raspberrypi3`
 
-### First Lauch 
+### First Launch 
 
 Once the image is ready, burn it onto a SD-card and boot up the image on raspi 3. The w3c-visserver-api requires the vss_rel_1.0.json file to set up the vss tree structure. This file can be copied to the `/usr/bin/w3c-visserver` folder by using scp command (sample file is available under https://github.com/GENIVI/vehicle_signal_specification or could also be generated using the tools in the repo). Once the file has been copied reboot the raspi 3.
 
