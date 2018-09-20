@@ -22,7 +22,7 @@ SRCREV = "${AUTOREV}"
 DEPENDS = "boost openssl"
 RDEPENDS_${PN} += "bash"
 
-SRC_URI = "git://github.com/rai20/kuksa.invehicle.git;branch=feature_update2;protocol=https" 
+SRC_URI = "git://github.com/eclipse/kuksa.invehicle.git;protocol=https" 
 SRC_URI_append = " file://bt_setup.sh "
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
 EXTRA_OECMAKE += "-Dpkg_config_libdir=${libdir} -DCMAKE_BUILD_TYPE=Release"
