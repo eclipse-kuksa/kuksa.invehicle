@@ -13,9 +13,8 @@ This is a simple data feeder to w3c-visserver service that reads OBD II data for
 
 * Create an AGL image using the instructions in `agl-kuksa` project.
 * Burn the image on to an SD card and boot the image on a Raspi 3.
-* ssh into the raspi 3 with root.
-* Go to `/usr/bin/elm327-visdatafeeder` using the ssh connection.
-* Launch the app. Using command `./start.sh`
+* elm327-visdatafeeder is deployed as a systemd service `elm327-visdatafeeder.service` which connects to w3c-visserver on port 8090.
+
 
 ## Creating own certificates and JWT Tokens
 Refer to the readme in w3c-visserver-api under how to section.

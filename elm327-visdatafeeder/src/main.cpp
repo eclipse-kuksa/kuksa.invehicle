@@ -41,7 +41,7 @@ void sendRequest(string command) {
 // Thread that updates the tree.
 void* elmRun (void* arg) {
    connectOBD(10);
-   usleep(1000000);
+   usleep(200000);
    // Punp the data into the tree.
 
    // send Authorize request.
@@ -53,18 +53,18 @@ void* elmRun (void* arg) {
    ss << pretty_print(authreq);
    sendRequest(ss.str());
 
-   usleep(1000000);
+   usleep(200000);
     
    
    while(1) {
     // sleep 1 sec
-    usleep(1000000);
+    usleep(200000);
     if( connection != NULL) {
        string rpm = setRPM();
        cout << " RPM val " << rpm <<endl;
        if( rpm != "Error")
           sendRequest(rpm);
-       usleep(1000000);
+       usleep(100000);
        string vSpeed = setVehicleSpeed();
        cout << " Speed val " << vSpeed <<endl;
        if( vSpeed != "Error")

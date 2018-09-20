@@ -1,5 +1,7 @@
 #!/bin/bash
-echo " Starting ELM 327 app"
+
+source bt_setup.sh
+echo "Starting ELM 327 app"
 
 
 SERIAL='/dev/rfcomm0'

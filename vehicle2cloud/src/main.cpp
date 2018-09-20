@@ -96,8 +96,8 @@ void sendToHono( string resp) {
 void* honoConnectRun (void* arg) {
 
   if(honoConnect) {
-  // wait for 10 seconds.
-  usleep(1000000);
+  // wait for 1 second.
+  usleep(100000);
   auto send_stream = make_shared<WssClient::SendStream>();
 
   // send Authorize request.
@@ -122,8 +122,8 @@ void* honoConnectRun (void* arg) {
 
 
 
-     // sleep 1 sec
-    usleep(1000000);  
+     // sleep 0.2 sec
+    usleep(200000);  
     string vSpeed_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.Speed\", \"requestId\": 1235 }";
     
     *send_stream << vSpeed_req;
@@ -131,8 +131,8 @@ void* honoConnectRun (void* arg) {
 
     
     
-     // sleep 1 sec
-    usleep(1000000);
+     // sleep 0.2 sec
+    usleep(200000);
   }
  }
 }

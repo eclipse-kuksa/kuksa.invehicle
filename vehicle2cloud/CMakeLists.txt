@@ -60,5 +60,5 @@ install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/vehicle2cloud)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/vehicle2cloud)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/vehicle2cloud)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh DESTINATION /usr/bin/vehicle2cloud)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE DESTINATION /usr/bin/vehicle2cloud)
 
