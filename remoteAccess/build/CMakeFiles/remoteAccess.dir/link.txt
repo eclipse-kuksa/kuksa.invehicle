@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/remoteAccess.dir/src/main.cpp.o CMakeFiles/remoteAccess.dir/src/honoMqtt.cpp.o  -o remoteAccess -rdynamic libpaho-lib.a -lpthread -Wl,-Bstatic -lboost_system -lboost_thread -lboost_chrono -lboost_date_time -lboost_atomic -Wl,-Bdynamic -lpthread -lssl -lcrypto 
