@@ -30,14 +30,14 @@ target_link_libraries(simple-websocket-server INTERFACE ${CMAKE_THREAD_LIBS_INIT
 
 # Build Paho lib
 file(GLOB_RECURSE PAHO_CPP_SRC_FILES
-${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho.mqtt.cpp/src/*.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho-mqtt-cpp/src/*.cpp
 )
 
 file(GLOB_RECURSE PAHO_C_SRC_FILES
-${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho.mqtt.c/src/*.c
+${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho-mqtt-c/src/*.c
 )
 add_library( paho-lib  ${PAHO_CPP_SRC_FILES} ${PAHO_C_SRC_FILES})
-target_include_directories(paho-lib PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho.mqtt.c/src ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho.mqtt.cpp/src)
+target_include_directories(paho-lib PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho-mqtt-c/src ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/paho-mqtt-cpp/src)
 
 # Boost
 find_package(Boost REQUIRED)
