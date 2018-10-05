@@ -39,11 +39,173 @@ The project maintains the following source code repositories:
 
 This project leverages the following third party content.
 
+autobahn-python (18.9.2)
+
+* License: MIT
+* Project: https://crossbar.io/autobahn/
+* Source: https://github.com/crossbario/autobahn-python/releases/tag/v18.9.2
+
+Boost.Asio (1.67.0)
+
+* License: BSL-1.0 AND LicenseRef-Public-Domain
+* Project: https://www.boost.org/doc/libs/1_66_0/doc/html/boost_asio.html
+* Source: https://github.com/boostorg/asio
+
+gson (2.8.0)
+
+* License: Apache-2.0
+
+h2 database (1.4.196)
+
+* License: EPL-1.0
+
+influxdb-java (2.7)
+
+* License: MIT
+
+Jackson Annotations (2.9.6)
+
+* License: Apache-2.0
+
+Javax.annotation (1.2)
+
+* License: CDDL
+
+javax.persistence (2.1)
+
+* License: EPL-1.0 OR BSD-3-Clause
+
+Jsoncons_v0.105.0 (0.105.0)
+
+* License: BSL-1.0 AND MIT AND Unicode-TOU
+* Project: https://github.com/danielaparker/jsoncons
+* Source: https://github.com/danielaparker/jsoncons
+
+jwt-cpp (0.1.0)
+
+* Project: https://github.com/Thalhammer/jwt-cpp
+* Source: https://github.com/Thalhammer/jwt-cpp/releases
+
+openssl (1.1.0)
+
+* License: OpenSSL AND Apache-1.0 AND LicenseRef-Public-Domain AND BSD-2-Clause
+   AND Apache-2.0 AND (GPL-2.1-or-later OR LGPL-2.0-or-later OR MPL-1.1) AND MIT
+   AND (GPL-1.0+ OR OpenSSL) AND LicenseRef-BSD-Style AND BSD-3-Clause
+
+openssl (1.1.0)
+
+* License: OpenSSL AND Apache-1.0 AND LicenseRef-Public-Domain AND BSD-2-Clause
+   AND Apache-2.0 AND (GPL-2.1-or-later OR LGPL-2.0-or-later OR MPL-1.1) AND MIT
+   AND (GPL-1.0+ OR OpenSSL) AND LicenseRef-BSD-Style AND BSD-3-Clause
+
+org.springframework.beans (4.3.9)
+
+* License: Apache-2.0
+
+pagination (8.0.6)
+
+* License: Apache-2.0
+* Project: https://vaadin.com/directory/component/pagination
+* Source: https://github.com/basakpie/vaadin-pagination-addon
+
 Simple-WebSocket-Server_V27.06.2018 (27.06.2018)
 
 * License: MIT
 * Project: https://gitlab.com/eidheim/Simple-WebSocket-Server/tree/master
 * Source: https://gitlab.com/eidheim/Simple-WebSocket-Server/tree/master
+
+spring-beans (4.3.2)
+
+* License: Apache License, 2.0
+
+spring-boot (1.5.8)
+
+* License: Apache-2.0
+
+spring-boot-starter (2.0.4)
+
+* License: Apache-2.0
+* Project: https://spring.io/projects/spring-boot
+* Source:
+   https://github.com/spring-projects/spring-boot/tree/v2.0.4.RELEASE/spring-boot-project/spring-boot-starters/spring-boot-starter
+
+spring-boot-starter-test (2.0.4)
+
+* License: Apache-2.0
+
+spring-boot-starter-tomcat (2.0.4)
+
+* License: Apache-2.0
+* Project: https://spring.io/projects/spring-boot
+* Source:
+   https://github.com/spring-projects/spring-boot/tree/master/spring-boot-project/spring-boot-starters/spring-boot-starter-tomcat
+
+spring-cloud-core-openfeign (2.0.1)
+
+* License: Apache-2.0
+* Project: https://projects.spring.io/spring-cloud
+* Source:
+   https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign/2.0.1.RELEASE
+
+spring-context (4.3.2)
+
+* License: Apache License, 2.0
+
+spring-core (4.3.12)
+
+* License: Apache-2.0
+
+spring-data-commons (1.13.6)
+
+* License: Apache-2.0
+
+spring-data-jpa (1.10.8)
+
+* License: Apache License, 2.0
+
+spring-data-jpa (2.0.4)
+
+* License: Apache-2.0
+* Project:
+   https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter
+* Source:
+   https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
+
+spring-security-config (4.1.4)
+
+* License: Apache-2.0
+
+spring-security-config (5.0.7)
+
+* License: Apache-2.0
+* Project: http://spring.io/spring-security
+* Source: https://github.com/spring-projects/spring-security
+
+spring-security-crypto (4.2.7)
+
+* License: Apache-2.0
+
+spring-security-web (5.0.7)
+
+* License: Apache-2.0
+* Project: http://spring.io/spring-security
+* Source: https://github.com/spring-projects/spring-security
+
+spring-web (4.1.8)
+
+* License: Apache License, 2.0
+
+vaadin-framework-server_v8.5.2 (8.5.2)
+
+* License: Apache-2.0
+* Project: https://vaadin.com
+* Source: https://github.com/vaadin/framework/releases/tag/8.5.2
+
+vaadin-spring (3.1.1)
+
+* License: Apache-2.0
+* Project: https://vaadin.com/directory/component/vaadin-spring
+* Source: https://github.com/vaadin/spring/releases/tag/3.1.1
 
 ## Cryptography
 
