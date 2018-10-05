@@ -84,7 +84,7 @@ This will set up the repo tool. Repo tool is used to download the recipes for AG
 
 Execute
 
-`cd $AGL_TOP ;repo init -b dab -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo ;repo sync`
+`cd $AGL_TOP ;repo init -b eel -m eel_5.1.0.xml -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo ;repo sync`
 
 This will download the latest daring dab version of AGL.
 

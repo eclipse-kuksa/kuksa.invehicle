@@ -52,51 +52,11 @@ const auto TIMEOUT = std::chrono::seconds(10);
 
 class HonoMqtt* honoConn;
 
-void sendToHono( string resp) {
+// callback method for receiving messages from hono.
+void onMessageFromHono(string message) {
 
-    cout << "Response >> " << resp << endl;
-    json root;
-    root = json::parse(resp);
-    string action = root["action"].as<string>();
-    
-    if( action == "authorize") {
-        return;
-    } else if ( root.has_key("error")) {
-        cout << " Error response from server " <<  root["error"].as<string>() << endl;
-        return;
-    }
-  
-    if( !root.has_key("value")) {
-        cout << " No value from server found" <<endl;
-        return;
-    } else if ( root["value"].as<string>() == "---") {
-        cout << " No value set !! server has returned --- for"<< root["path"].as<string>() <<endl;
-        return;
-    }    
+   cout <<" Message arrived in main " << message <<endl;
 
-    if( !root.has_key("value")) {
-        cout << " No value returned from server"<< endl;
-        return;
-    } 
-
-
-    std::string value = root["value"].as<string>();
-    int val = stoi(value, nullptr, 10);   
-    int reqID = root["requestId"].as<int>();
-    string signal;
-    if(reqID == 1234) {
-       signal = "RPM";
-    } else if (reqID == 1235) {
-       signal = "SPEED";
-    } 
-    //  int status = 1;
-    int status = 1;
-      
-    if (status == 1) {
-        cout << "Message accepted by HONO"<< endl;
-    } else {
-        cerr << "Message not accepted by HONO"<< endl;
-    }
 }
 
 
@@ -121,7 +81,12 @@ void* honoConnectRun (void* arg) {
    string honoAddr = string(honoAddress) +":" + string(honoPort);
    honoConn = new HonoMqtt();
    try {
-      honoConn->connect(honoAddr, CLIENT_ID);
+      cout << honoAddr <<endl;
+      string userName = string(honoDevice) + "@DEFAULT_TENANT";
+      string password(honoPassword);
+      honoConn->connect(honoAddr, CLIENT_ID, userName, password);
+      honoConn->setMessageCB(onMessageFromHono);
+      usleep(2000000);
       honoConn->subscribe(SUB_TOPIC);
    } catch ( mqtt::exception& e) {
 
@@ -129,26 +94,8 @@ void* honoConnectRun (void* arg) {
 
   // send data to hono instance.
   while(1) {
-    
-    string rpm_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.RPM\", \"requestId\": 1234 }";
-
-    
-    *send_stream << rpm_req;
-    connection->send(send_stream);    
-
-
-
-     // sleep 0.2 sec
-    usleep(200000);  
-    string vSpeed_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.Speed\", \"requestId\": 1235 }";
-    
-    *send_stream << vSpeed_req;
-    connection->send(send_stream); 
-
-    
-    
-     // sleep 0.2 sec
-    usleep(200000);
+     // sleep 0.5 sec
+    usleep(500000);
   }
  }
 }
@@ -158,7 +105,7 @@ void* startWSClient(void * arg) {
   WssClient client(url , true, "Client.pem", "Client.key", "CA.pem");
 
   client.on_message = [](shared_ptr<WssClient::Connection> connection, shared_ptr<WssClient::Message> message) {
-    sendToHono(message->string());
+   
   };
 
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
