@@ -23,37 +23,34 @@ class action_listener_pub : public virtual mqtt::iaction_listener
 {
 protected:
 	void on_failure(const mqtt::token& tok) override {
-		cout << "\tListener failure for token: "
+		cout << "Publish failure for token: "
 			<< tok.get_message_id() << endl;
 	}
 
 	void on_success(const mqtt::token& tok) override {
-		cout << "\tListener success for token: "
+		cout << "Publish success for token: "
 			<< tok.get_message_id() << endl;
 	}
 };
 
 /**
- * A base action listener for pub.
+ * A base action listener for sub.
  */
 class action_listener_sub : public virtual mqtt::iaction_listener
 {
 protected:
 	void on_failure(const mqtt::token& tok) override {
-		cout << "\tListener failure for token: "
+		cout << "Subscribe failure for token: "
 			<< tok.get_message_id() << endl;
 	}
 
 	void on_success(const mqtt::token& tok) override {
-		cout << "\tListener success for token: "
+		cout << "Subscribe success for token: "
 			<< tok.get_message_id() << endl;
 	}
 };
 
-/////////////////////////////////////////////////////////////////////////////
 
-
-  
 void HonoMqtt::connect (string honoAddr , string clientID, string userName, string password) {
 
    p_Client = new mqtt::async_client (honoAddr, clientID);
@@ -65,11 +62,11 @@ void HonoMqtt::connect (string honoAddr , string clientID, string userName, stri
    connOpts.set_password(password);
 
    try {
-         cout << "\nConnecting..." << endl;
+         cout << "Connecting..." << endl;
          mqtt::token_ptr conntok = p_Client->connect(connOpts, nullptr, *this);
 	 cout << "Waiting for the connection..." << endl;
 	 conntok->wait();
-         cout << "  ...OK" << endl;
+         cout << "Connected." << endl;
    } catch (const mqtt::exception& exc) {
 		cerr << exc.what() << endl;
 		throw exc;
@@ -83,22 +80,21 @@ void HonoMqtt::subscribe(string topic) {
 }
    
 void HonoMqtt::publish (string topic, string data) {
-    cout << "\nSending next message..." << endl;
+    cout << "Sending next message..." << endl;
     action_listener_pub listener;
     mqtt::message_ptr pubmsg = mqtt::make_message(topic, "Test");
     mqtt::delivery_token_ptr pubtok;
     pubtok = p_Client->publish(pubmsg, nullptr, listener);
     pubtok->wait();
-    cout << "  ...OK" << endl;
+    cout << "Published." << endl;
     
 }
 
 void HonoMqtt::disconnect() {
-   // Disconnect
-   cout << "\nDisconnecting..." << endl;
+   cout << "Disconnecting..." << endl;
    mqtt::token_ptr  conntok = p_Client->disconnect();
    conntok->wait();
-   cout << "  ...OK" << endl;
+   cout << "Disconnected" << endl;
 }
 
 void HonoMqtt::setMessageCB(void(*msgCB)(string)) {

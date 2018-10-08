@@ -26,7 +26,9 @@ Contributors:
 * *elm327_visdatafeeder* - ELM 327 app that reads OBDII data from the vehicle and feeds data to the w3c-visserver.
 * *kuksa-hawkbit* - API for connecting with Hawkbit.
 * *w3c-visserver_api* - W3C Vehicle Information Specification API.
-* *vehicle2cloud* - Example app that sends data from the vehicle to an Eclipse Hono instance.
+* *datalogger-http* - Example app that sends data from the vehicle to an Eclipse Hono instance with http.
+* *datalogger-mqtt* - Example app that sends data from the vehicle to an Eclipse Hono instance with mqtt.
+* *remoteAccess* - Example app that subscribes to control topic with Hono and receives commands sent.
 
 
 ## How to build and run AGL-Kuksa

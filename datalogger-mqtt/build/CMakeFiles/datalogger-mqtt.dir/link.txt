@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/datalogger-mqtt.dir/src/main.cpp.o CMakeFiles/datalogger-mqtt.dir/src/honoMqtt.cpp.o  -o datalogger-mqtt -rdynamic libpaho-lib.a -lpthread -Wl,-Bstatic -lboost_system -lboost_thread -lboost_chrono -lboost_date_time -lboost_atomic -Wl,-Bdynamic -lpthread -lssl -lcrypto 
