@@ -53,6 +53,13 @@ const auto TIMEOUT = std::chrono::seconds(10);
 
 class HonoMqtt* honoConn;
 
+// callback method for receiving messages from hono.
+void onMessageFromHono(string message) {
+
+   cout <<" Message arrived in main " << message <<endl;
+
+}
+
 void sendToHono( string resp) {
 
     cout << "Response >> " << resp << endl;
@@ -123,6 +130,7 @@ void* honoConnectRun (void* arg) {
       string userName = string(honoDevice) + "@DEFAULT_TENANT";
       string password(honoPassword);
       honoConn->connect(honoAddr, CLIENT_ID, userName, password);
+      honoConn->setMessageCB(onMessageFromHono);
    } catch ( mqtt::exception& e) {
 
    }
