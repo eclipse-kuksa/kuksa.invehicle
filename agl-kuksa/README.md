@@ -24,7 +24,6 @@ running;
 
 # Build the Image/SDK with cmake scripts
 
----- not stable as yet use steps mentioned in the next section ----
 
 ## Prerequisites:
 
@@ -84,9 +83,9 @@ This will set up the repo tool. Repo tool is used to download the recipes for AG
 
 Execute
 
-`cd $AGL_TOP ;repo init -b eel -m eel_5.1.0.xml -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo ;repo sync`
+`cd $AGL_TOP ;repo init -b flounder -m flounder_6.0.1.xml -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo ;repo sync`
 
-This will download the latest daring dab version of AGL.
+This will download the Funky Flounder version of AGL. This version has been tested and is recommended. 
 
 ### Start Building
 
@@ -116,7 +115,7 @@ Now copy the meta-kuksa folder (Link : https://github.com/eclipse/kuksa.invehicl
 
 The kuksa layer contains recipes for the APIs and Apps contained in Eclipse kuksa Invehicle repo.
 
-The AGL image with meta-kuksa layer adds w3c-visserver-api and elm327-visdatafeeder as systemd services. It will install the vehicle2cloud app in the location `/usr/bin/vehicle2cloud`
+The AGL image with meta-kuksa layer adds w3c-visserver-api and elm327-visdatafeeder as systemd services. It will install the datalogger apps in the respective locations `/usr/bin/datalogger-<PROTOCOL>`
 
 #### Set up wifi
 
@@ -146,15 +145,13 @@ This would take a few minutes to execute and at the end of the process the boota
 
 Once the image is ready, burn it onto a SD-card and boot up the image on raspi 3. The w3c-visserver-api requires the vss_rel_1.0.json file to set up the vss tree structure. This file can be copied to the `/usr/bin/w3c-visserver` folder by using scp command (sample file is available under https://github.com/GENIVI/vehicle_signal_specification or could also be generated using the tools in the repo). Once the file has been copied reboot the raspi 3.
 
-### Launch vehicle2cloud app
+### Launch Datalogger apps
 
-The vehicle2cloud app connects to a remote HONO-Instance and hence the IP-address of the Hono-Instance needs to be updated. The vehicle2cloud is already installed if you have followed the above steps. Now update the Hono configuration in the file `/usr/bin/vehicle2cloud/start.sh` with valid IP-address, Port, Device and password for Hono.
+The Datalogger apps connect to a remote HONO-Instance and hence the IP-address of the Hono-Instance needs to be updated. The datalogger apps are already installed if you have followed the above steps. Now update the Hono configuration in the file `/usr/bin/datalogger-*/start.sh` with valid IP-address for the respective adapters ( eg: HTTP and MQTT), Port, Device and password for Hono.
 
-You may also have to change the permission to execute the start.sh script. Use `chmod +x ./usr/bin/vehicle2cloud/start.sh`
+And you could start the datalogger apps by executing `./usr/bin/datalogger-*/start.sh`  
 
-And you could start the vehicle2cloud app by executing `./usr/bin/vehicle2cloud/start.sh`  
-
-Now the app connects to the w3c-visserver service using a websocket connection and retrieves Signal.OBD.RPM and Signal.OBD.Speed values to send to hono by packing the retrieved data into a json which looks like this `{SPEED:xxx}` & `{RPM:yyy}`
+The apps connect to the w3c-visserver service using a websocket connection and retrieves Signal.OBD.RPM and Signal.OBD.Speed values to send to hono by packing the retrieved data into a json which looks like this `{SPEED:xxx}` & `{RPM:yyy}`
 
 # Documentation
 

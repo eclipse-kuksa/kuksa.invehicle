@@ -91,6 +91,10 @@ void HonoMqtt::disconnect() {
    cout << "Disconnected" << endl;
 }
 
+void HonoMqtt::setMessageCB(void(*msgCB)(string)) {
+   onMsg = msgCB;
+}
+
 
 
 

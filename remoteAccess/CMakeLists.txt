@@ -67,7 +67,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.
 
 
 # uncomment lines below while building AGL image.
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/vehicle2cloud)
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/remoteAccess)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/remoteAccess)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/remoteAccess)
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/remoteAccess)

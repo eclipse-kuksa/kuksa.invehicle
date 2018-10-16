@@ -16,8 +16,8 @@
 # AGL URL
 set(AGL_URL
  "https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo")
-set(AGL_VERSION "4.0.3")
-set(AGL_RELEASE "dab")
+set(AGL_VERSION "6.0.1")
+set(AGL_RELEASE "flounder")
 
 
 ##########################################################################
@@ -25,7 +25,7 @@ set(AGL_RELEASE "dab")
 ##########################################################################
 # meta-kuksa repo
 set(META_KUKSA_URL
-"ssh://git@github.com:rai20/kuksa.invehicle.git")
+"ssh://git@github.com:eclipse/kuksa.invehicle.git")
 set(META_KUKSA_VERSION "0.0.1")
 
 
