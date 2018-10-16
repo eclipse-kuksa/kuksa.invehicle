@@ -11,14 +11,12 @@
 # *****************************************************************************
 
 SUMMARY = "DataLogger MQTT App"
-DESCRIPTION = "W3C VIS server implementation with GENIVI-VSS data model with ELM 327"
-HOMEPAGE = "https://www.w3.org/TR/vehicle-information-api/"
+DESCRIPTION = "Data logger app which sends data to Hono's MQTT adapter"
+HOMEPAGE = "https://www.eclipse.org/hono/concepts/command-and-control/"
 LICENSE = "EPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=d9fc0efef5228704e7f5b37f27192723"
 
 inherit pkgconfig cmake   
-
-SRC_URI_append_service = "file://dataloggerhttp.service"
 
 SRCREV = "${AUTOREV}"
 
