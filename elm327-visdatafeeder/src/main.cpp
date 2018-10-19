@@ -38,8 +38,8 @@ void sendRequest(string command) {
    connection->send(send_stream);
 }
 
-// Thread that updates the tree.
-void* elmRun (void* arg) {
+// Thread that updates AVs on the tree.
+void* elmActualValuesRun (void* arg) {
    connectOBD(10);
    usleep(200000);
    // Punp the data into the tree.
@@ -55,26 +55,77 @@ void* elmRun (void* arg) {
 
    usleep(200000);
     
-   
+   int count = 0;
    while(1) {
-    // sleep 1 sec
-    usleep(200000);
+    usleep(1000);
     if( connection != NULL) {
        string rpm = setRPM();
        cout << " RPM val " << rpm <<endl;
        if( rpm != "Error")
           sendRequest(rpm);
-       usleep(100000);
+       usleep(1000);
        string vSpeed = setVehicleSpeed();
        cout << " Speed val " << vSpeed <<endl;
        if( vSpeed != "Error")
           sendRequest(vSpeed);
+       if( count > 20) 
+       {
+          usleep(1000);
+          count = 0;
+          list<string> errors = readErrors();
+          int size = errors.size();
+          if( size > 0) 
+          {
+             for(string err : errors) 
+             {
+                sendRequest(err);
+                cout << err << endl;
+             }
+          }
+         usleep(1000);  
+
+         string fuel = setFuelLevel();
+         cout << " Fuel val " << rpm <<endl;
+         if( fuel != "Error")
+           sendRequest(fuel);
+       }
+       usleep(1000);  
     } else {
        cout << "No active connection to vis-server at the moment!"<<endl;
     }
+    count++;
   }
+   cout << "Exited the elm AVs update thread" << endl;
 }
 
+// Thread that updates the Errors ( DTCs)
+void* elmDTCRun(void* arg) {
+  
+   // Do nothing for the first 10 second.
+   usleep(10000000);
+
+   while(1) {
+    if( connection != NULL) {
+       list<string> errors = readErrors();
+       
+       int size = errors.size();
+
+       if( size > 0) {
+
+          for(string err : errors) {
+             sendRequest(err);
+             cout << err << endl;
+          }
+       }
+
+    } else {
+       cout << "No active connection to vis-server at the moment!"<<endl;
+    }
+   
+     usleep(3000000);
+  }
+   cout << "Exited the elm AVs update thread" << endl;
+}
 
 void* startWSClient(void * arg) {
 
@@ -87,12 +138,19 @@ void* startWSClient(void * arg) {
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
     cout << "Connection with server at " << url << " opened" << endl;
     connection = conn;
-    pthread_t ELMRun_thread;
+    pthread_t ELMAVRun_thread;
     /* create test run thread which updates the tree */
-    if(pthread_create(&ELMRun_thread, NULL, &elmRun, NULL )) {
-      cout << "Error creating test run thread"<<endl;
+    if(pthread_create(&ELMAVRun_thread, NULL, &elmActualValuesRun, NULL )) {
+      cout << "Error creating AVs update thread"<<endl;
       return 1;
     }
+
+     pthread_t ELMDTCRun_thread;
+    /* create test run thread which updates the tree */
+   /* if(pthread_create(&ELMDTCRun_thread, NULL, &elmDTCRun, NULL )) {
+      cout << "Error creating DTC check thread"<<endl;
+      return 1;
+    }*/
     
   };
 

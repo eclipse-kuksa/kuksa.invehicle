@@ -24,21 +24,30 @@
 using namespace std;
 
 #define BAUD_RATE B38400
-
-int first = 0;
+// sleep in microseconds
+#define AVTHREADSLEEP 100000
+#define DTCTHREADSLEEP 200000
 
 extern char PORT[128];
 extern int connectionHandle;
 
-void removeSlashRN( char * str) {
-
-   // replace carriage return and new line with empty string.
-   for(int i=0; i< sizeof(str); i++) {
+// filter out unwanted characters from raw data from the vehicle.
+void filter( char * str , int size) {
+   int index = 0;
+   for(int i=0; i< size; i++) {
         if(str[i] == '\r' || str[i] == '\n')
-           str[i] = ' ';
-
+           continue;
+        else if (str[i] == ':') {
+           //TODO: this will work only for 1-9 blocks, but this suffices the present requirement. This may cause a problem with Reading DTC, for
+           // sensor values should not matter. 
+           index = index - 2;
+           continue;
+        } else if (str[i] == '>') {
+           str[index++] = '\0';
+           return;
+        }
+        str[index++] = str[i];
    }
-
 }
 
 void resetELM() {   
@@ -47,25 +56,26 @@ void resetELM() {
    int res = write(connectionHandle,(char*)reset.c_str(), 4);
     
    fsync(connectionHandle);
-   usleep(500000);
+   usleep(50000);
    
    char read_buffer[64];
    int bytes_read = read(connectionHandle, &read_buffer, 64);
 
-   removeSlashRN(read_buffer);
+   filter(read_buffer, bytes_read);
    cout << "response for reset is " << string(read_buffer) << endl;
 }
 
 void setProtocol(int protocol) {
+   // TODO : Needs to be extended for other protocols.
    // set protocol to automatic
    string setProt = "ATSP0\r";
    write(connectionHandle,(char*)setProt.c_str(), 6);
    fsync(connectionHandle);
-   usleep(500000);
+   usleep(50000);
    char read_buffer[64];
    int bytes_read = read(connectionHandle, &read_buffer, 64);
-   removeSlashRN(read_buffer);
-   cout << "resp for ATSP0 is " << string(read_buffer) << endl;
+   filter(read_buffer, bytes_read);
+   cout << "response for Setprotocol to automatic is " << string(read_buffer) << endl;
 }
 
 bool connectOBD(int timeout)
@@ -89,7 +99,7 @@ bool connectOBD(int timeout)
     SerialPortSettings.c_cflag |= CLOCAL | CREAD | CS8;
     SerialPortSettings.c_lflag &= ~(ICANON | ISIG | ECHO);
 
-   SerialPortSettings.c_cc[VMIN]  = 10; /* Read 10 characters */
+   SerialPortSettings.c_cc[VMIN]  = 100; /* Read 10 characters */
    SerialPortSettings.c_cc[VTIME] = 10; // wait for val/10 seconds between each byte received.
 
    connectionHandle = open(PORT, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -113,9 +123,7 @@ bool connectOBD(int timeout)
    resetELM();
    
    usleep(200000);
-      
    setProtocol(0);
-
    return true;
 }
 
@@ -128,19 +136,42 @@ string readMode1Data(string command)
    int res = write(connectionHandle,write_buf, 6);
    fsync(connectionHandle);
 
-   usleep(500000);
+   usleep(AVTHREADSLEEP);
    
    char read_buffer[64] = {0};
    int bytes_read = read(connectionHandle, &read_buffer, 64);
-  
-   removeSlashRN(read_buffer);
+
+
+   filter(read_buffer, bytes_read);
 
    string response (read_buffer);
 #ifdef DEBUG
-   cout << "Data as string from vehicle ="<< endl << response << endl;
+   cout << "Sensor Data as string from vehicle ="<< endl << response << endl;
 #endif
    
    return response;
+}
+
+string readMode3Data() {
+
+   char cmdBuf[3] = {'0','3','\r'};
+
+   int res = write(connectionHandle,cmdBuf, 3);
+   fsync(connectionHandle);
+   usleep(DTCTHREADSLEEP);
+   
+   char read_buffer[128] = {0};
+   int bytes_read = read(connectionHandle, &read_buffer, 128);
+
+   cout << "Total bytes read =" << bytes_read <<endl;
+   
+   filter(read_buffer, bytes_read);
+   string response (read_buffer);
+
+#ifdef DEBUG
+   cout << "Error Data as string from vehicle ="<< endl << response << endl;
+#endif
+   return response;  
 }
 
 
@@ -167,7 +198,7 @@ int testCommands(string command, char* response) {
 #ifdef DEBUG
      cout << "Total bytes read as response = " << bytes_read << endl;
 #endif
-     removeSlashRN(response);
+     filter(response, bytes_read);
      return bytes_read;
 }
 

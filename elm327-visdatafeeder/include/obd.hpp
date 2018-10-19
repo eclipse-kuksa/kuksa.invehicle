@@ -16,5 +16,6 @@ using namespace std;
 
 bool connectOBD(int timeout);
 string readMode1Data(string command);
+string readMode3Data();
 void closeConnection();
 int testCommands(string command, char* response);

@@ -12,8 +12,11 @@
  * *****************************************************************************
  */
 #include <string>
+#include <list>
 
 using namespace std;
 
 string setRPM();
 string setVehicleSpeed();
+string setFuelLevel();
+list<string> readErrors();
