@@ -104,7 +104,7 @@ void sendToHono( string resp) {
        int val = stoi(value, nullptr, 10);
        valJson[signal] = val;
     } else if (reqID == 1236) {
-       signal = "ERROR1";
+       signal = "ERROR";
        int val = 0;
        if(value == "true")
            val = 1;

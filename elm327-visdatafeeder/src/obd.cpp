@@ -25,8 +25,8 @@ using namespace std;
 
 #define BAUD_RATE B38400
 // sleep in microseconds
-#define AVTHREADSLEEP 100000
-#define DTCTHREADSLEEP 200000
+#define AVTHREADSLEEP 300000
+#define DTCTHREADSLEEP 400000
 
 extern char PORT[128];
 extern int connectionHandle;
