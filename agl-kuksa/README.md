@@ -155,4 +155,4 @@ The apps connect to the w3c-visserver service using a websocket connection and r
 
 # Documentation
 
-The official documentation of this project can be reviewed [here](https://gitlab-pages.idial.institute/appstacle/agl-kuksa/index.html).
+The official documentation of this project can be reviewed [here](https://agl-kuksa.readthedocs.io/en/latest/).
