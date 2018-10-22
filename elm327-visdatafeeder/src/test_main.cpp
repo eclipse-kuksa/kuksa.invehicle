@@ -19,6 +19,9 @@
 
 char* PORT;
 int connectionHandle;
+int AVTHREADSLEEP = 100000;
+int DTCTHREADSLEEP = 100000;
+
 using namespace std;
 
 

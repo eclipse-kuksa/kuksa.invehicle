@@ -24,6 +24,10 @@ using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 
 int connectionHandle = -1;
 
+int AVTHREADSLEEP;
+int DTCTHREADSLEEP;
+
+
 char PORT[128];
 char TOKEN[8096];
 
@@ -171,11 +175,13 @@ client.start();
 int main(int argc, char* argv[])
 {
 
-        if(argc == 3) {
+        if(argc == 5) {
            strcpy(PORT , argv[1]);
            strcpy(TOKEN , argv[2]);
+           AVTHREADSLEEP = atoi(argv[3]);
+           DTCTHREADSLEEP = atoi(argv[4]);
         } else {
-           cerr<<"Usage ./elm327_visfeeder <ELM327-PORT>  <JWT TOKEN>"<<endl;
+           cerr<<"Usage ./elm327_visfeeder <ELM327-PORT>  <JWT TOKEN> <AVTHREADDELAY> <DTCTHREADDELAY>"<<endl;
            return -1; 
         }
 
