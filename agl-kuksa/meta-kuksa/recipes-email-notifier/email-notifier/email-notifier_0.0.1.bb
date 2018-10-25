@@ -10,9 +10,9 @@
 #      Robert Bosch GmbH - initial API and functionality
 # *****************************************************************************
 
-SUMMARY = "DataLogger HTTP App"
-DESCRIPTION = "Data logger that sends data to Hono's HTTP adapter"
-HOMEPAGE = "https://www.eclipse.org/hono/user-guide/http-adapter/"
+SUMMARY = "DTC Email notify app"
+DESCRIPTION = "Sends email to the user when DTC is found in the car"
+HOMEPAGE = "https://www.eclipse.org/hono/concepts/command-and-control/"
 LICENSE = "EPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=c7cc8aa73fb5717f8291fcec5ce9ed6c"
 
@@ -26,7 +26,7 @@ SRC_URI = "git://github.com/rai20/kuksa.invehicle.git;protocol=https;branch=demo
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
 EXTRA_OECMAKE += "-Dpkg_config_libdir=${libdir} -DCMAKE_BUILD_TYPE=Release"
 
-S = "${WORKDIR}/git/datalogger-http"
+S = "${WORKDIR}/git/email-notifier"
 
 
 
