@@ -119,7 +119,7 @@ void sendEmailToOwner( string resp) {
     if((reqID > -1 && reqID < MAX_ERRORS) && value == "true") {
        
       if(!mailsent[reqID]) {
-         int status = sendEmail(emailID, "Error Found In your Car!" , "Hello Sir, An Error has been found in your car, Please contact your nearest service station.");
+         int status = sendEmail(emailID, "Error Found In your Car!" , "Hello Sir, An Error has been found in your car, Please contact your nearest service station. Error details = P010" + std::to_string(reqID));
          if ( status == 1) {
              cout << " Email sent to user successfully!" << endl;
              mailsent[reqID] = true;
@@ -152,7 +152,7 @@ void* visConnectRun (void* arg) {
   // send data to hono instance.
   while(1) {
     
-    string dtc_1 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC1\", \"requestId\": 0 }";
+    string dtc_1 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC1\", \"requestId\": 5 }";
 
     
     *send_stream << dtc_1;
@@ -162,14 +162,14 @@ void* visConnectRun (void* arg) {
 
      // sleep 0.2 sec
     usleep(200000);  
-    string dtc_2 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC2\", \"requestId\": 1 }";
+    string dtc_2 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC2\", \"requestId\": 6 }";
     
     *send_stream << dtc_2;
     connection->send(send_stream); 
 
 
     usleep(200000);  
-    string dtc_3 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC3\", \"requestId\": 2 }";
+    string dtc_3 = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC3\", \"requestId\": 7 }";
     
     *send_stream << dtc_3;
     connection->send(send_stream); 
