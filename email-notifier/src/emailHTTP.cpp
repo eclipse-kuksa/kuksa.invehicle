@@ -24,7 +24,7 @@ int handleCode(int code)
 {
 	int status = 0;
 	switch (code)
-	{
+	{       case 100: // continue but in this case accepted.
 		case 200: //Accepted
 			printf("200 Accepted\n");
 			printf("Registration of device to Hono instance accepted.\n");

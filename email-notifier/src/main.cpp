@@ -40,6 +40,8 @@ char emailServerPort[64];
 
 char TOKEN[2048];
 
+string emailTemplate;
+
 const string DEFAULT_TENANT = "DEFAULT_TENANT";
 
 std::string query;
@@ -65,6 +67,28 @@ string readEmailAddr() {
     cout <<"User Email= " << email << endl;
     return email;
 
+}
+
+void readEmailTemplate() {
+
+   std::ifstream ifs ("emailTemplate.html", std::ifstream::in);
+    
+   if( !ifs.is_open()) {
+       cout << "Email template file not found!" << endl;
+       return; 
+   }
+
+    string line;
+    stringstream ss;
+    
+    
+    while(getline (ifs,line)) {
+        ss << line;
+    }
+    ifs.close();
+    emailTemplate = ss.str();
+    cout << emailTemplate << endl;
+    
 }
 
 
@@ -119,7 +143,13 @@ void sendEmailToOwner( string resp) {
     if((reqID > -1 && reqID < MAX_ERRORS) && value == "true") {
        
       if(!mailsent[reqID]) {
-         int status = sendEmail(emailID, "Error Found In your Car!" , "Hello Sir, An Error has been found in your car, Please contact your nearest service station. Error details = P010" + std::to_string(reqID));
+         string emailToSend = emailTemplate;
+        
+         size_t f = emailToSend.find("?????");
+
+         emailToSend.replace(f, 5, "P010" + std::to_string(reqID));
+
+         int status = sendEmail(emailID, "Error Found In your Car!" , emailToSend);
          if ( status == 1) {
              cout << " Email sent to user successfully!" << endl;
              mailsent[reqID] = true;
@@ -235,6 +265,8 @@ int main(int argc, char* argv[])
            return -1; 
         }
 
+
+      readEmailTemplate();
         
        
      pthread_t startWSClient_thread;

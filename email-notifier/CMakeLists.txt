@@ -50,6 +50,7 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
 configure_file(start.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(emailTemplate.html ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
