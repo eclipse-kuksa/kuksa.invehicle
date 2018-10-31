@@ -100,12 +100,13 @@ This will start the build system and would take about 7 hours to complete if you
 
 Go to $HOME/workspace_agl/build/conf folder and open bblayers.conf file.
 
-Append the below line at the end of the file.
+Append the following lines to the end of the file.
 
 ```
 BBLAYERS =+ “ \
 
 ${METADIR}/meta-kuksa \
+${METADIR}/meta-virtualization \
 
 “ 
 ```

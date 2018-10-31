@@ -1,0 +1,40 @@
+# ******************************************************************************
+# Copyright (c) 2018 Robert Bosch GmbH and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v2.0
+# which accompanies this distribution, and is available at
+# https://www.eclipse.org/org/documents/epl-2.0/index.php
+#
+#  Contributors:
+#      Robert Bosch GmbH - patch Makefile so we can inject the right flags from bitbake
+# *****************************************************************************
+
+diff --git a/Makefile b/Makefile
+index c822bf7..0ec91cc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -45,19 +45,19 @@ client: bin
+ 	cd ctr && go build -ldflags "${LDFLAGS}" -o ../bin/ctr
+
+ client-static:
+-	cd ctr && go build -ldflags "-w -extldflags -static ${LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/ctr
++	cd ctr && go build -ldflags "-w -extldflags -static ${EXTRA_LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/ctr
+
+ daemon: bin
+ 	cd containerd && go build -ldflags "${LDFLAGS}"  -tags "$(BUILDTAGS)" -o ../bin/containerd
+
+ daemon-static:
+-	cd containerd && go build -ldflags "-w -extldflags -static ${LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/containerd
++	cd containerd && go build -ldflags "-w -extldflags -static ${EXTRA_LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/containerd
+
+ shim: bin
+ 	cd containerd-shim && go build -tags "$(BUILDTAGS)" -ldflags "-w ${LDFLAGS}" -o ../bin/containerd-shim
+
+ shim-static:
+-	cd containerd-shim && go build -ldflags "-w -extldflags -static ${LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/containerd-shim
++	cd containerd-shim && go build -ldflags "-w -extldflags -static ${EXTRA_LDFLAGS}" -tags "$(BUILDTAGS)" -o ../bin/containerd-shim
+
+ $(TESTBENCH_BUNDLE_DIR)/busybox.tar:
+ 	mkdir -p $(TESTBENCH_BUNDLE_DIR)
+
