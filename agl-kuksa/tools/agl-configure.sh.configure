@@ -28,3 +28,6 @@ do
   cat "@AGL_BUILD_BBLAYERS_PATH@/${i}.bblayer" >> @AGL_BBLAYERS_PATH@
   sed -i 's/\(DISTRO =\) *\".*\"/\1 \"@POKY_DISTRO@\"/' @AGL_LOCAL_CONF_PATH@
 done
+
+# Added virtualization to the Distro feature. This is for the docker support.
+sed -i '$ a\DISTRO_FEATURES_append = \" virtualization \"' @AGL_LOCAL_CONF_PATH@

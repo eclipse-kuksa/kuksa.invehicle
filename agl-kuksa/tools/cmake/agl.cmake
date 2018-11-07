@@ -177,6 +177,12 @@ macro(agl_build_configure)
   # Meta kuksa layer
   config_layer(meta-kuksa "${META_KUKSA_PATH}")
 
+  # Added meta-virtualization layer for docker
+  set(METADIRVIRT "$")
+  set(METADIRVIRT "${METADIRVIRT}{METADIR}")
+  set(METADIRVIRT "${METADIRVIRT}/meta-virtualization")
+  config_layer(meta-virtualization "${METADIRVIRT}")
+
   if (DEV_LAYERS)
       message("-- Development mode ON adding meta-kuksa-dev")
       config_layer(meta-kuksa-dev "${META_KUKSA_DEV_PATH}")
