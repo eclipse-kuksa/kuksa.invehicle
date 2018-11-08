@@ -7,11 +7,6 @@ adds Kuksa's specific Bitbake layers on top of the original AGL. The scripts in
 this project help ease the process of building an AGL image by simple using a few
 commands. This project includes the yocto recipes found in meta-kuksa project.
 
-# Prerequisites
-
-* PC with a Linux Distro (eg: ubuntu).
-* Minimum of 100GB Memory.
-* Some patience as it takes about 8 hours the first time.
 
 # Dependencies
 
@@ -32,6 +27,9 @@ running;
 2. Fast Internet connection.
 
 3. Minimum of 100 GB memory.
+
+4. Some patience as it takes about 8 hours the first time.
+
 
 To build the Image/SDK, run;
 
@@ -60,6 +58,8 @@ The output images can be seen at `<agl-kuksa-root>/build/images` and the SDKs at
 2. Fast Internet connection.
 
 3. Minimum of 100 GB memory.
+
+4. Some patience as it takes about 8 hours the first time.
 
 ## Steps
 
