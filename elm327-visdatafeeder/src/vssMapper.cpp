@@ -101,7 +101,7 @@ string setVehicleSpeed() {
   int pos = readBuf.find("41 0D", 0);
 
   if( pos == -1) {
-      cout << "Response not valid for Vehicle Speed" << endl;
+      cout << "Response not valid for Vehicle Speed " << readBuf <<endl;
       return "Error";
   }
 

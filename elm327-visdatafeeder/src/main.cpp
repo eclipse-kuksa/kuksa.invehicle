@@ -15,6 +15,7 @@
 #include "client_wss.hpp"
 #include "obd.hpp"
 #include"vssMapper.hpp"
+#include "actuatorTest.hpp"
 #include <json.hpp>
 
 using namespace std;
@@ -58,11 +59,21 @@ void* elmActualValuesRun (void* arg) {
    sendRequest(ss.str());
 
    usleep(200000);
+   
+   // subsribe to throttle topic.
+   json subscibeReq;
+   subscibeReq["requestId"] = rand() % 99999;
+   subscibeReq["action"]= "subscribe";
+   subscibeReq["path"] = "Signal.Drivetrain.InternalCombustionEngine.ThrottleTest";
+   stringstream sstream; 
+   sstream << pretty_print(subscibeReq);
+   sendRequest(sstream.str());
+   
     
    int count = 0;
    while(1) {
-    usleep(1000);
     if( connection != NULL) {
+       usleep(1000);
        string rpm = setRPM();
        cout << " RPM val " << rpm <<endl;
        if( rpm != "Error")
@@ -93,7 +104,6 @@ void* elmActualValuesRun (void* arg) {
          if( fuel != "Error")
            sendRequest(fuel);
        }
-       usleep(1000);  
     } else {
        cout << "No active connection to vis-server at the moment!"<<endl;
     }
@@ -131,12 +141,26 @@ void* elmDTCRun(void* arg) {
    cout << "Exited the elm AVs update thread" << endl;
 }
 
+// on messages received.
+void onMessage(string message) {
+   cout << "Response >> " << message << endl;
+   json msg;
+   msg = json::parse(message);
+   
+   if( !msg.has_key("value")) {
+      return;
+   } else if(msg.has_key("subscriptionId")) {
+       moveThrottleValve();
+   } 
+}
+
 void* startWSClient(void * arg) {
 
   WssClient client(url , true ,"Client.pem", "Client.key","CA.pem");
 
   client.on_message = [](shared_ptr<WssClient::Connection> connection, shared_ptr<WssClient::Message> message) {
-    cout << "Response >> " << message->string() << endl;
+    
+    onMessage(message->string());
   };
 
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {

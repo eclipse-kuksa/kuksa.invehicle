@@ -31,6 +31,8 @@ extern int DTCTHREADSLEEP;
 extern char PORT[128];
 extern int connectionHandle;
 
+pthread_mutex_t obdMutex;
+
 // filter out unwanted characters from raw data from the vehicle.
 void filter( char * str , int size) {
    int index = 0;
@@ -99,7 +101,7 @@ bool connectOBD(int timeout)
     SerialPortSettings.c_cflag |= CLOCAL | CREAD | CS8;
     SerialPortSettings.c_lflag &= ~(ICANON | ISIG | ECHO);
 
-   SerialPortSettings.c_cc[VMIN]  = 100; /* Read 10 characters */
+   SerialPortSettings.c_cc[VMIN]  = 30; /* Read 30 characters */
    SerialPortSettings.c_cc[VTIME] = 10; // wait for val/10 seconds between each byte received.
 
    connectionHandle = open(PORT, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -120,16 +122,18 @@ bool connectOBD(int timeout)
    // Apply ELM 327 settings.
    fcntl(connectionHandle, F_SETFL, 0);
 
-   resetELM();
-   
+   pthread_mutex_lock (&obdMutex);  
+   resetELM();   
    usleep(200000);
    setProtocol(0);
+   pthread_mutex_unlock (&obdMutex);
+   
    return true;
 }
 
 string readMode1Data(string command)
 {
-
+   pthread_mutex_lock (&obdMutex);  
    char write_buf[6];
    memcpy(write_buf , command.c_str(), 6);
 
@@ -140,7 +144,7 @@ string readMode1Data(string command)
    
    char read_buffer[64] = {0};
    int bytes_read = read(connectionHandle, &read_buffer, 64);
-
+   pthread_mutex_unlock (&obdMutex);  
 
    filter(read_buffer, bytes_read);
 
@@ -153,7 +157,7 @@ string readMode1Data(string command)
 }
 
 string readMode3Data() {
-
+   pthread_mutex_lock (&obdMutex);  
    char cmdBuf[3] = {'0','3','\r'};
 
    int res = write(connectionHandle,cmdBuf, 3);
@@ -164,7 +168,7 @@ string readMode3Data() {
    int bytes_read = read(connectionHandle, &read_buffer, 128);
 
    cout << "Total bytes read =" << bytes_read <<endl;
-   
+   pthread_mutex_unlock (&obdMutex);  
    filter(read_buffer, bytes_read);
    string response (read_buffer);
 
@@ -172,6 +176,33 @@ string readMode3Data() {
    cout << "Error Data as string from vehicle ="<< endl << response << endl;
 #endif
    return response;  
+}
+
+string writeMode8Data(string command) {
+   pthread_mutex_lock (&obdMutex);  
+   char write_buf[12];
+   memcpy(write_buf , command.c_str(), 12);
+
+   int res = write(connectionHandle,write_buf, 12);
+   fsync(connectionHandle);
+
+   usleep(AVTHREADSLEEP);
+   
+   char read_buffer[64] = {0};
+   int bytes_read = read(connectionHandle, &read_buffer, 64);
+   fsync(connectionHandle);
+   tcflush(connectionHandle,TCIOFLUSH);
+   pthread_mutex_unlock (&obdMutex);  
+
+   filter(read_buffer, bytes_read);
+
+   string response (read_buffer);
+#ifdef DEBUG
+   cout << "Response for mode 8 as string from vehicle ="<< endl << response << endl;
+#endif
+   
+   return response;
+
 }
 
 

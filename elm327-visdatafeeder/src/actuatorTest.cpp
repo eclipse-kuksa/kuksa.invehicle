@@ -12,11 +12,16 @@
  * *****************************************************************************
  */
 #include<string>
+#include <iostream>
+#include "actuatorTest.hpp"
+#include "obd.hpp"
+
 using namespace std;
 
-bool connectOBD(int timeout);
-string readMode1Data(string command);
-string readMode3Data();
-string writeMode8Data(string command);
-void closeConnection();
-int testCommands(string command, char* response);
+
+
+void moveThrottleValve() {
+  cout << "sending Throttle Request"<< endl;     
+  string resp = writeMode8Data("08 77\r");
+  cout <<"Throttle cmd resp= "<< resp << endl;
+}
