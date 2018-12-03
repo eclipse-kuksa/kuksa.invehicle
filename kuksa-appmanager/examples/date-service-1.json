@@ -1,0 +1,9 @@
+{
+  "name": "date-service",
+  "version": "1",
+  "image": "alpine:latest",
+  "config": {
+    "command": "sh -c \"while true; do date; sleep 10; done\"",
+    "tty": true
+  }
+}
