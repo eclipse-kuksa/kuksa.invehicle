@@ -10,6 +10,7 @@
 
 import json
 import logging
+import os
 import time
 from queue import Queue
 from threading import Lock
@@ -269,6 +270,13 @@ class DeploymentJob:
             service_name = chunk['name']
             self.logger.debug("Provisioning chunk: {name}".format(name=service_name))
 
+            if service_name in services:
+                # invalid configuration detected
+                raise ConfigurationError("Duplicate service configuration for service: {}".format(service_name))
+
+            service = dict()
+            services[service_name] = service
+
             for artifact in chunk['artifacts']:
                 self.__cancelled_check()
 
@@ -281,17 +289,29 @@ class DeploymentJob:
                     artifact_content = artifact_response.content
                     assert md5(artifact_content) == artifact['hashes']['md5']
 
-                    if service_name in services:
-                        # invalid configuration detected
-                        raise ConfigurationError("Duplicate service configuration for service: {}".format(service_name))
-
-                    service: dict = json.loads(artifact_content)
+                    service.update(json.loads(artifact_content))
                     service.update(dict(
                         name=service_name,
                         version=chunk['version'],
                     ))
+                elif artifact_filename == 'docker-image.tar':
+                    artifact_response = self.http.get(artifact['_links']['download-http']['href'], stream=True)
+                    artifact_response.raise_for_status()
 
-                    services[service_name] = service
+                    try:
+                        os.mkdir('artifacts')
+                    except FileExistsError:
+                        # ignored
+                        pass
+                    artifact_file = 'artifacts/{}-{}.tar'.format(service_name, chunk['version'])
+                    with open(artifact_file, 'wb') as f:
+                        for chunk in artifact_response.iter_content(chunk_size=4096):
+                            f.write(chunk)
+                            self.__cancelled_check()
+
+                    # TODO: validate downloaded file
+
+                    service['image-tarball'] = artifact_file
                 else:
                     self.logger.debug("Ignored artifact: {filename}".format(filename=artifact_filename))
 
