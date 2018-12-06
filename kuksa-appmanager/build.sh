@@ -23,7 +23,7 @@ function build {
     esac
 
     # build image
-    docker build -f ./Dockerfile.build -t kuksaregistry.azurecr.io/kuksa/${TARGET}/client:${VERSION} .
+    docker build --platform os/$TARGET -f ./Dockerfile.build -t kuksaregistry.azurecr.io/kuksa/${TARGET}/client:${VERSION} .
 }
 
 build 'amd64'
