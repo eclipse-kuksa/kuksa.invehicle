@@ -9,6 +9,15 @@
 #  SPDX-License-Identifier: EPL-2.0
 #
 #  Contributors: Robert Bosch GmbH
+#
+#
+#  This program and the accompanying materials are made available under the
+#  terms of the Eclipse Public License 2.0 which is available at
+#  http://www.eclipse.org/legal/epl-2.0
+#
+#  SPDX-License-Identifier: EPL-2.0
+#
+#  Contributors: Robert Bosch GmbH
 
 import json
 import os
@@ -25,14 +34,24 @@ def create_app(config_file, upload_image=False, server=DEFAULT_SERVER, username=
     with open(config_file, mode='r') as __config_file:
         config = json.load(__config_file)
 
-    image_file = None
+    app_image_file = None
     if upload_image:
-        image_file = '{}-{}.tar'.format(config['name'], config['version'])
-        success = subprocess.run('docker save {} > {}'.format(config['image'], image_file), shell=True).returncode
+        app_image_file = '{}-{}.tar'.format(config['name'], config['version'])
 
+        app_image = config['image']
+        app_image_new = '{}__{}-{}'.format(app_image, config['name'], config['version'])
+
+        success = subprocess.run('docker tag {} {}'.format(app_image, app_image_new), shell=True).returncode
+        if success != 0:
+            print("Failed to re-tag the app image")
+            exit(1)
+
+        success = subprocess.run('docker save {} > {}'.format(app_image_new, app_image_file), shell=True).returncode
         if success != 0:
             print("Failed to save the docker image")
             exit(1)
+
+        config['image'] = app_image_new
 
     http = Session()
     http.auth = (username, password)
@@ -69,19 +88,19 @@ def create_app(config_file, upload_image=False, server=DEFAULT_SERVER, username=
 
     # upload the docker image artifact
 
-    if image_file:
+    if app_image_file:
         image_response = http.post(
             url='{}/rest/v1/softwaremodules/{}/artifacts'.format(server, app_id),
             data={
                 'filename': 'docker-image.tar',
             },
             files={
-                'file': open(image_file, mode='rb')
+                'file': open(app_image_file, mode='rb')
             },
         )
         __handle_error(image_response)
 
-        os.remove(image_file)
+        os.remove(app_image_file)
 
 
 def __handle_error(response):
