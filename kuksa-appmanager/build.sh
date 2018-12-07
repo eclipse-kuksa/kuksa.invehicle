@@ -13,10 +13,10 @@ if [ "$EXPERIMENTAL" != "Experimental: true" ]; then
 fi
 
 function build {
-    TARGET=$1
+    ARCH=$1
 
     # generate Dockerfile.build
-    case ${TARGET} in
+    case ${ARCH} in
     'amd64')
         sed -e "s/arm64v8/amd64/g" Dockerfile > Dockerfile.build
         sed -i -e "s/^.*qemu-aarch64-static.*$//g" Dockerfile.build
@@ -38,10 +38,14 @@ function build {
         sed -e "s/arm64v8/armhf/g" Dockerfile > Dockerfile.build
         sed -i -e "s/qemu-aarch64-static/qemu-arm-static/g" Dockerfile.build
         ;;
+    *)
+        echo "Unsupported architecture: $ARCH" 1>&2
+        exit 1
+        ;;
     esac
 
     # build image
-    docker build --platform linux/$TARGET -f ./Dockerfile.build -t ${TARGET}/kuksa-appmanager:${VERSION} .
+    docker build --platform linux/$ARCH -f ./Dockerfile.build -t ${ARCH}/kuksa-appmanager:${VERSION} .
 
     # cleanup
     rm -f Dockerfile.build
@@ -49,6 +53,11 @@ function build {
     rm -f qemu-arm-static
 }
 
-build 'amd64'
-build 'arm64'
-build 'armhf'
+ARCHS="$@"
+if [ -z "$ARCHS" ]; then
+    ARCHS="amd64 arm64 armhf"
+fi
+
+for ARCH in $ARCHS; do
+    build $ARCH
+done
