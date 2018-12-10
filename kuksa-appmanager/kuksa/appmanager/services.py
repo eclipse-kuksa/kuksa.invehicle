@@ -47,7 +47,7 @@ class DockerSession:
 
         services = self.__sort_services(services)
 
-        self.__pull_docker_images(services)
+        self.__update_docker_images(services)
 
         self.__stop_and_remove_existing_services()
 
@@ -116,19 +116,25 @@ class DockerSession:
 
         return sorted_services
 
-    def __pull_docker_images(self, services, cancellable=True):
+    def __update_docker_images(self, services, cancellable=True):
         for service_name, service in services.items():
             if cancellable:
                 self.cancelled_check()
 
-            service_image = service['image']
-            auth_config = dict(service.get('auths') or {})
-            logger.debug("Pulling docker image '{}' for service {}".format(service_image, service_name))
-            try:
-                self.docker.images.pull(service_image, auth_config=auth_config)
-            except docker.errors.ImageNotFound:
-                raise ConfigurationError("Docker image does not exist: {}".format(service_image))
-            logger.debug("Finished pulling docker image '{}'".format(service_image))
+            service_image_tarball = service.get('image-tarball')
+            if service_image_tarball:
+                # load image from downloaded file
+                with open(service_image_tarball, 'rb') as __file:
+                    self.docker.images.load(__file)
+            else:
+                service_image = service['image']
+                auth_config = service.get('auths')
+                logger.debug("Pulling docker image '{}' for service {}".format(service_image, service_name))
+                try:
+                    self.docker.images.pull(service_image, auth_config=auth_config)
+                except docker.errors.ImageNotFound:
+                    raise ConfigurationError("Docker image does not exist: {}".format(service_image))
+                logger.debug("Finished pulling docker image '{}'".format(service_image))
 
     def __stop_and_remove_existing_services(self, cancellable=True):
         if cancellable:
