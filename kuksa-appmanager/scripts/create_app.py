@@ -81,7 +81,7 @@ def create_app(config_file, upload_image=False, server=DEFAULT_SERVER, username=
             'filename': 'docker-container.json',
         },
         files={
-            'file': open(config_file, mode='rb')
+            'file': json.dumps(config)
         },
     )
     __handle_error(config_response)
