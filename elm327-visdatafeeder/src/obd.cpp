@@ -180,10 +180,10 @@ string readMode3Data() {
 
 string writeMode8Data(string command) {
    pthread_mutex_lock (&obdMutex);  
-   char write_buf[12];
-   memcpy(write_buf , command.c_str(), 12);
+   char write_buf[16];
+   memcpy(write_buf , command.c_str(), 16);
 
-   int res = write(connectionHandle,write_buf, 12);
+   int res = write(connectionHandle,write_buf, 16);
    fsync(connectionHandle);
 
    usleep(AVTHREADSLEEP);

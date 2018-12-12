@@ -14,4 +14,4 @@
 #include<string>
 using namespace std;
 
-void moveThrottleValve();
+void moveThrottleValve(int percent);

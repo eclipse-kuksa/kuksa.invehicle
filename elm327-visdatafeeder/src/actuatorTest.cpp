@@ -20,8 +20,29 @@ using namespace std;
 
 
 
-void moveThrottleValve() {
-  cout << "sending Throttle Request"<< endl;     
-  string resp = writeMode8Data("08 77\r");
+void moveThrottleValve(int percent) {
+  cout << "sending Throttle Request for % " << percent << endl; 
+  string command = "\r";
+  switch (percent) {
+
+     case 25:
+              command = "08 77 19\r";
+              break;
+     case 50:
+              command = "08 77 32\r";
+              break;
+
+     case 75: 
+              command = "08 77 4b\r";
+              break;
+ 
+     case 100:
+              command = "08 77 64\r";
+              break;
+
+  }    
+  string resp = writeMode8Data(command);
   cout <<"Throttle cmd resp= "<< resp << endl;
 }
+
+

@@ -150,7 +150,8 @@ void onMessage(string message) {
    if( !msg.has_key("value")) {
       return;
    } else if(msg.has_key("subscriptionId")) {
-       moveThrottleValve();
+          int percent = msg["value"].as<int>();
+          moveThrottleValve(percent);
    } 
 }
 
@@ -175,10 +176,10 @@ void* startWSClient(void * arg) {
 
      pthread_t ELMDTCRun_thread;
     /* create test run thread which updates the tree */
-   /* if(pthread_create(&ELMDTCRun_thread, NULL, &elmDTCRun, NULL )) {
+    if(pthread_create(&ELMDTCRun_thread, NULL, &elmDTCRun, NULL )) {
       cout << "Error creating DTC check thread"<<endl;
       return 1;
-    }*/
+    }
     
   };
 
