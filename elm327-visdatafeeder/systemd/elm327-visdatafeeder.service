@@ -1,10 +1,11 @@
 [Unit]
 Description = OBDII data feeder thLM 327 for w3c-visserver
-After = w3c-visserver.service
+Requires=multi-user.target
+After=w3c-visserver.service multi-user.target
  
 [Service]
 WorkingDirectory=/usr/bin/elm327-visdatafeeder
 ExecStart =/usr/bin/elm327-visdatafeeder/start.sh
 
 [Install]
-WantedBy = multi-user.target
+WantedBy = custom.target
