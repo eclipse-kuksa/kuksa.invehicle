@@ -197,6 +197,10 @@ macro(agl_build_configure)
   configure_file("${CMAKE_SOURCE_DIR}/tools/agl-build.sh.configure"
     "${AGL_BUILD_TMP_PATH}/agl-kuksa-build.sh"
     @ONLY)
+  configure_file("${CMAKE_SOURCE_DIR}/tools/agl-buildsdk.sh.configure"
+    "${AGL_BUILD_TMP_PATH}/agl-kuksa-buildsdk.sh"
+    @ONLY)
+  
   configure_file("${CMAKE_SOURCE_DIR}/tools/agl-configure.sh.configure"
     "${AGL_BUILD_TMP_PATH}/agl-kuksa-configure.sh"
     @ONLY)

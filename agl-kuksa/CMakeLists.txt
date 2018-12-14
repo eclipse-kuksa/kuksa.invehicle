@@ -62,6 +62,7 @@ set(META_KUKSA_PATH "${CMAKE_SOURCE_DIR}/meta-kuksa")
 # Prepare output directories
 set(IMAGE_PATH "${CMAKE_BINARY_DIR}/images")
 set(SDK_PATH "${CMAKE_BINARY_DIR}/sdk")
+
 file(MAKE_DIRECTORY "${IMAGE_PATH}")
 file(MAKE_DIRECTORY "${SDK_PATH}")
 
@@ -83,4 +84,12 @@ add_custom_target(agl-kuksa
   COMMAND bash "${AGL_BUILD_TMP_PATH}/agl-kuksa-build.sh"
   DEPENDS agl-kuksa-config
   WORKING_DIRECTORY "${AGL_ROOT}")
+
+# Add agl-kuksa target with SDK
+add_custom_target(agl-kuksa-sdk
+  COMMAND bash "${AGL_BUILD_TMP_PATH}/agl-kuksa-buildsdk.sh"
+  DEPENDS agl-kuksa-config
+  WORKING_DIRECTORY "${AGL_ROOT}")
+
+
 

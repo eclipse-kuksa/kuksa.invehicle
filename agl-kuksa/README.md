@@ -43,7 +43,8 @@ To build the Image/SDK, run;
 
 Where `<agl-kuksa-target>` can be;
 
-* `agl-kuksa`: AGL kuksa image and SDK
+* `agl-kuksa-sdk`: AGL kuksa image and SDK
+* `agl-kuksa`: AGL kuksa Image only
 *  Other Targets to follow.
 
 The output images can be seen at `<agl-kuksa-root>/build/images` and the SDKs at `<agl-kuksa-root>/build/sdk`.
