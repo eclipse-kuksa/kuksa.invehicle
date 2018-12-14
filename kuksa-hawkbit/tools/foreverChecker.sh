@@ -16,7 +16,7 @@ DELAY=5
 coproc pwd                                                                                                                                                                        
 DIR=$(cat <&"${COPROC[0]}")                                                                                                                                                       
 pwd                                                                                                                                                                               
-                                                                                                                                                                                  
+mkdir /usr/apps                                                                                                                                                                                  
 while true;                                                                                                                                                                       
 do                                                                                                                                                                                
         echo "Checking...."                                                                                                                                                       
