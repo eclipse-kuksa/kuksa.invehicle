@@ -4,7 +4,7 @@ After=w3c-visserver.service
  
 [Service]
 WorkingDirectory=/usr/bin/elm327-visdatafeeder
-ExecStarto=/usr/bin/elm327-visdatafeeder/start.sh
+ExecStart=/usr/bin/elm327-visdatafeeder/start.sh
 
 [Install]
 WantedBy=multi-user.target
