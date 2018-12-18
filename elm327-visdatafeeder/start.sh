@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sleep 5s
+
 source bt_setup.sh
 echo "Starting ELM 327 app"
 
