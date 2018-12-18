@@ -28,6 +28,8 @@ int connectionHandle = -1;
 int AVTHREADSLEEP;
 int DTCTHREADSLEEP;
 
+bool isClosed = false;
+
 
 char PORT[128];
 char TOKEN[8096];
@@ -186,11 +188,13 @@ void* startWSClient(void * arg) {
   client.on_close = [](shared_ptr<WssClient::Connection> /*connection*/, int status, const string & /*reason*/) {
     cout << "Connection closed with status code " << status << endl;
     connection = NULL;
+    isClosed = true;
   };
 
   // See http://www.boost.org/doc/libs/1_55_0/doc/html/boost_asio/reference.html, Error Codes for error code meanings
   client.on_error = [](shared_ptr<WssClient::Connection> /*connection*/, const SimpleWeb::error_code &ec) {
     cout << "Error: " << ec << ", message: " << ec.message() << endl;
+    isClosed = true;
   };
 
 client.start();
@@ -220,6 +224,10 @@ int main(int argc, char* argv[])
 
         }
 
-       while (1) { usleep (1000000); };
+       while (!isClosed) { usleep (1000000); };
+    
+       cout << "Exiting ELM327-datafeeder main thread because of possible error" << endl; 
+
+       return 1;
 
 }

@@ -9,3 +9,7 @@ TOKEN='eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJFeGFtcGxlIEpXVCIsImlzcyI6
 
 
 ./elm327-visdatafeeder $SERIAL $TOKEN 150000 150000
+
+exit_code=$?
+
+exit $exit_code
