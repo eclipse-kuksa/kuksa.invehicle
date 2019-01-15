@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- * Copyright (c) 2018 Robert Bosch GmbH.
+ * Copyright (c) 2019 KocSistem Bilgi ve Iletisim Hizmetleri A.S..
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -8,22 +8,18 @@
  * https://www.eclipse.org/org/documents/epl-2.0/index.php
  *
  *  Contributors:
- *      Robert Bosch GmbH - initial API and functionality
+ *      Initial functionality - Ismail Burak Oksuzoglu, Erdem Ergen, Aslihan Cura (KocSistem Bilgi ve Iletisim Hizmetleri A.S.) 
  * *****************************************************************************
  */
 
-#include "accesschecker.hpp"
+#ifndef COMMON_HPP
+#define COMMON_HPP
 
-accesschecker::accesschecker(class authenticator* vdator) {
-  tokenValidator = vdator;
-}
+typedef enum t_return_value { SUCCESS, FAILURE, UNKNOWN } e_result;
 
-bool accesschecker::checkAccess(class wschannel& channel, string path) {
-  if (channel.isAuthorized()) {
-    return tokenValidator->isStillValid(channel);
-  } else {
-    return false;
-  }
+extern int sockfd;
+extern const char *obe_server_ip;
+extern int obe_port;
+extern int connection_status;
 
-  return true;
-}
+#endif  // COMMON_HPP

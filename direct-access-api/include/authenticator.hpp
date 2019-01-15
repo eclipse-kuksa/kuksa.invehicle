@@ -20,17 +20,16 @@
 
 using namespace std;
 
-
 class authenticator {
+ private:
+  string key = "secret";
+  string algorithm = "HS256";
 
-private:
-    string key = "secret";
-    string algorithm = "HS256";
+ public:
+  authenticator(string secretkey, string algorithm);
+  int validate(wschannel &channel, string authToken);
+  bool isStillValid(wschannel &channel);
 
-public:
-   authenticator(string secretkey, string algorithm);
-   int validate (wschannel &channel , string authToken);
-   bool isStillValid (wschannel &channel);
-
+  json get_payload(string authToken);
 };
 #endif

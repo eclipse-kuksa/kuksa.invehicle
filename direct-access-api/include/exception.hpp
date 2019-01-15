@@ -17,40 +17,26 @@
 using namespace std;
 
 // No path on Tree exception
-class noPathFoundonTree: public exception
-{
-  private:
-    string loc;
+class noPathFoundonTree : public exception {
+ private:
+  string loc;
 
-  public:
-    
-    noPathFoundonTree(string path) {
-        loc = path;
-    }
+ public:
+  noPathFoundonTree(string path) { loc = path; }
 
-  virtual const char* what() const throw()
-  {
+  virtual const char* what() const throw() {
     string message = "Path " + loc + " not found on the VSS Tree";
     return message.c_str();
   }
-} ;
+};
 
 // Generic exception
-class genException: public exception
-{
-  private:
-    string message;
+class genException : public exception {
+ private:
+  string message;
 
-  public:
-    
-    genException(string msg) {
-       message = msg;
-    }
+ public:
+  genException(string msg) { message = msg; }
 
-  virtual const char* what() const throw()
-  {
-    return message.c_str();
-  }
-} ;
-
-
+  virtual const char* what() const throw() { return message.c_str(); }
+};
