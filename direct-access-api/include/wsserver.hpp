@@ -12,9 +12,11 @@
  * *****************************************************************************
  */
 #include <stdio.h>
-#include "server_wss.hpp"
+#include "Simple-WebSocket-Server/server_wss.hpp"
 #include "directAccessProcessor.hpp"
 #include "authenticator.hpp"
+#include "obeclient.hpp"
+#include "vcanhandler.hpp"
 
 using namespace std;
 
@@ -25,22 +27,18 @@ using WssServer = SimpleWeb::SocketServer<SimpleWeb::WSS>;
 using WsServer = SimpleWeb::SocketServer<SimpleWeb::WS>;
 
 class wsserver {
-  private:
-    
-    WssServer* secureServer;
-    WsServer*  insecureServer;
-    bool isSecure;
-    
+ private:
+  WssServer* secureServer;
+  WsServer* insecureServer;
+  bool isSecure;
 
-  public:
-    
-    class directAccessProcessor* cmdProcessor;
-    class authenticator* tokenValidator;
+ public:
+  class directAccessProcessor* cmdProcessor;
+  class authenticator* tokenValidator;
 
-    wsserver(int port, bool secure);
-    ~wsserver();
-    void startServer(string endpointName);
-    void sendToConnection(uint32_t connID, string message);
-
+  wsserver(int port, bool secure);
+  ~wsserver();
+  void startServer(string endpointName);
+  void sendToConnection(uint32_t connID, string message);
 };
 #endif

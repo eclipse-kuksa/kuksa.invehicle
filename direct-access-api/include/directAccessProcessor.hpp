@@ -18,25 +18,27 @@
 #include "wschannel.hpp"
 #include "accesschecker.hpp"
 #include <jsoncons/json.hpp>
+#include "vcanhandler.hpp"
+#include "dbmanager.hpp"
+
 using namespace std;
 using namespace jsoncons;
 using jsoncons::json;
 
-
 class directAccessProcessor {
+ private:
+  string ks_token;
+  class authenticator* tokenValidator = NULL;
+  class accesschecker* accessValidator = NULL;
+  class vcanhandler* vcanHandler = NULL;
 
-private:
-   class  authenticator* tokenValidator = NULL;
-   class  accesschecker* accessValidator = NULL;
+  string processCreate(class wschannel& channel, string rchannel);
+  string processDelete(string vchannel);
+  string processAuthorize(string token, class wschannel& channel);
 
-   string processCreate(class wschannel& channel, string rchannel);
-   string processDelete(string vchannel);
-   string processAuthorize (string token ,class wschannel& channel);
-
-public:
-   directAccessProcessor( class  authenticator* vdator);
-   string processQuery(string req_json , class wschannel& channel);
+ public:
+  directAccessProcessor(class authenticator* vdator);
+  string processQuery(string req_json, class wschannel& channel);
 };
-
 
 #endif
