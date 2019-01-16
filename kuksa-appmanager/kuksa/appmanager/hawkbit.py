@@ -15,6 +15,7 @@ import time
 from queue import Queue
 from threading import Lock
 from threading import Thread
+import subprocess
 
 from requests import Session
 
@@ -237,12 +238,21 @@ class DeploymentJob:
             self.__send_feedback('proceeding', 'none')
 
             try:
-                deployment_services = self.__get_services(deployment)
+                deployment_firmwares = self.__get_firmwares(deployment)
 
-                with DockerSession(self.__cancelled_check) as docker:
-                    docker.deploy(deployment_services)
+                deployment_firmwares = self.__get_installable_firmwares(deployment_firmwares)
 
-                self.__send_feedback('closed', 'success')
+                if deployment_firmwares:
+                    # TODO: check if firmware failed to be installed
+
+                    self.__flash_firmware(deployment_firmwares)
+                else:
+                    deployment_services = self.__get_services(deployment)
+
+                    with DockerSession(self.__cancelled_check) as docker:
+                        docker.deploy(deployment_services)
+
+                    self.__send_feedback('closed', 'success')
             except ConfigurationError as error:
                 self.logger.error(error)
                 # TODO: forward error message to HawkBit
@@ -264,9 +274,94 @@ class DeploymentJob:
     def __send_feedback(self, execution, finished):
         self.client._send_feedback(self.action_url, self.action_id, execution, finished)
 
+    def __get_firmwares(self, deployment):
+        firmwares = {}
+        for chunk in deployment['deployment']['chunks']:
+            if chunk['part'] != 'os':
+                # check if this is an firmware
+                continue
+
+            firmware_name = chunk['name']
+            self.logger.debug("Provisioning chunk: {name}".format(name=firmware_name))
+
+            firmware = dict(
+                name=firmware_name,
+                version=chunk['version'],
+                files=[],
+            )
+            firmwares[firmware_name] = firmware
+
+            for artifact in chunk['artifacts']:
+                self.__cancelled_check()
+
+                # TODO: check if firmware was already downloaded
+
+                self.logger.debug(artifact)
+                artifact_filename = artifact['filename']
+
+                artifact_response = self.http.get(artifact['_links']['download-http']['href'], stream=True)
+                artifact_response.raise_for_status()
+
+                try:
+                    os.mkdir('firmwares')
+                except FileExistsError:
+                    # ignored
+                    pass
+                artifact_file = 'firmwares/{}'.format(artifact_filename)
+                with open(artifact_file, 'wb') as f:
+                    for chunk in artifact_response.iter_content(chunk_size=4096):
+                        f.write(chunk)
+                        self.__cancelled_check()
+
+                # TODO: validate downloaded file
+
+                firmware['files'].append(dict(
+                    name=artifact_filename,
+                    path=artifact_file
+                ))
+
+        return firmwares
+
+    def __get_installable_firmwares(self, deployment_firmwares):
+        firmwares = {}
+
+        for firmware_name, firmware in deployment_firmwares.items():
+            self.__cancelled_check()
+
+            # call script that gives the current firmware version
+            with subprocess.Popen(['kuksa-firmware-get-version', firmware_name], stdout=subprocess.PIPE) as get_firmware_version_call:
+                get_firmware_version_call.wait()
+                if get_firmware_version_call.returncode == 0:
+                    installed_firmware_version = get_firmware_version_call.stdout.readline().strip().decode()
+
+                    if installed_firmware_version != firmware['version']:
+                        firmwares[firmware_name] = firmware
+
+        return firmwares
+
+    def __flash_firmware(self, deployment_firmwares):
+        for firmware_name, firmware in deployment_firmwares.items():
+            self.__cancelled_check()
+
+            # call script that flashes a firmware
+            with subprocess.Popen(['kuksa-firmware-flash'], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as flash_firmware_call:
+                flash_firmware_call.stdin.write(json.dumps(firmware).encode())
+                flash_firmware_call.stdin.close()
+                flash_firmware_call.wait()
+
+                if flash_firmware_call.returncode == 0:
+                    self.logger.debug('kuksa-firmware-flash response: {}'.format(flash_firmware_call.stdout.read()))
+
+            # flash only the first firmware
+            break
+
     def __get_services(self, deployment):
         services = {}
         for chunk in deployment['deployment']['chunks']:
+            if chunk['part'] != 'bApp':
+                # check if this is an app
+                continue
+
             service_name = chunk['name']
             self.logger.debug("Provisioning chunk: {name}".format(name=service_name))
 
