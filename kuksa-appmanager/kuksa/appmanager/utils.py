@@ -8,15 +8,7 @@
 #
 # Contributors: Robert Bosch GmbH
 
-import hashlib
-
 
 class ConfigurationError(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-
-def md5(content):
-    content_hash = hashlib.md5()
-    content_hash.update(content)
-    return content_hash.hexdigest()
