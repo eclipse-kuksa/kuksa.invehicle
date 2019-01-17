@@ -7,15 +7,15 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 # Contributors: Robert Bosch GmbH
-
+import hashlib
 import json
 import logging
 import os
+import subprocess
 import time
 from queue import Queue
 from threading import Lock
 from threading import Thread
-import subprocess
 
 from requests import Session
 
@@ -238,19 +238,25 @@ class DeploymentJob:
             self.__send_feedback('proceeding', 'none')
 
             try:
-                deployment_firmwares = self.__get_firmwares(deployment)
+                deployment_chunks = self.__download_chunks(deployment)
 
-                deployment_firmwares = self.__get_installable_firmwares(deployment_firmwares)
+                deployment_firmwares = self.__get_firmwares(deployment_chunks)
+
+                if deployment_firmwares:
+                    deployment_firmwares = self.__get_installable_firmwares(deployment_firmwares)
 
                 if deployment_firmwares:
                     # TODO: check if firmware failed to be installed
 
-                    self.__flash_firmware(deployment_firmwares)
+                    # flash only the first firmware
+                    self.__flash_firmware(deployment_firmwares[0])
                 else:
-                    deployment_services = self.__get_services(deployment)
+                    deployment_apps = {chunk['name']: chunk for chunk in deployment_chunks.values() if chunk['type'] == 'application'}
+
+                    deployment_docker_apps = self.__get_docker_apps(deployment_apps)
 
                     with DockerSession(self.__cancelled_check) as docker:
-                        docker.deploy(deployment_services)
+                        docker.deploy(deployment_docker_apps)
 
                     self.__send_feedback('closed', 'success')
             except ConfigurationError as error:
@@ -274,143 +280,120 @@ class DeploymentJob:
     def __send_feedback(self, execution, finished):
         self.client._send_feedback(self.action_url, self.action_id, execution, finished)
 
-    def __get_firmwares(self, deployment):
-        firmwares = {}
-        for chunk in deployment['deployment']['chunks']:
-            if chunk['part'] != 'os':
-                # check if this is an firmware
-                continue
-
-            firmware_name = chunk['name']
-            self.logger.debug("Provisioning chunk: {name}".format(name=firmware_name))
-
-            firmware = dict(
-                name=firmware_name,
-                version=chunk['version'],
-                files=[],
-            )
-            firmwares[firmware_name] = firmware
-
-            for artifact in chunk['artifacts']:
-                self.__cancelled_check()
-
-                # TODO: check if firmware was already downloaded
-
-                self.logger.debug(artifact)
-                artifact_filename = artifact['filename']
-
-                artifact_response = self.http.get(artifact['_links']['download-http']['href'], stream=True)
-                artifact_response.raise_for_status()
-
-                try:
-                    os.mkdir('firmwares')
-                except FileExistsError:
-                    # ignored
-                    pass
-                artifact_file = 'firmwares/{}'.format(artifact_filename)
-                with open(artifact_file, 'wb') as f:
-                    for chunk in artifact_response.iter_content(chunk_size=4096):
-                        f.write(chunk)
-                        self.__cancelled_check()
-
-                # TODO: validate downloaded file
-
-                firmware['files'].append(dict(
-                    name=artifact_filename,
-                    path=artifact_file
-                ))
-
-        return firmwares
+    def __get_firmwares(self, deployment_chunks):
+        return [chunk for chunk in deployment_chunks.values() if chunk['type'] == 'firmware']
 
     def __get_installable_firmwares(self, deployment_firmwares):
-        firmwares = {}
+        firmwares = []
 
-        for firmware_name, firmware in deployment_firmwares.items():
+        for firmware in deployment_firmwares:
             self.__cancelled_check()
 
             # call script that gives the current firmware version
-            with subprocess.Popen(['kuksa-firmware-get-version', firmware_name], stdout=subprocess.PIPE) as get_firmware_version_call:
+            with subprocess.Popen(['kuksa-firmware-get-version', firmware['name']], stdout=subprocess.PIPE) as get_firmware_version_call:
                 get_firmware_version_call.wait()
                 if get_firmware_version_call.returncode == 0:
                     installed_firmware_version = get_firmware_version_call.stdout.readline().strip().decode()
 
                     if installed_firmware_version != firmware['version']:
-                        firmwares[firmware_name] = firmware
+                        firmwares.append(firmware)
 
         return firmwares
 
-    def __flash_firmware(self, deployment_firmwares):
-        for firmware_name, firmware in deployment_firmwares.items():
-            self.__cancelled_check()
+    def __flash_firmware(self, firmware):
+        self.__cancelled_check()
 
-            # call script that flashes a firmware
-            with subprocess.Popen(['kuksa-firmware-flash'], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as flash_firmware_call:
-                flash_firmware_call.stdin.write(json.dumps(firmware).encode())
-                flash_firmware_call.stdin.close()
-                flash_firmware_call.wait()
+        firmware_data = dict(
+            name=firmware['name'],
+            version=firmware['version'],
+            files=[artifact for artifact in firmware['artifacts'].values()]
+        )
 
-                if flash_firmware_call.returncode == 0:
-                    self.logger.debug('kuksa-firmware-flash response: {}'.format(flash_firmware_call.stdout.read()))
+        # call script that flashes a firmware
+        with subprocess.Popen(['kuksa-firmware-flash'], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as flash_firmware_call:
+            flash_firmware_call.stdin.write(json.dumps(firmware_data).encode())
+            flash_firmware_call.stdin.close()
+            flash_firmware_call.wait()
 
-            # flash only the first firmware
-            break
+            if flash_firmware_call.returncode == 0:
+                self.logger.debug('kuksa-firmware-flash response: {}'.format(flash_firmware_call.stdout.read()))
 
-    def __get_services(self, deployment):
-        services = {}
-        for chunk in deployment['deployment']['chunks']:
-            if chunk['part'] != 'bApp':
-                # check if this is an app
+    def __get_docker_apps(self, deployment_apps):
+        docker_apps = {}
+        for app_name, app in deployment_apps.items():
+            docker_app_config = app['artifacts'].get('docker-container.json')
+            if not docker_app_config:
+                # this is not a docker app
                 continue
 
-            service_name = chunk['name']
-            self.logger.debug("Provisioning chunk: {name}".format(name=service_name))
+            app_version = app['version']
+            self.logger.debug("Provisioning app: {name}:{version}".format(name=app_name, version=app_version))
 
-            if service_name in services:
+            docker_app = dict()
+            docker_apps[app_name] = docker_app
+
+            self.__cancelled_check()
+
+            with open(docker_app_config['path'], 'r') as f:
+                docker_app_config = json.load(f)
+
+            docker_app.update(docker_app_config)
+            docker_app.update(dict(
+                name=app_name,
+                version=app['version'],
+            ))
+
+            docker_app_image = app['artifacts'].get('docker-image.tar')
+            if docker_app_image:
+                docker_app['image-tarball'] = docker_app_image['path']
+
+        return docker_apps
+
+    def __download_chunks(self, deployment):
+        chunks = {}
+        for artifact_file_part in deployment['deployment']['chunks']:
+            chunk_name = artifact_file_part['name']
+            chunk_version = artifact_file_part['version']
+            chunk_type = 'firmware' if artifact_file_part['part'] == 'os' else 'application'
+            self.logger.debug("Downloading chunk: {name}:{version}".format(name=chunk_name, version=chunk_version))
+
+            if chunk_name in chunks:
                 # invalid configuration detected
-                raise ConfigurationError("Duplicate service configuration for service: {}".format(service_name))
+                raise ConfigurationError("Configuration contains chunks with the same name: {}".format(chunk_name))
 
-            service = dict()
-            services[service_name] = service
+            chunk = dict(
+                name=chunk_name,
+                version=chunk_version,
+                type=chunk_type,
+                artifacts={},
+            )
+            chunks[chunk_name] = chunk
 
-            for artifact in chunk['artifacts']:
+            chunk_downloads_dir = os.path.join(os.getcwd(), 'downloads', chunk_name, chunk_version)
+            os.makedirs(chunk_downloads_dir, exist_ok=True)
+
+            for artifact in artifact_file_part['artifacts']:
                 self.__cancelled_check()
 
-                self.logger.debug(artifact)
                 artifact_filename = artifact['filename']
-                if artifact_filename == 'docker-container.json':
-                    artifact_response = self.http.get(artifact['_links']['download-http']['href'])
-                    artifact_response.raise_for_status()
+                artifact_response = self.http.get(artifact['_links']['download-http']['href'], stream=True)
+                artifact_response.raise_for_status()
 
-                    artifact_content = artifact_response.content
-                    assert md5(artifact_content) == artifact['hashes']['md5']
+                artifact_file_hash = hashlib.md5()
+                artifact_file = os.path.join(chunk_downloads_dir, artifact_filename)
+                with open(artifact_file, 'wb') as f:
+                    for artifact_file_part in artifact_response.iter_content(chunk_size=4096):
+                        f.write(artifact_file_part)
+                        artifact_file_hash.update(artifact_file_part)
+                        self.__cancelled_check()
 
-                    service.update(json.loads(artifact_content))
-                    service.update(dict(
-                        name=service_name,
-                        version=chunk['version'],
-                    ))
-                elif artifact_filename == 'docker-image.tar':
-                    artifact_response = self.http.get(artifact['_links']['download-http']['href'], stream=True)
-                    artifact_response.raise_for_status()
+                # validate downloaded file
+                artifact_file_md5 = artifact_file_hash.hexdigest()
+                assert artifact_file_md5 == artifact['hashes']['md5']
 
-                    try:
-                        os.mkdir('artifacts')
-                    except FileExistsError:
-                        # ignored
-                        pass
-                    artifact_file = 'artifacts/{}-{}.tar'.format(service_name, chunk['version'])
-                    with open(artifact_file, 'wb') as f:
-                        for chunk in artifact_response.iter_content(chunk_size=4096):
-                            f.write(chunk)
-                            self.__cancelled_check()
+                chunk['artifacts'][artifact_filename] = dict(
+                    name=artifact_filename,
+                    path=artifact_file,
+                )
 
-                    # TODO: validate downloaded file
-
-                    service['image-tarball'] = artifact_file
-                else:
-                    self.logger.debug("Ignored artifact: {filename}".format(filename=artifact_filename))
-
-            if service_name not in services:
-                raise ConfigurationError("Missing 'docker-container.json' artifact for service: {}".format(service_name))
-
-        return services
+        return chunks
