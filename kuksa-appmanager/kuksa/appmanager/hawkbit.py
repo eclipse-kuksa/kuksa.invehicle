@@ -22,7 +22,6 @@ from requests import Session
 from . import __version__
 from .services import DockerSession
 from .utils import ConfigurationError
-from .utils import md5
 
 
 class Config:
