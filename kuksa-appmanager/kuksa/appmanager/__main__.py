@@ -13,47 +13,45 @@ import os
 
 from . import hawkbit
 from . import hono
+from .utils import ConfigurationError
 
 logging.basicConfig(format='%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger('kuksa.appmanager')
 
-__missing_config_detected = False
 
-
-def __get_config_value(name, default_value=None, value_type: type = str):
+def __get_config_value(name):
     value = os.getenv(name)
-    if value is None:
-        if default_value is None:
-            global __missing_config_detected
-            __missing_config_detected = True
-            logger.error("Missing environment variable: {}".format(name))
-        else:
-            value = default_value
-            logger.debug("Using default {} value".format(name))
-    elif value_type != str:
-        value = value_type(value)
-    logger.debug("{} = {}".format(name, value))
+    if not value:
+        raise ConfigurationError("Missing environment variable: {}".format(name))
     return value
 
 
-HAWKBIT_CONFIG = hawkbit.Config(
-    server=__get_config_value('HAWKBIT_SERVER'),
-    tenant=__get_config_value('HAWKBIT_TENANT'),
-    device=__get_config_value('HAWKBIT_DEVICE'),
-    token=__get_config_value('HAWKBIT_TOKEN'),
-)
-
-HONO_CONFIG = hono.Config(
-    server=__get_config_value('HONO_SERVER'),
-    username=__get_config_value('HONO_USERNAME'),
-    password=__get_config_value('HONO_PASSWORD'),
-)
-
-if __missing_config_detected:
+try:
+    HAWKBIT_CONFIG = hawkbit.Config(
+        server=__get_config_value('HAWKBIT_SERVER'),
+        tenant=__get_config_value('HAWKBIT_TENANT'),
+        device=__get_config_value('HAWKBIT_DEVICE'),
+        token=__get_config_value('HAWKBIT_TOKEN'),
+    )
+except ConfigurationError as error:
+    logger.error(error)
     exit(1)
 
-hawkbit_client = hawkbit.Client(HAWKBIT_CONFIG)
-hono_client = hono.Client(HONO_CONFIG, handle_config_changed=hawkbit_client.enqueue_check_config_command)
+try:
+    HONO_CONFIG = hono.Config(
+        server=__get_config_value('HONO_SERVER'),
+        username=__get_config_value('HONO_USERNAME'),
+        password=__get_config_value('HONO_PASSWORD'),
+    )
+except ConfigurationError as error:
+    logger.warning(error)
+    logger.warning("Hono feature is disabled")
+    HONO_CONFIG = None
 
-hono_client.start()
+hawkbit_client = hawkbit.Client(HAWKBIT_CONFIG)
+
+if HONO_CONFIG:
+    hono_client = hono.Client(HONO_CONFIG, handle_config_changed=hawkbit_client.enqueue_check_config_command)
+    hono_client.start()
+
 hawkbit_client.start()
