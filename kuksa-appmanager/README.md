@@ -9,14 +9,18 @@ Currently, only the `docker-configuration.json` artifact is supported. The AppMa
 
 #### Hello world app
 
-    {
-        "image": "alpine:latest",
-        "config": {
-            "command": "sh -c \"while :; do echo 'Hello world'; sleep 1; done\"",
-            "tty": true
-        }
+```json
+{
+    "image": "alpine:latest",
+    "config": {
+        "command": "sh -c \"while :; do echo 'Hello world'; sleep 1; done\"",
+        "tty": true
     }
+}
+```
 
 ## Resources
 
 - [Development](wiki/development.md)
+- [Build](wiki/build.md)
+- [FOTA](wiki/fota.md)
