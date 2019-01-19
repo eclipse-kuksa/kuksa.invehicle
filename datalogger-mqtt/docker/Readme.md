@@ -7,9 +7,9 @@ To build for am64 do
 
 `./build.sh amd64`
 
-to build for a Pi do
+to build for a Pi
 
-`/build.sh armhf`
+`/build.sh arm32v6`
 
 If you try playing with the docker file directly, note that the build context
 needs to be the toplevel of kuksa.invehicle
