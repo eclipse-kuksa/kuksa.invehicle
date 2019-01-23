@@ -1,0 +1,9 @@
+[Unit]
+Description = Checks for new apps and installs them from hawkbit.
+ 
+[Service]
+WorkingDirectory=/usr/bin/kuksa-hawkbit
+ExecStart =/usr/bin/kuksa-hawkbit/tools/foreverChecker.sh
+
+[Install]
+WantedBy = multi-user.target

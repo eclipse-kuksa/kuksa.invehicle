@@ -52,11 +52,34 @@ const auto TIMEOUT = std::chrono::seconds(10);
 
 class HonoMqtt* honoConn;
 
+void sendRequest(string command) {
+   cout << "Send << " << command <<endl;     
+   auto send_stream = make_shared<WssClient::SendStream>();
+   *send_stream << command;
+   connection->send(send_stream);
+}
+
 // callback method for receiving messages from hono.
 void onMessageFromHono(string message) {
 
-   cout <<" Message arrived in main " << message <<endl;
-
+   json msg;
+   msg = json::parse(message);
+   
+   if( !msg.has_key("command")) {
+      cout << "Malformed command received from hono" << endl;
+   } else if(msg["command"].as<string>() == "k") {
+      cout << "Command received from Hono" << message << endl;
+      json req;
+      req["requestId"] = rand() % 99999;
+      req["action"]= "set";
+      req["path"] = "Signal.Drivetrain.InternalCombustionEngine.ThrottleTest";
+      req["value"] = 100;
+      stringstream ss; 
+      ss << pretty_print(req);
+      sendRequest(ss.str());
+   } else {
+     cout << "Invalid command received from hono" << endl;
+   }
 }
 
 

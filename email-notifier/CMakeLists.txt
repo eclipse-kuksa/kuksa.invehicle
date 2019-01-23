@@ -10,15 +10,19 @@
 #  Contributors:
 #      Robert Bosch GmbH - initial API and functionality
 # *****************************************************************************
-
 cmake_minimum_required(VERSION 2.8)
-project(elm327-visdatafeeder)
 
-#add_definitions(-DDEBUG)
-add_compile_options(-std=c++11)
-add_executable(${PROJECT_NAME} "src/main.cpp" "src/obd.cpp" "src/vssMapper.cpp" "src/actuatorTest.cpp")
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../w3c-visserver ${CMAKE_CURRENT_SOURCE_DIR}/../w3c-visserver/build)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jsoncons)
+project(email-notifier)
+
+message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_compile_options(-std=c++11 )
+
+add_executable(${PROJECT_NAME}  "src/main.cpp" "src/emailHTTP.cpp")
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jsoncons)
 
 add_library(simple-websocket-server INTERFACE)
 
@@ -46,13 +50,16 @@ message(STATUS " openssl libraries ${OPENSSL_LIBRARIES}")
 target_link_libraries(${PROJECT_NAME}  simple-websocket-server)
 
 configure_file(start.sh ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file(emailTemplate.html ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
-install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/elm327-visdatafeeder)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/elm327-visdatafeeder)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/elm327-visdatafeeder)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/elm327-visdatafeeder)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE DESTINATION /usr/bin/elm327-visdatafeeder)
+# uncomment lines below while building AGL image.
+install(TARGETS ${PROJECT_NAME} DESTINATION /usr/bin/email-notifier)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem DESTINATION /usr/bin/email-notifier)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem DESTINATION /usr/bin/email-notifier)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key DESTINATION /usr/bin/email-notifier)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/start.sh PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE DESTINATION /usr/bin/email-notifier)
+
