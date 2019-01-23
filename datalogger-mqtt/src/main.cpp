@@ -31,7 +31,7 @@ using jsoncons::json;
 
 std::string query;
 
-string url = "localhost:8090/vss";
+char w3cUrl[256];
 
 bool honoConnect = true;
 
@@ -210,14 +210,15 @@ void* sendSensorValues (void* arg) {
 
 void* startWSClient(void * arg) {
 
-  WssClient client(url , true, "Client.pem", "Client.key", "CA.pem");
+  static string w3cUrlStr(w3cUrl);
+  WssClient client(w3cUrlStr , true, "Client.pem", "Client.key", "CA.pem");
 
   client.on_message = [](shared_ptr<WssClient::Connection> connection, shared_ptr<WssClient::Message> message) {
     sendToHono(message->string());
   };
 
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
-    cout << "Connection with server at " << url << " opened" << endl;
+    cout << "Connection with server at " << w3cUrlStr << " opened" << endl;
     connection = conn;
        pthread_t honoConnect_thread;
         /* create the sensor values thread. */
@@ -253,15 +254,16 @@ void* startWSClient(void * arg) {
 int main(int argc, char* argv[])
 {
 
-        if(argc == 6) {
-           strcpy(honoAddress , argv[1]);
+        if(argc == 7) {
+           strcpy(w3cUrl , argv[1]);
+           strcpy(honoAddress , argv[2]);
            char honoPortStr[16];
-           strcpy(honoPort , argv[2]);
-           strcpy(honoPassword , argv[3]); 
-           strcpy(honoDevice , argv[4]);
-           strcpy(TOKEN, argv[5]);
+           strcpy(honoPort , argv[3]);
+           strcpy(honoPassword , argv[4]); 
+           strcpy(honoDevice , argv[5]);
+           strcpy(TOKEN, argv[6]);
         } else {
-           cerr<<"Usage ./remoteAccess <HONO-MQTT IP-ADDR> <HONO-MQTT PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
+           cerr<<"Usage ./datalogger-mqtt <W3C-VISS-URL> <HONO-MQTT IP-ADDR> <HONO-MQTT PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
            return -1; 
         }
 
