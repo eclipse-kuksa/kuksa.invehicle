@@ -30,7 +30,7 @@ Contributors:
 * *datalogger-http* - Example app that sends data from the vehicle to an Eclipse Hono instance with http.
 * *datalogger-mqtt* - Example app that sends data from the vehicle to an Eclipse Hono instance with mqtt.
 * *remoteAccess* - Example app that subscribes to control topic with Hono and receives commands sent.
-* *kuksa-appmanager* - Hawkbit appmanager which deploys in-vehicle apps an docker conatiners and more..
+* *kuksa-appmanager* - Hawkbit appmanager which deploys in-vehicle apps as docker conatiners and more..
 * *email-notifier* - Example app that talks to an email-server and sends e-mails to the configured email address. Used at the moment only for internal demos.
 
 ## How to build and run AGL-Kuksa on Raspberry Pi 3
