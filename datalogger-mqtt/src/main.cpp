@@ -20,6 +20,8 @@
 #include "honoMqtt.hpp"
 #include <json.hpp>
 
+// delay between sending each signals in microseconds
+#define SENDDELAY 50000
 
 using namespace std;
 
@@ -29,7 +31,7 @@ using jsoncons::json;
 
 std::string query;
 
-string url = "localhost:8090/vss";
+char w3cUrl[256];
 
 bool honoConnect = true;
 
@@ -89,27 +91,49 @@ void sendToHono( string resp) {
 
 
     std::string value = root["value"].as<string>();
-    int val = stoi(value, nullptr, 10);   
+       
     int reqID = root["requestId"].as<int>();
     string signal;
+    json valJson;
     if(reqID == 1234) {
        signal = "RPM";
+       int val = stoi(value, nullptr, 10);
+       valJson[signal] = val;
     } else if (reqID == 1235) {
        signal = "SPEED";
-    } 
-
-    json valJson;
-    valJson[signal] = val;
-   
+       int val = stoi(value, nullptr, 10);
+       valJson[signal] = val;
+    } else if (reqID == 1236) {
+       signal = "ERROR";
+       int val = 0;
+       if(value == "true")
+           val = 1;
+       valJson[signal] = val;      
+    } else if (reqID == 1237) {
+       signal = "ERROR2";
+       int val = 0;
+       if(value == "true")
+           val = 1;
+       valJson[signal] = val;      
+    } else if (reqID == 1238) {
+       signal = "ERROR3";
+       int val = 0;
+       if(value == "true")
+           val = 1;
+       valJson[signal] = val;      
+    } else if (reqID == 1239) {
+       signal = "FUEL";
+       int val = stoi(value, nullptr, 10);
+       valJson[signal] = val;
+    }
     honoConn->publish(PUB_TOPIC, valJson.as<string>());
 }
 
 
-void* honoConnectRun (void* arg) {
+void* sendSensorValues (void* arg) {
 
   if(honoConnect) {
-  // wait for 1 second.
-  usleep(100000);
+  usleep(SENDDELAY);
   auto send_stream = make_shared<WssClient::SendStream>();
 
   // send Authorize request.
@@ -144,38 +168,63 @@ void* honoConnectRun (void* arg) {
     connection->send(send_stream);    
 
 
-
-     // sleep 0.2 sec
-    usleep(200000);  
+    usleep(SENDDELAY);  
     string vSpeed_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.Speed\", \"requestId\": 1235 }";
     
     *send_stream << vSpeed_req;
     connection->send(send_stream); 
 
     
+    usleep(SENDDELAY);
+
+   string dtc2_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC2\", \"requestId\": 1236 }";
     
-     // sleep 0.2 sec
-    usleep(200000);
+    *send_stream << dtc2_req;
+    connection->send(send_stream);
+
+    usleep(SENDDELAY); 
+
+    string dtc3_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC3\", \"requestId\": 1237 }";
+    
+    *send_stream << dtc3_req;
+    connection->send(send_stream);
+
+    usleep(SENDDELAY); 
+
+    string dtc4_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.DTC4\", \"requestId\": 1238 }";
+    
+    *send_stream << dtc4_req;
+    connection->send(send_stream);
+
+    usleep(SENDDELAY); 
+
+    string fuel_req = "{\"action\": \"get\", \"path\": \"Signal.OBD.FuelLevel\", \"requestId\": 1239 }";
+    
+    *send_stream << fuel_req;
+    connection->send(send_stream);
+
+    usleep(SENDDELAY); 
   }
  }
 }
 
 void* startWSClient(void * arg) {
 
-  WssClient client(url , true, "Client.pem", "Client.key", "CA.pem");
+  static string w3cUrlStr(w3cUrl);
+  WssClient client(w3cUrlStr , true, "Client.pem", "Client.key", "CA.pem");
 
   client.on_message = [](shared_ptr<WssClient::Connection> connection, shared_ptr<WssClient::Message> message) {
     sendToHono(message->string());
   };
 
   client.on_open = [](shared_ptr<WssClient::Connection> conn) {
-    cout << "Connection with server at " << url << " opened" << endl;
+    cout << "Connection with server at " << w3cUrlStr << " opened" << endl;
     connection = conn;
        pthread_t honoConnect_thread;
-        /* create the hono connection thread. */
-        if(pthread_create(&honoConnect_thread, NULL, &honoConnectRun, NULL )) {
+        /* create the sensor values thread. */
+        if(pthread_create(&honoConnect_thread, NULL, &sendSensorValues, NULL )) {
 
-         cout<<"Error creating hono connect run thread"<<endl;
+         cout<<"Error creating send sensor values thread"<<endl;
          return 1;
 
         }
@@ -205,15 +254,16 @@ void* startWSClient(void * arg) {
 int main(int argc, char* argv[])
 {
 
-        if(argc == 6) {
-           strcpy(honoAddress , argv[1]);
+        if(argc == 7) {
+           strcpy(w3cUrl , argv[1]);
+           strcpy(honoAddress , argv[2]);
            char honoPortStr[16];
-           strcpy(honoPort , argv[2]);
-           strcpy(honoPassword , argv[3]); 
-           strcpy(honoDevice , argv[4]);
-           strcpy(TOKEN, argv[5]);
+           strcpy(honoPort , argv[3]);
+           strcpy(honoPassword , argv[4]); 
+           strcpy(honoDevice , argv[5]);
+           strcpy(TOKEN, argv[6]);
         } else {
-           cerr<<"Usage ./remoteAccess <HONO-MQTT IP-ADDR> <HONO-MQTT PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
+           cerr<<"Usage ./datalogger-mqtt <W3C-VISS-URL> <HONO-MQTT IP-ADDR> <HONO-MQTT PORT> <HONO-PASSWORD> <HONO-DEVICE NAME> <JWT TOKEN>"<<endl;
            return -1; 
         }
 

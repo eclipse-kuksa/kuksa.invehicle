@@ -11,12 +11,12 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include<string>
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include <string.h>
+
 using namespace std;
 
-bool connectOBD(int timeout);
-string readMode1Data(string command);
-string readMode3Data();
-string writeMode8Data(string command);
-void closeConnection();
-int testCommands(string command, char* response);
+int sendEmail (string address, string subject , string message);
+

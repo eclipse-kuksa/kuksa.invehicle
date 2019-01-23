@@ -14,9 +14,4 @@
 #include<string>
 using namespace std;
 
-bool connectOBD(int timeout);
-string readMode1Data(string command);
-string readMode3Data();
-string writeMode8Data(string command);
-void closeConnection();
-int testCommands(string command, char* response);
+void moveThrottleValve(int percent);
