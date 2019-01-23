@@ -1,1 +1,1 @@
-This directory contains some example applications.
+This directory contains some example applications taht can be used with the `create_app.py` script.
