@@ -93,9 +93,9 @@ class BindClass:
         try:
             self.c.execute('''create table items (Network, AlertID)''')
         except Exception as e:
-            print("table exists")
+            pass
 
-        self.c.execute("INSERT INTO items (Network, AlertID) VALUES(?,?)", ('lab',self.a))
+        self.c.execute("INSERT INTO items (Network, AlertID) VALUES(?,?)", ('Kuksa',self.a))
         self.conn.commit()
 
     def postprocess2(self):
