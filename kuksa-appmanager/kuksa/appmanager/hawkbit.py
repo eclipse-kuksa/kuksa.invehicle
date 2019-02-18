@@ -323,7 +323,7 @@ class DeploymentJob:
             docker_app_config = app['artifacts'].get('docker-container.json')
             if not docker_app_config:
                 # this is not a docker app
-                continue
+                raise ConfigurationError("App {name} has no config-file with name docker-container.json".format(name=app_name))
 
             app_version = app['version']
             self.logger.debug("Provisioning app: {name}:{version}".format(name=app_name, version=app_version))
