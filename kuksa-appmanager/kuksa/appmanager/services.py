@@ -60,6 +60,9 @@ class DockerSession:
 
             raise error
 
+    def undeploy_all_services(self):
+        self.__stop_and_remove_existing_services()
+
     def __revert(self):
         try:
             with open(os.path.join(DEPLOYMENTS_DIR, self.__class__.__DEPLOYED_SERVICES), 'r') as fp:
