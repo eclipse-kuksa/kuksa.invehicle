@@ -118,7 +118,7 @@ class Client:
         # TODO: handle response errors
         actions_response.raise_for_status()
 
-        actions: dict = actions_response.json()
+        actions = actions_response.json()
         self.logger.debug("Received actions: {}".format(actions))
 
         # update polling interval
