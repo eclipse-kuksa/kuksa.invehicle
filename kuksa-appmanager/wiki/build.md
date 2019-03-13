@@ -2,7 +2,7 @@
 
 ## Docker
 
-Use the `build.sh` script to build docker images for **amd64**, **arm64** and **armhf** architectures.
+Use the `build.sh` script to build docker images for **amd64**, **arm64**, **arm32** and **armhf** architectures.
 
 Without arguments the script will build images for all the supported architectures. To build only a subset, you need to specify the desired architecture(s) as arguments:
 
