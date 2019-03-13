@@ -29,6 +29,15 @@ function build {
         fi
         cp Dockerfile Dockerfile.build
         ;;
+    'arm32')
+        cp /usr/bin/qemu-arm-static ./
+        if [ "$?" != "0" ]; then
+            echo "Please install the qemu-user-static package" 1>&2
+            exit 1
+        fi
+        sed -e "s/arm64v8/arm32v6/g" Dockerfile > Dockerfile.build
+        sed -i -e "s/qemu-aarch64-static/qemu-arm-static/g" Dockerfile.build
+        ;;
     'armhf')
         cp /usr/bin/qemu-arm-static ./
         if [ "$?" != "0" ]; then
@@ -55,7 +64,7 @@ function build {
 
 ARCHS="$@"
 if [ -z "$ARCHS" ]; then
-    ARCHS="amd64 arm64 armhf"
+    ARCHS="amd64 arm64 armhf arm32"
 fi
 
 for ARCH in $ARCHS; do
