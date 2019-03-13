@@ -42,6 +42,7 @@ Install dependencies
 - `HAWKBIT_DEVICE` - unique for each device
 - `HAWKBIT_TOKEN`  - securitytoken for the device
 
+Optional settings: (When it is set hono server will be connected)
 - `HONO_SERVER`    - hono host:port for service hono-adapter-mqtt-vertx
 - `HONO_USERNAME`  - given username@tenant for registered device
 - `HONO_PASSWORD`  - given password for registered device
@@ -53,5 +54,5 @@ You can add them to the virtualenv's `activate` script at `~/.virtualenv/kuksa-a
     $ python -m kuksa.appmanager
 
 Notes: 
-* python should be > v3.5. If you have mutliple versions installed, make sure you use the correct one e.g. `python3.6 -m kuksa.appmanager`.
+* python should be > v3.5. If you have mutliple versions installed, make sure you use the correct one e.g. `python3.5 -m kuksa.appmanager`.
 * the security token can be generated from hawkbit via `system config -> Allow a gateway to authenticate and manage multiple targets through a gateway security token`
