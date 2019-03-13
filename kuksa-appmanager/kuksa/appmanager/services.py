@@ -30,8 +30,8 @@ class DockerSession:
     __DEPLOYING_SERVICES = 'deploying_services.json'
 
     def __init__(self, cancelled_check: Callable[[], None]):
-        self.docker: docker.DockerClient = None
-        self.cancelled_check: Callable[[], None] = cancelled_check
+        self.docker = None
+        self.cancelled_check = cancelled_check
 
     def __enter__(self):
         self.docker = docker.from_env()
@@ -95,7 +95,7 @@ class DockerSession:
         while unsorted_services:
             unsorted_services_old_size = len(unsorted_services)
             for service_name, service in unsorted_services.items():
-                service_dependencies: list = service.get('dependencies')
+                service_dependencies = service.get('dependencies')
                 if not service_dependencies:
                     # move this to the sorted devices
                     sorted_services[service_name] = service
