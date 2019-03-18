@@ -20,7 +20,7 @@ LIC_FILES_CHKSUM = ""
 inherit pkgconfig cmake
 SRCREV = "${AUTOREV}"
 
- DEPENDS = "python3-native, python-numpy"
+DEPENDS = "python3-native, python-numpy"
 
 SRC_URI = "git://github.com/eclipse/kuksa.invehicle.git;protocol=https" 
 SRC_URI[sha256sum] = ""
