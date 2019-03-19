@@ -19,6 +19,7 @@
 #include "vssdatabase.hpp"
 #include "subscriptionhandler.hpp"
 #include "accesschecker.hpp"
+#include "visconf.hpp"
 using namespace std;
 using namespace jsoncons;
 using namespace jsoncons::jsonpath;
@@ -32,13 +33,16 @@ private:
    class  subscriptionhandler* subHandler = NULL;
    class  authenticator* tokenValidator = NULL;
    class  accesschecker* accessValidator = NULL;
+#ifdef JSON_SIGNING_ON
+   class signing* signer = NULL;
+#endif
 
-   string processGet(uint32_t request_id, string path);
-   string processSet(uint32_t request_id, string path, json value);
-   string processSubscribe(uint32_t request_id, string path, uint32_t connectionID);
+   string processGet(class wschannel& channel,uint32_t request_id, string path);
+   string processSet(class wschannel& channel,uint32_t request_id, string path, json value);
+   string processSubscribe(class wschannel& channel, uint32_t request_id, string path, uint32_t connectionID);
    string processUnsubscribe(uint32_t request_id, uint32_t subscribeID);
    string processGetMetaData(uint32_t request_id, string path); 
-   string processAuthorize (uint32_t request_id, string token ,class wschannel& channel);
+   string processAuthorize (class wschannel& channel,uint32_t request_id, string token);
 
 public:
    vsscommandprocessor(class vssdatabase* database, class  authenticator* vdator , class subscriptionhandler* subhandler);

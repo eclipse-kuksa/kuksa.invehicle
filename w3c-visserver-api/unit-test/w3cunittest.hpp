@@ -14,12 +14,13 @@
 #ifndef __W3CUNITTEST_HPP__
 #define __W3CUNITTEST_HPP__
 
-
+#include <jsoncons/json.hpp>
 #include "vssdatabase.hpp"
 #include "wsserver.hpp"
 #include "subscriptionhandler.hpp"
 #include "authenticator.hpp"
 #include "accesschecker.hpp"
+#include "signing.hpp"
 
 using namespace std;
 using namespace jsoncons;
