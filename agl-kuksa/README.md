@@ -1,9 +1,9 @@
-# AGL KUKSA Build and Run on Raspberry PI 3
+# AGL KUKSA Build and Run on Raspberry Pi 3 / Compute Module 3 (Lite)
 
 Kuksa is a wrapper project around Automotive Grade Linux (AGL). From its side,
 AGL uses Yocto/Bitbake building system to build an automotive domain specific
 Linux distribution. Therefore, this projects provides a building system that
-adds Kuksa's specific Bitbake layers on top of the original AGL. The scripts in 
+adds Kuksa's specific Bitbake layers on top of the original AGL. The scripts in
 this project help ease the process of building an AGL image by simple using a few
 commands. This project includes the yocto recipes found in meta-kuksa project.
 
@@ -86,7 +86,7 @@ Execute
 
 `cd $AGL_TOP ;repo init -b flounder -m flounder_6.0.1.xml -u https://gerrit.automotivelinux.org/gerrit/AGL/AGL-repo ;repo sync`
 
-This will download the Funky Flounder version of AGL. This version has been tested and is recommended. 
+This will download the Funky Flounder version of AGL. This version has been tested and is recommended.
 
 ### Start Building
 
@@ -104,14 +104,23 @@ Go to $HOME/workspace_agl/build/conf folder and open bblayers.conf file.
 Append the following lines to the end of the file.
 
 ```
-BBLAYERS =+ “ \
-
-${METADIR}/meta-kuksa \
-${METADIR}/meta-virtualization \
-
-“ 
+BBLAYERS =+ " \
+    ${METADIR}/meta-kuksa \
+    ${METADIR}/meta-virtualization \
+"
 ```
 Now copy the meta-kuksa folder (Link : https://github.com/eclipse/kuksa.invehicle/agl-kuksa) into the $HOME/workspace_agl directory.
+
+### Building for the Raspberry Pi Compute Module 3 (Lite)
+
+To build for the Raspberry Pi CM3 (Lite) platform,
+go to $HOME/workspace_agl/build/conf folder and open local.conf file.
+
+Append the following lines to the end of the file.
+
+```
+KERNEL_IMAGETYPE = "zImage"
+```
 
 ### Configure meta-kuksa layer
 
@@ -133,7 +142,7 @@ The elm327-datafeeder service connects to an ELM327 Bluetooth adapter to retriev
 Update the fields
 
 ![Alt text](./pictures/bt_setup.png?raw=true "bt-setup")
- 
+
 
 Now Execute the below line to build image with Kuksa layers
 
@@ -143,7 +152,7 @@ This would take a few minutes to execute and at the end of the process the boota
 
 `$HOME/workspace_agl/build/tmp/deploy/images/raspberrypi3`
 
-### First Launch 
+### First Launch
 
 Once the image is ready, burn it onto a SD-card and boot up the image on raspi 3. The w3c-visserver-api requires the vss_rel_1.0.json file to set up the vss tree structure. This file can be copied to the `/usr/bin/w3c-visserver` folder by using scp command (sample file is available under https://github.com/GENIVI/vehicle_signal_specification or could also be generated using the tools in the repo). Once the file has been copied reboot the raspi 3.
 
@@ -151,7 +160,7 @@ Once the image is ready, burn it onto a SD-card and boot up the image on raspi 3
 
 The Datalogger apps connect to a remote HONO-Instance and hence the IP-address of the Hono-Instance needs to be updated. The datalogger apps are already installed if you have followed the above steps. Now update the Hono configuration in the file `/usr/bin/datalogger-*/start.sh` with valid IP-address for the respective adapters ( eg: HTTP and MQTT), Port, Device and password for Hono.
 
-And you could start the datalogger apps by executing `./usr/bin/datalogger-*/start.sh`  
+And you could start the datalogger apps by executing `./usr/bin/datalogger-*/start.sh`
 
 The apps connect to the w3c-visserver service using a websocket connection and retrieves Signal.OBD.RPM and Signal.OBD.Speed values to send to hono by packing the retrieved data into a json which looks like this `{SPEED:xxx}` & `{RPM:yyy}`
 
