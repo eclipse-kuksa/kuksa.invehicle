@@ -1540,8 +1540,8 @@ BOOST_AUTO_TEST_CASE(json_signing)
    
    // sign the response json
    string signedData = json_signer->sign(response_json);
-  
-    
+   
+
    // now decode the signed json 
    string decoded_json_as_string = json_signer->decode(signedData);
    json decoded_json = json::parse(decoded_json_as_string);

@@ -17,8 +17,6 @@
 #define PRIVATEFILENAME "signing.private.key"
 #define PUBLICFILENAME "signing.public.key"
 
-
-
 /**
  Constructor
 */
@@ -32,10 +30,10 @@ signing::signing() {
  Get the private key for signing.
 */
 string signing::getKey (string fileName) {
-
+  
   std::ifstream fileStream(fileName);
   std::string privatekey((std::istreambuf_iterator<char>(fileStream)),
-                       (std::istreambuf_iterator<char>()));
+                          (std::istreambuf_iterator<char>()));
   key = privatekey;
   return key;
 }
@@ -45,7 +43,7 @@ string signing::getKey (string fileName) {
 */
 string signing::getPublicKey (string fileName) {
 
-  std::ifstream fileStream(fileName);
+  std::ifstream fileStream (fileName);
   std::string privatekey( (std::istreambuf_iterator<char>(fileStream)),
                        (std::istreambuf_iterator<char>()));
   pubkey = privatekey;
