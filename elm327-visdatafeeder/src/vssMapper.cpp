@@ -31,6 +31,7 @@ typedef float Float ;
 typedef double Double ;
 typedef bool Boolean ;
 
+// Utility tokenizer.
 int tokenizeResponse(char** tokens , string response) {
   char* cString = strdup(response.c_str());
   char *tok = strtok(cString, " ");
@@ -43,6 +44,7 @@ int tokenizeResponse(char** tokens , string response) {
   return i;
 }
 
+// Utility method to create W3C-VIS SET request
 json setRequest(string path) {
 
   json req;
@@ -52,15 +54,14 @@ json setRequest(string path) {
   return req;
 }
 
-
-
+// Reads RPM from the vehicle and packs the response in w3c-VIS SET request.
 string setRPM() {
 
   string readBuf = readMode1Data("01 0C\r");
   int pos = readBuf.find("41 0C", 0);
-
+  
   if( pos == -1) {
-      cout << "Response not valid for RPM" << endl;
+      cout << "Response "<< readBuf <<" not valid for RPM" << endl;
       return "Error";
   }
 
@@ -83,25 +84,26 @@ string setRPM() {
   int B = stoi (string(tokens[3]),nullptr,16);
   
   UInt16 value = (A * 256 + B) / 4;
- 
+#ifdef DEBUG
   cout << "RPMread from the vehicle = "<< value << endl;
+#endif
 
   json req = setRequest("Signal.OBD.RPM"); 
   req["value"] = value;
   stringstream ss; 
   ss << pretty_print(req);
   string resp = ss.str();
-  cout << resp << endl;
   return resp;
 }
 
+// Reads Engine speed from the vehicle and packs the response in w3c-VIS SET request.
 string setVehicleSpeed() {
 
   string readBuf = readMode1Data("01 0D\r");
   int pos = readBuf.find("41 0D", 0);
 
   if( pos == -1) {
-      cout << "Response not valid for Vehicle Speed " << readBuf <<endl;
+      cout << "Response "<< readBuf <<" not valid for Vehicle speed" << endl;
       return "Error";
   }
 
@@ -122,8 +124,9 @@ string setVehicleSpeed() {
   int A = stoi (string(tokens[2]),nullptr,16);
  
   Int32 value = A ;
- 
+#ifdef DEBUG
   cout << "Vehicle speed read from the vehicle = "<< value << endl;
+#endif
   json req = setRequest("Signal.OBD.Speed"); 
   req["value"] = value;
   stringstream ss; 
@@ -133,6 +136,7 @@ string setVehicleSpeed() {
   return resp;
 }
 
+// Reads Fuel status from the vehicle and packs the response in w3c-VIS SET request.
 string setFuelLevel() {
 
   string readBuf = readMode1Data("01 2F\r");
@@ -160,8 +164,9 @@ string setFuelLevel() {
   int A = stoi (string(tokens[2]),nullptr,16);
  
   Int32 value = A ;
- 
+#ifdef DEBUG 
   cout << "Fuel level read from the vehicle = "<< value << endl;
+#endif
   json req = setRequest("Signal.OBD.FuelLevel"); 
   req["value"] = value;
   stringstream ss; 
@@ -171,6 +176,7 @@ string setFuelLevel() {
   return resp;
 }
 
+// Utility method to pack DTC data in W3C-VIS SET format.
 string createDTCJson( string dtcCode ) {
 
   json req;
@@ -196,11 +202,14 @@ string createDTCJson( string dtcCode ) {
   stringstream ss; 
   ss << pretty_print(req);
   string resp = ss.str();
-  cout << resp << endl; 
+#ifdef DEBUG
+  cout << resp << endl;
+#endif
   return resp;
 }
 
-
+// Reads DTCs from the vehicle and packs the response in w3c-VIS SET request.
+// Updates 6 DTCs in VSS tree (0104, 0105, 0106, 0107, 0108 and 0109). These are some dummy values. 
 list<string> readErrors() {
    
   list<string> errorList;
@@ -224,8 +233,9 @@ list<string> readErrors() {
   int tknos = tokenizeResponse(tokens , response);
 
   int dtcNos = stoi (string(tokens[1]),nullptr,10);
-
+#ifdef DEBUG
   cout <<"" << dtcNos << " Errors found" << endl;
+#endif
 
   if ( dtcNos > 0) {
        for(int i=0 ; i < dtcNos*2 ; i++) {
@@ -265,7 +275,9 @@ list<string> readErrors() {
       stringstream ss; 
       ss << pretty_print(req);
       string resp = ss.str();
+#ifdef DEBUG
       cout << resp << endl;
+#endif
       errorList.push_back(resp);
    }
 

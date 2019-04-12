@@ -23,32 +23,37 @@ using namespace jsoncons;
 
 using WssClient = SimpleWeb::SocketClient<SimpleWeb::WSS>;
 
-int connectionHandle = -1;
+// Websocket connection mutex.
+pthread_mutex_t wsMutex;
 
+// Websocket connection status flag. Initially false.
+bool isClosed = false;
+
+// Cmd line parameters
+char PORT[128];
+char TOKEN[8096];
 int AVTHREADSLEEP;
 int DTCTHREADSLEEP;
 
-bool isClosed = false;
-
-
-char PORT[128];
-char TOKEN[8096];
-
 string url = "localhost:8090/vss";
 
+// Websocket handle.
 shared_ptr<WssClient::Connection> connection = NULL;
 
 void sendRequest(string command) {
    cout << "Send << " << command <<endl;     
    auto send_stream = make_shared<WssClient::SendStream>();
    *send_stream << command;
+   pthread_mutex_lock (&wsMutex);  
    connection->send(send_stream);
+   pthread_mutex_unlock (&wsMutex);  
 }
 
 // Thread that updates AVs on the tree.
 void* elmActualValuesRun (void* arg) {
    connectOBD(10);
-   usleep(200000);
+   // Sleep 100ms.
+   usleep(100000);
    // Punp the data into the tree.
 
    // send Authorize request.
@@ -60,7 +65,9 @@ void* elmActualValuesRun (void* arg) {
    ss << pretty_print(authreq);
    sendRequest(ss.str());
 
-   usleep(200000);
+
+   // Sleep 100ms.
+   usleep(100000);
    
    // subsribe to throttle topic.
    json subscibeReq;
@@ -75,39 +82,33 @@ void* elmActualValuesRun (void* arg) {
    int count = 0;
    while(1) {
     if( connection != NULL) {
-       usleep(1000);
+       // Sleep between values. Configurable as cmd line argument.
+       usleep(AVTHREADSLEEP);
        string rpm = setRPM();
+#ifdef DEBUG
        cout << " RPM val " << rpm <<endl;
+#endif
        if( rpm != "Error")
           sendRequest(rpm);
-       usleep(1000);
        string vSpeed = setVehicleSpeed();
+#ifdef DEBUG
        cout << " Speed val " << vSpeed <<endl;
+#endif
        if( vSpeed != "Error")
           sendRequest(vSpeed);
-       if( count > 20) 
+       // Fuel status is updated leisurely. 
+       if( count > 200) 
        {
-          usleep(1000);
-          count = 0;
-          list<string> errors = readErrors();
-          int size = errors.size();
-          if( size > 0) 
-          {
-             for(string err : errors) 
-             {
-                sendRequest(err);
-                cout << err << endl;
-             }
-          }
-         usleep(1000);  
-
          string fuel = setFuelLevel();
+#ifdef DEBUG
          cout << " Fuel val " << rpm <<endl;
+#endif
          if( fuel != "Error")
            sendRequest(fuel);
-       }
+       } // Fuel update end
     } else {
-       cout << "No active connection to vis-server at the moment!"<<endl;
+       cout << "No active connection to vis-server at the moment!"<< endl;
+       
     }
     count++;
   }
@@ -130,22 +131,26 @@ void* elmDTCRun(void* arg) {
 
           for(string err : errors) {
              sendRequest(err);
+#ifdef DEBUG
              cout << err << endl;
+#endif
           }
        }
 
     } else {
        cout << "No active connection to vis-server at the moment!"<<endl;
     }
-   
-     usleep(3000000);
+     // Sleep between reading DTC. Configurable as cmd line argument.
+     usleep(DTCTHREADSLEEP);
   }
-   cout << "Exited the elm AVs update thread" << endl;
+   cout << "Exited the elm DTC update thread" << endl;
 }
 
 // on messages received.
 void onMessage(string message) {
+#ifdef DEBUG
    cout << "Response >> " << message << endl;
+#endif
    json msg;
    msg = json::parse(message);
    
@@ -162,7 +167,6 @@ void* startWSClient(void * arg) {
   WssClient client(url , true ,"Client.pem", "Client.key","CA.pem");
 
   client.on_message = [](shared_ptr<WssClient::Connection> connection, shared_ptr<WssClient::Message> message) {
-    
     onMessage(message->string());
   };
 
@@ -200,7 +204,7 @@ void* startWSClient(void * arg) {
 client.start();
 }
 
-
+// Main
 int main(int argc, char* argv[])
 {
 
@@ -218,16 +222,12 @@ int main(int argc, char* argv[])
 
         /* create the web socket client thread. */
         if(pthread_create(&startWSClient_thread, NULL, &startWSClient, NULL )) {
-
-         cout << "Error creating websocket client run thread"<<endl;
-         return 1;
-
+           cout << "Error creating websocket client run thread"<<endl;
+           return 1;
         }
 
-       while (!isClosed) { usleep (1000000); };
-    
+       while (!isClosed) { usleep (1000000); }; // Loop until websocket connection exists.
        cout << "Exiting ELM327-datafeeder main thread because of possible error" << endl; 
-
        return 1;
 
 }
