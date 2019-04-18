@@ -32,6 +32,7 @@ Contributors:
 * *remoteAccess* - Example app that subscribes to control topic with Hono and receives commands sent.
 * *kuksa-appmanager* - Hawkbit appmanager which deploys in-vehicle apps as docker conatiners and more..
 * *email-notifier* - Example app that talks to an email-server and sends e-mails to the configured email address. Used at the moment only for internal demos.
+* *app-ids* - Proof-of-Concept implementation of a modular Host-based Intrusion Detection System
 
 ## How to build and run AGL-Kuksa on Raspberry Pi 3
 

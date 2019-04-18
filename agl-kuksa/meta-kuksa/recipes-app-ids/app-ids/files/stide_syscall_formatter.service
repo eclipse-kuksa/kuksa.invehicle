@@ -1,0 +1,14 @@
+[Unit]
+Description = Subscribes to mqtt "TRACED" topic, formats the received system calls, and publishes to "REFINED"
+ConditionPathExists=/usr/bin/app-ids/src/config.xml
+Requires= mosquitto.service stide.service syscall_tracer.service
+After = mosquitto.service stide.service
+Before = syscall_tracer.service
+ 
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/app-ids/src
+ExecStart =/usr/bin/python3 /usr/bin/app-ids/src/stide_syscall_formatter.py
+
+[Install]
+WantedBy = multi-user.target
