@@ -1,0 +1,13 @@
+[Unit]
+Description = Calls strace to monitor system calls of a given process and publishes those via mqtt
+ConditionPathExists = /usr/bin/app-ids/src/config.xml
+Requires = mosquitto.service stide_syscall_formatter.service stide.service
+After = mosquitto.service stide_syscall_formatter.service stide.service
+ 
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/app-ids/src
+ExecStart =/usr/bin/python3 /usr/bin/app-ids/src/syscall_tracer.py
+
+[Install]
+WantedBy = multi-user.target
