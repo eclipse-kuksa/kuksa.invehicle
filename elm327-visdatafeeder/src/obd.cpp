@@ -23,14 +23,22 @@
 
 using namespace std;
 
-#define BAUD_RATE B38400
-// sleep in microseconds
-extern int AVTHREADSLEEP;
-extern int DTCTHREADSLEEP;
+// OBDII serial port setting.
 
+// To change the baud rate on the kuksa-OBD-Dongle use the below commands and also modify the value below.
+// The serial device is /dev/ttyAMA0
+// Open using screen using the current baud rate -> screen /dev/ttyAMA0 <PRESENT BAUD RATE>
+// You should see ">" prompt
+// now type STSBR <NEW BAUD RATE> press enter and you should see OK on the screen.
+// now type STWBR press enter and you should get an "OK" on the screen
+// Close the screen window.
+#define BAUD_RATE B2000000 //2Mbps
 extern char PORT[128];
-extern int connectionHandle;
 
+// OBDII connection handle.
+int connectionHandle = -1;
+
+// READ/WRITE mutex on Serial OBDII connection.
 pthread_mutex_t obdMutex;
 
 // filter out unwanted characters from raw data from the vehicle.
@@ -52,6 +60,7 @@ void filter( char * str , int size) {
    }
 }
 
+// Reset ELM327.
 void resetELM() {   
    string reset =  "ATZ\r";
 
@@ -64,9 +73,10 @@ void resetELM() {
    int bytes_read = read(connectionHandle, &read_buffer, 64);
 
    filter(read_buffer, bytes_read);
-   cout << "response for reset is " << string(read_buffer) << endl;
+   cout << "RESET OBDII respone = " << string(read_buffer) << endl;
 }
 
+// Set protocol on ELM327.
 void setProtocol(int protocol) {
    // TODO : Needs to be extended for other protocols.
    // set protocol to automatic
@@ -77,9 +87,13 @@ void setProtocol(int protocol) {
    char read_buffer[64];
    int bytes_read = read(connectionHandle, &read_buffer, 64);
    filter(read_buffer, bytes_read);
+#ifdef DEBUG
    cout << "response for Setprotocol to automatic is " << string(read_buffer) << endl;
+#endif
 }
 
+
+// Connect to OBD II
 bool connectOBD(int timeout)
 {
 
@@ -101,7 +115,7 @@ bool connectOBD(int timeout)
     SerialPortSettings.c_cflag |= CLOCAL | CREAD | CS8;
     SerialPortSettings.c_lflag &= ~(ICANON | ISIG | ECHO);
 
-   SerialPortSettings.c_cc[VMIN]  = 30; /* Read 30 characters */
+   SerialPortSettings.c_cc[VMIN]  = 10; /* Read 30 characters */
    SerialPortSettings.c_cc[VTIME] = 10; // wait for val/10 seconds between each byte received.
 
    connectionHandle = open(PORT, O_RDWR | O_NOCTTY | O_NDELAY);
@@ -124,13 +138,15 @@ bool connectOBD(int timeout)
 
    pthread_mutex_lock (&obdMutex);  
    resetELM();   
-   usleep(200000);
-   setProtocol(0);
+   //usleep(200000);
+   //setProtocol(0);
    pthread_mutex_unlock (&obdMutex);
    
    return true;
 }
 
+
+// Method to read OBDII Mode 1 values.
 string readMode1Data(string command)
 {
    pthread_mutex_lock (&obdMutex);  
@@ -139,11 +155,12 @@ string readMode1Data(string command)
 
    int res = write(connectionHandle,write_buf, 6);
    fsync(connectionHandle);
-
-   usleep(AVTHREADSLEEP);
-   
    char read_buffer[64] = {0};
-   int bytes_read = read(connectionHandle, &read_buffer, 64);
+   char character;
+   int bytes_read = 0;
+   while((read(connectionHandle, &character, 1)) && character != '>') {
+       read_buffer[bytes_read++] = character;
+   }
    pthread_mutex_unlock (&obdMutex);  
 
    filter(read_buffer, bytes_read);
@@ -156,18 +173,22 @@ string readMode1Data(string command)
    return response;
 }
 
+// Method to read OBDII Mode 3 values.
 string readMode3Data() {
    pthread_mutex_lock (&obdMutex);  
    char cmdBuf[3] = {'0','3','\r'};
 
    int res = write(connectionHandle,cmdBuf, 3);
    fsync(connectionHandle);
-   usleep(DTCTHREADSLEEP);
-   
    char read_buffer[128] = {0};
-   int bytes_read = read(connectionHandle, &read_buffer, 128);
-
+   char character;
+   int bytes_read = 0;
+   while((read(connectionHandle, &character, 1)) && character != '>') {
+       read_buffer[bytes_read++] = character;
+   }
+#ifdef DEBUG
    cout << "Total bytes read =" << bytes_read <<endl;
+#endif
    pthread_mutex_unlock (&obdMutex);  
    filter(read_buffer, bytes_read);
    string response (read_buffer);
@@ -178,6 +199,7 @@ string readMode3Data() {
    return response;  
 }
 
+// Method to write Mode 8 vallues to the (CAN) BUS. 
 string writeMode8Data(string command) {
    pthread_mutex_lock (&obdMutex);  
    char write_buf[16];
@@ -186,10 +208,15 @@ string writeMode8Data(string command) {
    int res = write(connectionHandle,write_buf, 16);
    fsync(connectionHandle);
 
-   usleep(AVTHREADSLEEP);
+  
    
    char read_buffer[64] = {0};
-   int bytes_read = read(connectionHandle, &read_buffer, 64);
+   char character;
+   int bytes_read = 0;
+   while((read(connectionHandle, &character, 1)) && character != '>') {
+       read_buffer[bytes_read++] = character;
+   }
+
    fsync(connectionHandle);
    tcflush(connectionHandle,TCIOFLUSH);
    pthread_mutex_unlock (&obdMutex);  
@@ -205,16 +232,17 @@ string writeMode8Data(string command) {
 
 }
 
-
+// Close OBDII connection
 void closeConnection() {
     close(connectionHandle);
 }
 
-
+//  Test method.
 int testCommands(string command, char* response) {
      
      command = command + '\r';
-     int res = write(connectionHandle,(char*)command.c_str(), command.length());
+     int length = command.length();
+     int res = write(connectionHandle,(char*)command.c_str(), length);
      fsync(connectionHandle);
 
      usleep(500000);
@@ -224,7 +252,12 @@ int testCommands(string command, char* response) {
         cout<< "not all request bytes written to the buffer! bytes written = " << res << endl;
      }
 #endif
-     int bytes_read = read(connectionHandle, response, 256);
+    
+     char character;
+     int bytes_read = 0;
+     while((read(connectionHandle, &character, 1)) && character != '>') {
+       response[bytes_read++] = character;
+     }
 
 #ifdef DEBUG
      cout << "Total bytes read as response = " << bytes_read << endl;
