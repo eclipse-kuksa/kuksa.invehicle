@@ -1,0 +1,12 @@
+[Unit]
+Description = Kuksa AppManager
+ConditionPathExists = /etc/kuksa-appmanager.conf
+ 
+[Service]
+Type = simple
+EnvironmentFile = /etc/kuksa-appmanager.conf
+WorkingDirectory = /usr/bin
+ExecStart = /usr/bin/python3 -m kuksa.appmanager
+
+[Install]
+WantedBy = multi-user.target

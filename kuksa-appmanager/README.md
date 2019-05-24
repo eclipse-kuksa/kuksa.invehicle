@@ -24,3 +24,4 @@ Currently, only the `docker-configuration.json` artifact is supported. The AppMa
 - [Development](wiki/development.md)
 - [Build](wiki/build.md)
 - [FOTA](wiki/fota.md)
+- [AGL Recipe](wiki/agl.md)
