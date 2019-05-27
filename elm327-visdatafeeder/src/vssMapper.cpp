@@ -164,6 +164,7 @@ string setFuelLevel() {
   int A = stoi (string(tokens[2]),nullptr,16);
  
   Int32 value = A ;
+  value = (value * 100) / 255;
 #ifdef DEBUG 
   cout << "Fuel level read from the vehicle = "<< value << endl;
 #endif
