@@ -96,6 +96,49 @@ string setRPM() {
   return resp;
 }
 
+
+// Reads catalyst temperature from the vehicle and packs the response in w3c-VIS SET request.
+string setCatalystTempB1S1() {
+
+  string readBuf = readMode1Data("01 3C\r");
+  int pos = readBuf.find("41 3C", 0);
+  
+  if( pos == -1) {
+      cout << "Response "<< readBuf <<" not valid for Catalyst temp for B1 S1" << endl;
+      return "Error";
+  }
+
+  string response = readBuf.substr (pos, 12);
+
+  if (response.empty()) {
+      cout << "atalyst temp for B1 S1 Data is NULL form vehicle!" <<endl;
+      return "Error";
+  }
+  
+  char* tokens[4];
+  tokenizeResponse(tokens , response);
+
+  if(string(tokens[1]) != "3C"){
+     cout<< "PID not matching for catalyst temp for B1 S1!" <<endl;
+     return "Error";
+  }
+
+  int A = stoi (string(tokens[2]),nullptr,16);
+  int B = stoi (string(tokens[3]),nullptr,16);
+  
+  float value = ((A * 256 + B) / 10) - 40;
+#ifdef DEBUG
+  cout << "catalyst temp for B1 S1 read from the vehicle = "<< value << endl;
+#endif
+
+  json req = setRequest("Signal.OBD.Catalyst.Bank1.Temperature1"); 
+  req["value"] = value;
+  stringstream ss; 
+  ss << pretty_print(req);
+  string resp = ss.str();
+  return resp;
+}
+
 // Reads Engine speed from the vehicle and packs the response in w3c-VIS SET request.
 string setVehicleSpeed() {
 
@@ -136,11 +179,54 @@ string setVehicleSpeed() {
   return resp;
 }
 
+
+// Reads Oxygen sensor 1 from the vehicle and packs the response in w3c-VIS SET request.
+string setOxygenSensor1() {
+
+  string readBuf = readMode1Data("01 14\r");
+  int pos = readBuf.find("41 14", 0);
+
+  if( pos == -1) {
+      cout << "Response "<< readBuf <<" not valid for Oxygen sensor 1" << endl;
+      return "Error";
+  }
+
+  string response = readBuf.substr (pos, 9);
+
+  if (response.empty()) {
+      cout << "Oxygen sensor 1 Data is NULL form vehicle!" <<endl;
+      return "Error";
+  }
+  char* tokens[3];
+  tokenizeResponse(tokens , response);
+
+  if(string(tokens[1]) != "14"){
+     cout<< "PID not matching for Oxygen sensor 1!" <<endl;
+     return "Error";
+  }
+
+  int A = stoi (string(tokens[2]),nullptr,16);
+ 
+  float value = A / 200 ;
+#ifdef DEBUG
+  cout << "oxygen sensor 1 read from the vehicle = "<< value << endl;
+#endif
+  json req = setRequest("Signal.OBD.O2Sensors.Bank1.Sensor1.Voltage"); 
+  req["value"] = value;
+  stringstream ss; 
+  ss << pretty_print(req);
+  string resp = ss.str();
+  cout << resp << endl; 
+  return resp;
+}
+
+
 // Reads Fuel status from the vehicle and packs the response in w3c-VIS SET request.
 string setFuelLevel() {
 
   string readBuf = readMode1Data("01 2F\r");
   int pos = readBuf.find("41 2F", 0);
+  
 
   if( pos == -1) {
       cout << "Response not valid for Fuel level" << endl;
@@ -150,7 +236,7 @@ string setFuelLevel() {
   string response = readBuf.substr (pos, 9);
 
   if (response.empty()) {
-      cout<<"Fuel level Vehicle Speed Data is NULL form vehicle!" <<endl;
+      cout<<"Fuel level Data is NULL form vehicle!" <<endl;
       return "Error";
   }
   char* tokens[3];
@@ -161,13 +247,16 @@ string setFuelLevel() {
      return "Error";
   }
 
+
+  //cout << string(tokens[0]) << " " << string(tokens[1]) << " " << string(tokens[2])<< endl;
   int A = stoi (string(tokens[2]),nullptr,16);
  
   Int32 value = A ;
-  value = (value / 255) * 100;
-#ifdef DEBUG 
+ 
+  value = (value * 100) / 254;
+
   cout << "Fuel level read from the vehicle = "<< value << endl;
-#endif
+
   json req = setRequest("Signal.OBD.FuelLevel"); 
   req["value"] = value;
   stringstream ss; 
@@ -176,6 +265,143 @@ string setFuelLevel() {
   cout << resp << endl; 
   return resp;
 }
+
+
+// Reads coolant temp from the vehicle and packs the response in w3c-VIS SET request.
+string setEngineCoolantTemp() {
+
+  string readBuf = readMode1Data("01 05\r");
+  int pos = readBuf.find("41 05", 0);
+  
+
+  if( pos == -1) {
+      cout << "Response not valid for Engine coolant temp" << endl;
+      return "Error";
+  }
+
+  string response = readBuf.substr (pos, 9);
+
+  if (response.empty()) {
+      cout<<"Engine coolant Data is NULL form vehicle!" <<endl;
+      return "Error";
+  }
+  char* tokens[3];
+  tokenizeResponse(tokens , response);
+
+  if(string(tokens[1]) != "05"){
+     cout<< "PID not matching for coolant temp!" <<endl;
+     return "Error";
+  }
+
+  
+  int A = stoi (string(tokens[2]),nullptr,16);
+ 
+  Int32 value = A ;
+ 
+  value = value - 40;
+
+  cout << "Engine coolant temp read from the vehicle = "<< value << endl;
+
+  json req = setRequest("Signal.OBD.CoolantTemperature"); 
+  req["value"] = value;
+  stringstream ss; 
+  ss << pretty_print(req);
+  string resp = ss.str();
+  cout << resp << endl; 
+  return resp;
+}
+
+
+// Reads Throttle position from the vehicle and packs the response in w3c-VIS SET request.
+string setThrottlePosition() {
+
+  string readBuf = readMode1Data("01 11\r");
+  int pos = readBuf.find("41 11", 0);
+  
+
+  if( pos == -1) {
+      cout << "Response not valid for Throttle position" << endl;
+      return "Error";
+  }
+
+  string response = readBuf.substr (pos, 9);
+
+  if (response.empty()) {
+      cout<<"Throttle position Data is NULL form vehicle!" <<endl;
+      return "Error";
+  }
+  char* tokens[3];
+  tokenizeResponse(tokens , response);
+
+  if(string(tokens[1]) != "11"){
+     cout<< "PID not matching for throttle position!" <<endl;
+     return "Error";
+  }
+
+  
+  int A = stoi (string(tokens[2]),nullptr,16);
+ 
+  Int32 value = A ;
+ 
+  value = (value * 100)/255;
+
+  cout << "Throttle position read from the vehicle = "<< value << endl;
+
+  json req = setRequest("Signal.OBD.ThrottlePosition"); 
+  req["value"] = value;
+  stringstream ss; 
+  ss << pretty_print(req);
+  string resp = ss.str();
+  cout << resp << endl; 
+  return resp;
+}
+
+
+// Reads Accelerator pedal position D from the vehicle and packs the response in w3c-VIS SET request.
+string setAccPedalPositionD() {
+
+  string readBuf = readMode1Data("01 49\r");
+  int pos = readBuf.find("41 49", 0);
+  
+
+  if( pos == -1) {
+      cout << "Response not valid for Acc pedal position D" << endl;
+      return "Error";
+  }
+
+  string response = readBuf.substr (pos, 9);
+
+  if (response.empty()) {
+      cout<<"Acc pedal position D Data is NULL form vehicle!" <<endl;
+      return "Error";
+  }
+  char* tokens[3];
+  tokenizeResponse(tokens , response);
+
+  if(string(tokens[1]) != "49"){
+     cout<< "PID not matching for Acc pedal position D!" <<endl;
+     return "Error";
+  }
+
+  
+  int A = stoi (string(tokens[2]),nullptr,16);
+ 
+  UInt16 value = A ;
+ 
+  value = (value * 100)/254;
+
+  cout << "Acc pedal position D read from the vehicle = "<< value << endl;
+
+  json req = setRequest("Signal.OBD.AcceleratorPositionD"); 
+  req["value"] = value;
+  stringstream ss; 
+  ss << pretty_print(req);
+  string resp = ss.str();
+  cout << resp << endl; 
+  return resp;
+}
+
+
 
 // Utility method to pack DTC data in W3C-VIS SET format.
 string createDTCJson( string dtcCode ) {

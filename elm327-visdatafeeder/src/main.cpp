@@ -96,8 +96,25 @@ void* elmActualValuesRun (void* arg) {
 #endif
        if( vSpeed != "Error")
           sendRequest(vSpeed);
-       // Fuel status is updated leisurely. 
-       if( count > 200) 
+
+       string throttlePos = setThrottlePosition();
+#ifdef DEBUG
+       cout << " Throttle pos val " << throttlePos <<endl;
+#endif
+       if( throttlePos != "Error")
+          sendRequest(throttlePos);
+
+
+       string acclPos = setAccPedalPositionD();
+#ifdef DEBUG
+       cout << " Accelerator pos val " << acclPos <<endl;
+#endif
+       if( acclPos != "Error")
+          sendRequest(acclPos);
+
+
+       // Some status is updated leisurely. 
+       if( count > 20) 
        {
          string fuel = setFuelLevel();
 #ifdef DEBUG
@@ -105,7 +122,28 @@ void* elmActualValuesRun (void* arg) {
 #endif
          if( fuel != "Error")
            sendRequest(fuel);
-       } // Fuel update end
+
+
+          string coolantTemp = setEngineCoolantTemp();
+#ifdef DEBUG
+         cout << " Engine Coolant temp val " << coolantTemp <<endl;
+#endif
+         if( coolantTemp != "Error")
+           sendRequest(coolantTemp);
+
+           string catalystTemp = setCatalystTempB1S1();
+#ifdef DEBUG
+           cout << " Catalyst temp val " << catalystTemp <<endl;
+#endif
+          if( catalystTemp != "Error")
+            sendRequest(catalystTemp);
+
+          
+
+             
+
+         count = 0;
+       } // leisurely update end
     } else {
        cout << "No active connection to vis-server at the moment!"<< endl;
        
