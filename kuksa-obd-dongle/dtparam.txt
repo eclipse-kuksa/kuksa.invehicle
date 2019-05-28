@@ -1,0 +1,8 @@
+// This is a way to enable the LTE modem on Boot by exploiting the GPIO power on/off feature of Raspi3. 
+// active_low will set the pins to high and will wait for the High->Low transition for poweroff.
+dtoverlay=gpio-poweroff,gpiopin=10,active_low
+dtoverlay=gpio-poweroff,gpiopin=11,active_low
+dtoverlay=gpio-poweroff,gpiopin=12,active_low
+
+// Need a pin to power off the pi. This pin is connected to the ELM chip in kuksa dongle. This is the correct configuration for power on/off feature in pi.
+dtoverlay=gpio-poweroff,gpiopin=9,active_low
