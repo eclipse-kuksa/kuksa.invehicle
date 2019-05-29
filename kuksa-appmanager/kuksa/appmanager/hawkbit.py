@@ -350,7 +350,7 @@ class DeploymentJob:
                 version=app['version'],
             ))
 
-            docker_app_image = app['artifacts'].get('docker-image.tar')
+            docker_app_image = app['artifacts'].get('docker-image.tar.bz2')
             if docker_app_image:
                 docker_app['image-tarball'] = docker_app_image['path']
 
