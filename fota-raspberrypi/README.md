@@ -22,7 +22,7 @@ The SD card has to have three partitions:
 Only one rootfs partitions is active at a time.
 When a new firmware is flashed, it is flashed to the inactive partition and the bootloader configuration is updated to switch to the other partition.
 
-The AGL image by default only contains two partitions, the third one has to be added manually to the SD card.
+When the meta-kuksa-bsp layer is used, the AGL image for the Raspberry Pi will contain these three partitions, with partition A active and partition B inactive and empty.
 
 ## Firmware OS image
 The firmware has to consist of exactly one file.
