@@ -1,6 +1,6 @@
 # Kuksa OBD dongle
 
-Kuksa OBD Dongle is hardware platform for based on Raspberry pi Compute Module 3, which illustrates kuksa functionalities for an Aftermarket or Retrofit Solution.
+Kuksa OBD Dongle is hardware platform based on Raspberry pi Compute Module 3, which illustrates kuksa functionalities for an Aftermarket or Retrofit Solution.
 
 The Dongle has the following features
 
@@ -14,7 +14,7 @@ The Dongle has the following features
 ![Alt text](./logos/kuksa_dongle.png?raw=true "Eclipse kuksa dongle")
 
 The kuksa dongle connects to the OBD port in the car and draws power from the OBD port. It can run any flavour of Linux on the CM3 and would enable the LTE Module for Internet connection.
-It can basically read OBD II related data from the car and establish connection to the cloud through the LTE connection and provides a platform for deploying kuksa invehicle software components.
+It can basically read OBD II related data from the car and establish connection to the cloud through the LTE Module and provides a platform for deploying kuksa invehicle software components.
 
 ## Build and run AGL-Kuksa for kuksa-obd-dongle
 
@@ -28,9 +28,8 @@ This should do the trick.
 If you are using the Cmake wrapper to build AGL, follow the steps below.
 
 * go to `kuksa.invehicle/agl-kuksa` and create a new directory named build and go to build dir. use `mkdir build ; cd build`
-* now execute `cmake ..`
-* Once the above command is executed, go to `meta-agl-bsp/conf/include` and open file `agl_raspberrypi3.inc` in the file change value of key `KERNEL_IMAGETYPE` to `zImage`.
-* Now go back to the `kuksa.invehicle/agl-kuksa/build` dir and execute `make agl-kuksa`.
+* now execute `cmake .. ; make agl-kuksa`
+
 
 This will take sometime to finish, once it is done the kuksa-dongle image should be ready.
 

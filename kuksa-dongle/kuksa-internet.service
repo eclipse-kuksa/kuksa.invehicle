@@ -1,0 +1,15 @@
+[Unit]
+Description=kuksa dongle LTE modul postset service
+Requires=ofono.service               
+After=network.target ofono.service
+  
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/kuksa-dongle
+ExecStart=/usr/bin/kuksa-dongle/kuksa-internet.sh
+Restart=on-failure
+StandardError=null            
+                              
+[Install]                     
+WantedBy=multi-user.target
+
