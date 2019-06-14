@@ -4,7 +4,7 @@ Description=Service to enable dongle standby mode
 [Service]
 Type=simple
 WorkingDirectory=/usr/bin/kuksa-dongle
-ExecStart=/usr/bin/python3  /usr/bin/kuksa-dongle/enable_standby.py
+ExecStart=/usr/bin/kuksa-dongle/kuksa-standby.sh
 RestartSec=5
 Restart=on-failure
 
