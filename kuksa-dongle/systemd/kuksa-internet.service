@@ -1,6 +1,5 @@
 [Unit]
-Description=kuksa dongle LTE modul postset service
-Requires=ofono.service               
+Description=kuksa dongle internet service             
 After=network.target ofono.service
   
 [Service]
