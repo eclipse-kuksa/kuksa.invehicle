@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export PYTHONPATH=/usr/bin/
+
+python3 -m kuksa.firmware.get-version "$@"

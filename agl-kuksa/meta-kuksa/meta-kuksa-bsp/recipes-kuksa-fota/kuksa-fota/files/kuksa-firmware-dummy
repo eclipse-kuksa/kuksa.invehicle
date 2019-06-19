@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "No platform specific FOTA script available" >&2
+exit -1
