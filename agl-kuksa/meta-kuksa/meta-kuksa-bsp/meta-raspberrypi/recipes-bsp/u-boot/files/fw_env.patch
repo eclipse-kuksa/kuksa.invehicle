@@ -1,0 +1,21 @@
+diff --git a/tools/env/fw_env.config b/tools/env/fw_env.config
+index 7916ebd..f6eac0e 100644
+--- a/tools/env/fw_env.config
++++ b/tools/env/fw_env.config
+@@ -8,8 +8,8 @@
+ 
+ # NOR example
+ # MTD device name	Device offset	Env. size	Flash sector size	Number of sectors
+-/dev/mtd1		0x0000		0x4000		0x4000
+-/dev/mtd2		0x0000		0x4000		0x4000
++#/dev/mtd1		0x0000		0x4000		0x4000
++#/dev/mtd2		0x0000		0x4000		0x4000
+ 
+ # MTD SPI-dataflash example
+ # MTD device name	Device offset	Env. size	Flash sector size	Number of sectors
+@@ -27,4 +27,4 @@
+ #/dev/mmcblk0		-0x20000	0x20000
+ 
+ # VFAT example
+-#/boot/uboot.env	0x0000          0x4000
++/boot/uboot.env		0x0000          0x4000
