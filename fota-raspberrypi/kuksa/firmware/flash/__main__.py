@@ -24,7 +24,6 @@ from . import partitions
 partition1 = 2
 partition2 = 3
 partition_base_path = "/dev/mmcblk0p"
-cmdline_path = "/boot/cmdline.txt"
 boot_path = "/boot"
 
 tmp_file = "/tmp/bootpartition"
@@ -69,14 +68,13 @@ def flash_osimage(image_file, partition_path):
     partition_table = partitions.read_partition_table(image_file)
     if len(partition_table) < 2:
         raise Exception("Expecting at least 2 partitions in image (boot and rootfs). Found {}".format(len(partition_table)))
-    # Extract rootfs first, if that fails for some reason, we don't want to overwrite the boot files
+    # Extract rootfs, we don't need the other partitions from the image
     extract_rootfs_partition(image_file, partition_table[1], partition_path)
-    extract_boot_partition(image_file, partition_table[0])
 
 
 def firmware_flash(files):
     # Find out which partition to flash
-    current_partition = bootsettings.get_boot_partition(cmdline_path)
+    current_partition = bootsettings.get_boot_partition()
     new_partition = partition1 if current_partition == partition2 else partition2
     partition_path = "{}{}".format(partition_base_path, new_partition)
 
@@ -100,7 +98,7 @@ def firmware_flash(files):
         raise Exception("Unsupported image file type (supported: .img and .xz)")
 
     print("Setting boot partition to {}".format(new_partition))
-    bootsettings.set_boot_partition(cmdline_path, new_partition)
+    bootsettings.set_boot_partition(new_partition)
     print("Rebooting...")
     os.system("reboot")
 
