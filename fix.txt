@@ -1,0 +1,6 @@
+on 14/06
+
+1. dtoverlay file needs to be added manually.
+2. still need to add vss file manually.
+3. still need to add kuksa-dongle file in init.d directory manually  and execute update-rc.d kuksa-dongle defaults command
+

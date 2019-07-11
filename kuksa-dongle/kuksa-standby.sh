@@ -21,7 +21,6 @@ if [ $res -eq 1 ]
 then
 #echo "Waited 0.5 seconds and the pin9 is still high so shutting down"
 #halt
-# FIX this- At the moment pi is not shut down but simply the power is removed.
 echo 1 > /sys/class/gpio/gpio7/value
 fi
 fi

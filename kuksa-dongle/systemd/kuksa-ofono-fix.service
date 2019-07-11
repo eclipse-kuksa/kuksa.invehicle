@@ -1,12 +1,11 @@
 [Unit]
-Description=kuksa dongle internet service             
-After=network.target ofono.service
+Description=ofono fix for kuksa dongle internet service             
+After=ofono.service
   
 [Service]
 Type=simple
 WorkingDirectory=/usr/bin/kuksa-dongle
-ExecStart=/usr/bin/kuksa-dongle/kuksa-internet.sh
-Restart=on-failure
+ExecStart=/usr/bin/python3 /usr/bin/kuksa-dongle/ofono-fix.py
 StandardError=null            
                               
 [Install]                     

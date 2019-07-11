@@ -1,6 +1,10 @@
 [global]
 OfflineMode=false
 
+[Cellular]
+Enable=true
+Tethering=false
+
 [WiFi]
 Enable=true
 Tethering=false

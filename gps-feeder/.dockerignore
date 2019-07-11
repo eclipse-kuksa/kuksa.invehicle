@@ -1,0 +1,8 @@
+*.tar
+*.bz2
+build.sh
+Dockerfile
+*.md
+*.pyc
+*.sh
+*.build

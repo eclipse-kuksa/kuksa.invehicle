@@ -14,13 +14,13 @@ SUMMARY = "kuksa dongle related services"
 DESCRIPTION = "Services to enable LTE, GPS and Standby mode in kuksa-dongle"
 HOMEPAGE = "https://www.eclipse.org/kuksa/"
 LICENSE = "EPL-2.0"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=c7cc8aa73fb5717f8291fcec5ce9ed6c"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=d9fc0efef5228704e7f5b37f27192723"
 
-inherit systemd   
+inherit systemd pkgconfig
 
 SRCREV = "${AUTOREV}"
 
-DEPENDS = "python3"
+RDEPENDS_${PN} += " bash python3"
 
 SRC_URI = "git://github.com/rai20/kuksa.invehicle.git;protocol=https;branch=kuksa-dongle"
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
@@ -30,18 +30,13 @@ S = "${WORKDIR}/git/kuksa-dongle"
 
 do_install_append() {
   install -d ${D}${bindir}/kuksa-dongle
-  install -m 0644 ${S}/*.py ${D}${bindir}/kuksa-dongle
+  install -m 0755 ${S}/kuksa-standby.sh ${D}${bindir}/kuksa-dongle
   install -d ${D}${bindir}/kuksa-dongle
-  install -m 0644 ${S}/*.sh ${D}${bindir}/kuksa-dongle
+  install -m 0755 ${S}/ofono-fix.py ${D}${bindir}/kuksa-dongle
   install -d ${D}${systemd_system_unitdir}
-  install -m 0644 ${S}/systemd/kuksa-internet.service ${D}${systemd_system_unitdir}
+  install -m 0644 ${S}/systemd/kuksa-ofono-fix.service ${D}${systemd_system_unitdir}
   install -d ${D}${systemd_system_unitdir}
   install -m 0644 ${S}/systemd/kuksa-standby.service ${D}${systemd_system_unitdir}
 }
 
-SYSTEMD_SERVICE_${PN} = "kuksa-internet.service"
-SYSTEMD_SERVICE_${PN} = "kuksa-standby.service"
-
-
-
-
+SYSTEMD_SERVICE_${PN} = "kuksa-ofono-fix.service kuksa-standby.service"

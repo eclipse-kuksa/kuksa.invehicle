@@ -11,8 +11,6 @@
 # *****************************************************************************
 
 do_deploy_append() {
-    echo "dtoverlay=gpio-poweroff,gpiopin=10,active_low=1" >> ${DEPLOYDIR}/bcm2835-bootfiles/config.txt
-    echo "dtoverlay=gpio-poweroff,gpiopin=11,active_low=1" >> ${DEPLOYDIR}/bcm2835-bootfiles/config.txt
-    echo "dtoverlay=gpio-poweroff,gpiopin=12,active_low=1" >> ${DEPLOYDIR}/bcm2835-bootfiles/config.txt
+    echo "dtoverlay=kuksa-dongle" >> ${DEPLOYDIR}/bcm2835-bootfiles/config.txt
 }
 

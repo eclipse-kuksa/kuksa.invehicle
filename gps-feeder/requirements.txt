@@ -1,0 +1,4 @@
+requests
+gps3
+twisted
+autobahn
