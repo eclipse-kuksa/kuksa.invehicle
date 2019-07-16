@@ -52,7 +52,7 @@ def main():
                                                                         if current_tech == "" :                                                                                                             
                                                                                 current_tech = str(properties[key])                                                                                         
                                                                         elif current_tech != str(properties[key]):                                                   
-                                                                                print("Technology changed from %s to %s. This case does not work without re-enabling internet context" % (current_tech, str(
+                                                                                print("Technology changed from %s to %s. This case does not work without re-enabling internet context" % (current_tech, str(properties[key])))
                                                                                 os.system("cd /usr/lib/ofono/test ; ./activate-context ; ./process-context-settings")
                                                                                 time.sleep(5)
                                                                                 current_tech = str(properties[key])
