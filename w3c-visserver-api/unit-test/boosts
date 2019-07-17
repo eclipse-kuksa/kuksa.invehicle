@@ -1,0 +1,153 @@
+#define BOOST_TEST_MODULE w3c-unit-test
+BOOST_AUTO_TEST_CASE(path_for_get_without_wildcard_simple)
+    BOOST_TEST(paths.size() ==  1);
+    BOOST_TEST(result == "$['Signal']['children']['OBD']['children']['RPM']");
+    BOOST_TEST(isBranch == false);
+BOOST_AUTO_TEST_CASE(path_for_get_with_wildcard_simple)
+    BOOST_TEST(paths.size() ==  1);
+    BOOST_TEST(result == "$['Signal']['children']['OBD']['children']['RPM']");
+    BOOST_TEST(isBranch == false);
+BOOST_AUTO_TEST_CASE(path_for_get_with_wildcard_multiple)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(result1 == "$['Signal']['children']['Chassis']['children']['Axle']['children']['Row1']['children']['Wheel']['children']['Left']['children']['Tire']['children']['Pressure']");
+    BOOST_TEST(result2 == "$['Signal']['children']['Chassis']['children']['Axle']['children']['Row2']['children']['Wheel']['children']['Left']['children']['Tire']['children']['Pressure']");
+    BOOST_TEST(isBranch == false);
+BOOST_AUTO_TEST_CASE(test_get_branch)
+    BOOST_TEST(paths.size() ==  14);
+    BOOST_TEST(isBranch == true);
+BOOST_AUTO_TEST_CASE(test_get_branch_with_wildcard)
+    BOOST_TEST(paths.size() ==  5);
+    BOOST_TEST(isBranch == true);
+BOOST_AUTO_TEST_CASE(test_get_random)
+    BOOST_TEST(paths.size() ==  0);
+    BOOST_TEST(isBranch == false);
+BOOST_AUTO_TEST_CASE(path_for_set_without_wildcard_simple)
+    BOOST_TEST(paths.size() ==  1);
+    BOOST_TEST(paths[0]["path"].as<string>() == "$.Signal.children.OBD.children.RPM");
+BOOST_AUTO_TEST_CASE(path_for_set_with_wildcard_simple)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "$.Signal.children.OBD.children.RPM");
+    BOOST_TEST(paths[1]["path"].as<string>() == "$.Signal.children.OBD.children.Speed");
+BOOST_AUTO_TEST_CASE(path_for_set_with_wildcard_with_invalid_values)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "");
+    BOOST_TEST(paths[1]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(path_for_set_with_wildcard_with_one_valid_value)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "$.Signal.children.OBD.children.RPM");
+    BOOST_TEST(paths[1]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(path_for_set_with_wildcard_with_invalid_path_valid_values)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "");
+    BOOST_TEST(paths[1]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(test_set_value_on_branch)
+    BOOST_TEST(isException ==  true);
+BOOST_AUTO_TEST_CASE(test_set_value_on_branch_with_valid_values)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "$.Signal.children.OBD.children.O2SensorsAlt.children.Bank2.children.Sensor1.children.Present");
+    BOOST_TEST(paths[1]["path"].as<string>() == "$.Signal.children.OBD.children.O2SensorsAlt.children.Bank2.children.Sensor2.children.Present");
+BOOST_AUTO_TEST_CASE(test_set_value_on_branch_with_invalid_values)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "");
+    BOOST_TEST(paths[1]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(test_set_value_on_branch_with_one_invalid_value)
+    BOOST_TEST(paths.size() ==  2);
+    BOOST_TEST(paths[0]["path"].as<string>() == "$.Signal.children.OBD.children.O2SensorsAlt.children.Bank2.children.Sensor1.children.Present");
+    BOOST_TEST(paths[1]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(set_get_test_all_datatypes_boundary_conditions)
+    BOOST_TEST(result["value"] == numeric_limits<uint8_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<uint8_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<uint8_t>::max() / 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == numeric_limits<uint16_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<uint16_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<uint16_t>::max() / 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == numeric_limits<uint32_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<uint32_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<uint32_t>::max() / 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == numeric_limits<int8_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<int8_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<int8_t>::max() / 2);
+    BOOST_TEST(result["value"] == numeric_limits<int8_t>::min() / 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == numeric_limits<int16_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<int16_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<int16_t>::max()/2);
+    BOOST_TEST(result["value"] == numeric_limits<int16_t>::min()/2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == numeric_limits<int32_t>::min());
+    BOOST_TEST(result["value"] == numeric_limits<int32_t>::max());
+    BOOST_TEST(result["value"] == numeric_limits<int32_t>::max() / 2);
+    BOOST_TEST(result["value"] == numeric_limits<int32_t>::min() / 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == std::numeric_limits<float>::min());
+    BOOST_TEST(result["value"] == std::numeric_limits<float>::max());
+    BOOST_TEST(result["value"] == (std::numeric_limits<float>::min() * -1));
+    BOOST_TEST(result["value"] == (std::numeric_limits<float>::max() * -1));
+    BOOST_TEST(result["value"] == std::numeric_limits<float>::max() / 2);
+    BOOST_TEST(result["value"] == std::numeric_limits<float>::min() * 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == std::numeric_limits<double>::min());
+    BOOST_TEST(result["value"] == std::numeric_limits<double>::max());
+    BOOST_TEST(result["value"] == (std::numeric_limits<double>::min() * -1));
+    BOOST_TEST(result["value"] == (std::numeric_limits<double>::max() * -1));
+    BOOST_TEST(result["value"] == std::numeric_limits<double>::max() / 2);
+    BOOST_TEST(result["value"] == std::numeric_limits<double>::min() * 2);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(isExceptionThrown == true);
+    BOOST_TEST(result["value"] == "");
+    BOOST_TEST(result["value"] == "\0");
+    BOOST_TEST(result["value"] == test_value_String_long);
+    BOOST_TEST(result["value"] == test_value_String_long_with_special_chars);
+    BOOST_TEST(result["value"] == test_value_bool_false);
+    BOOST_TEST(result["value"] == test_value_bool_true);
+BOOST_AUTO_TEST_CASE(test_set_random)
+    BOOST_TEST(paths.size() ==  1);
+    BOOST_TEST(paths[0]["path"].as<string>() == "");
+BOOST_AUTO_TEST_CASE(test_metadata_simple)
+    BOOST_TEST(result ==  expected);  
+BOOST_AUTO_TEST_CASE(test_metadata_with_wildcard)
+    BOOST_TEST(result ==  expected);  
+BOOST_AUTO_TEST_CASE(test_metadata_branch)
+    BOOST_TEST(result ==  expected);  
+BOOST_AUTO_TEST_CASE(test_metadata_branch_with_wildcard)
+    BOOST_TEST(result ==  expected);  
+BOOST_AUTO_TEST_CASE(process_query_set_get_simple)
+   BOOST_TEST(set_response_json.has_key("timestamp") == true);
+   BOOST_TEST(set_response_json == set_response_expected);
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_get_withwildcard)
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_set_get_withwildcard)
+   BOOST_TEST(set_response_json.has_key("timestamp") == true);
+   BOOST_TEST(set_response_json == set_response_expected);
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_get_withwildcard_invalid)
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_set_withwildcard_invalid)
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_set_invalid_value)
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+BOOST_AUTO_TEST_CASE(process_query_set_one_valid_one_invalid_value)
+   BOOST_TEST(response_json.has_key("timestamp") == true);
+   BOOST_TEST(response_json == expected);
+   BOOST_TEST(response_response_getvalid_json.has_key("timestamp") == true);
+   BOOST_TEST(response_response_getvalid_json == expected_getvalid);
