@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *      Robert Bosch GmbH - initial API and functionality
+ *      Expleo Germany GmbH - additional W3C unit tests
  * *****************************************************************************
  */
 #include <limits> 
