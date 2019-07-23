@@ -11,38 +11,32 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include<string>
-#include <iostream>
 #include "actuatorTest.hpp"
+#include <iostream>
+#include <string>
 #include "obd.hpp"
 
 using namespace std;
 
-
-
 void moveThrottleValve(int percent) {
-  cout << "sending Throttle Request for % " << percent << endl; 
+  cout << "sending Throttle Request for % " << percent << endl;
   string command = "\r";
   switch (percent) {
+    case 25:
+      command = "08 77 19\r";
+      break;
+    case 50:
+      command = "08 77 32\r";
+      break;
 
-     case 25:
-              command = "08 77 19\r";
-              break;
-     case 50:
-              command = "08 77 32\r";
-              break;
+    case 75:
+      command = "08 77 4b\r";
+      break;
 
-     case 75: 
-              command = "08 77 4b\r";
-              break;
- 
-     case 100:
-              command = "08 77 64\r";
-              break;
-
-  }    
+    case 100:
+      command = "08 77 64\r";
+      break;
+  }
   string resp = writeMode8Data(command);
-  cout <<"Throttle cmd resp= "<< resp << endl;
+  cout << "Throttle cmd resp= " << resp << endl;
 }
-
-

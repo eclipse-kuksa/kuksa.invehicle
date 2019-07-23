@@ -11,7 +11,7 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include<string>
+#include <string>
 using namespace std;
 
 bool connectOBD(int timeout);
