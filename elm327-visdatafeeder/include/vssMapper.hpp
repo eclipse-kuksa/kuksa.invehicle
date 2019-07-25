@@ -11,8 +11,8 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include <string>
 #include <list>
+#include <string>
 
 using namespace std;
 
