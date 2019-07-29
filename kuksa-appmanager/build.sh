@@ -54,7 +54,7 @@ function build {
     esac
 
     # build image
-    docker build --platform linux/$ARCH -f ./Dockerfile.build -t ${ARCH}/kuksa-appmanager:${VERSION} .
+    docker build --squash --platform linux/$ARCH -f ./Dockerfile.build -t ${ARCH}/kuksa-appmanager:${VERSION} .
 
     # cleanup
     rm -f Dockerfile.build
