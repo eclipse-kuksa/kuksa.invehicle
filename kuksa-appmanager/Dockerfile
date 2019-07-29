@@ -1,4 +1,4 @@
-FROM arm64v8/python:3.6-alpine AS build-env
+FROM arm64v8/python:3.7-alpine AS build-env
 
 COPY qemu-aarch64-static /usr/bin/qemu-aarch64-static
 
