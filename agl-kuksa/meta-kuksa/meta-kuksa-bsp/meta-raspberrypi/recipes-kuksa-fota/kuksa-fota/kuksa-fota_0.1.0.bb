@@ -17,20 +17,29 @@ HOMEPAGE = "https://www.eclipse.org/kuksa/"
 LICENSE = "EPL-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=c7cc8aa73fb5717f8291fcec5ce9ed6c"
 
+inherit systemd
+
 RDEPENDS_${PN} = "\
 		  python3 \
-		  bash"
+		  bash \
+          u-boot-fw-utils \
+          kernel-image \
+          kernel-devicetree \
+"
 
 SRCREV = "${AUTOREV}"
 
 SRC_URI = "\
 	   git://github.com/eclipse/kuksa.invehicle.git;protocol=https \
 	   file://kuksa-firmware-get-version \
-	   file://kuksa-firmware-flash"
+	   file://kuksa-firmware-flash \
+"
 
 S = "${WORKDIR}/git/fota-raspberrypi"
 
-FILES_${PN} += "${bindir}/kuksa/*"
+FILES_${PN} += "${bindir}/kuksa/* "
+FILES_${PN} += "${bindir}/kuksa-upgrade-verification.sh "
+FILES_${PN} += "${systemd_system_unitdir}/kuksa-upgrade-verification.service "
 
 do_install() {
   install -d ${D}${bindir}/kuksa
@@ -48,4 +57,10 @@ do_install() {
   install -d ${D}${bindir}
   install -m 0755 ${WORKDIR}/kuksa-firmware-get-version ${D}${bindir}/kuksa-firmware-get-version
   install -m 0755 ${WORKDIR}/kuksa-firmware-flash ${D}${bindir}/kuksa-firmware-flash
+  install -m 0755 ${S}/upgrade-verification/kuksa-upgrade-verification.sh ${D}${bindir}
+
+  install -d ${D}${systemd_system_unitdir}	
+  install -m 0644 ${S}/upgrade-verification/kuksa-upgrade-verification.service ${D}${systemd_system_unitdir}
 }
+
+SYSTEMD_SERVICE_${PN} = "kuksa-upgrade-verification.service"

@@ -13,8 +13,8 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <iostream>
+#include <string>
 #include "obd.hpp"
 
 char* PORT;
@@ -24,27 +24,24 @@ int DTCTHREADSLEEP = 100000;
 
 using namespace std;
 
+int main(int argc, char* argv[]) {
+  string command;
+  char response[256] = {'\0'};
+  ;
+  if (argc == 2) {
+    PORT = argv[1];
+    cout << " ELM 327 app started with PORT= " << PORT << endl;
+  } else {
+    cerr << "Usage ./elm327 <PORT>" << endl;
+  }
 
-int main(int argc, char* argv[])
-{
-     string command;
-     char response[256] = {'\0'};;
-        if(argc == 2) {
-          PORT = argv[1];
-          cout <<" ELM 327 app started with PORT= " << PORT <<endl; 
-        } else {
-          cerr <<"Usage ./elm327 <PORT>" <<endl;
-        }
+  while (true) {
+    cout << "ENTER COMMAND:" << endl;
+    getline(cin, command);
+    testCommands(command, response);
+    cout << "RESPONSE:" << endl << response << endl;
+  }
 
-      
-       while(true) {
-         cout<<"ENTER COMMAND:" << endl;
-         getline (cin, command);
-         testCommands(command, response);
-         cout<<"RESPONSE:"<< endl<< response <<endl;
-       }
-       
-      getchar();
-      return 0;
+  getchar();
+  return 0;
 }
-

@@ -1,0 +1,9 @@
+[Unit]
+Description = Kuksa Upgrade Verification
+
+[Service]
+Type = oneshot
+ExecStart = /usr/bin/kuksa-upgrade-verification.sh
+
+[Install]
+WantedBy = multi-user.target

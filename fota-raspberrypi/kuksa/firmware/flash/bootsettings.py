@@ -10,24 +10,19 @@
 #  Paderborn University
 
 import re
-
-def get_boot_partition(cmdline_path):
-    with open(cmdline_path, "r") as f:
-        line = f.read()
-
-        # We expect the cmdline.txt file to have exactly one line that contains a segment like this:
-        # ... root=PARTUUID=b598b92e-03 ... where 3 is indicating the current boot partition
-        return int(re.search("root=.*?(.) ", line).group(1))
+import subprocess
 
 
-def set_boot_partition(cmdline_path, partition):
-    with open(cmdline_path, "r") as f:
-        line = f.read()
+def get_boot_partition():
+    result = subprocess.run(['fw_printenv', 'kuksa_root'], stdout=subprocess.PIPE)
+    output = result.stdout.decode('utf-8').split('=')
+    if len(output) == 2:
+        return int(output[1])
+    else:
+        raise Exception("Could not get active boot partition")
 
-    # Replace partition number with new partition
-    line = re.sub("(root=.*?)(.) ", r"\g<1>" + str(partition) + " ", line)
+def set_boot_partition(partition):
+    subprocess.run(['fw_setenv', 'kuksa_root', str(partition)])
+    subprocess.run(['fw_setenv', 'upgrade_available', '1'])
 
-    # Save file
-    with open(cmdline_path, "w") as f:
-        f.write(line)
 
