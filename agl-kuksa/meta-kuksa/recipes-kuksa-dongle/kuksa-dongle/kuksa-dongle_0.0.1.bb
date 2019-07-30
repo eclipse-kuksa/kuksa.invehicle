@@ -20,7 +20,7 @@ inherit systemd pkgconfig
 
 SRCREV = "${AUTOREV}"
 
-RDEPENDS_${PN} += " bash python3"
+RDEPENDS_${PN} += " bash python3-core"
 
 SRC_URI = "git://github.com/eclipse/kuksa.invehicle.git;protocol=https;branch=master"
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
@@ -43,4 +43,4 @@ do_install_append() {
   install -m 0644 ${S}/systemd/kuksa-internet-status.service ${D}${systemd_system_unitdir}
 }
 
-SYSTEMD_SERVICE_${PN} = "kuksa-ofono-fix.service kuksa-standby.service"
+SYSTEMD_SERVICE_${PN} = " kuksa-ofono-fix.service kuksa-standby.service kuksa-internet-status.service"
