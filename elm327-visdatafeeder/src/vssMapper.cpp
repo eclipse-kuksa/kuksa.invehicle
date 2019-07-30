@@ -85,7 +85,7 @@ string setRPM() {
   cout << "RPMread from the vehicle = " << value << endl;
 #endif
 
-  json req = setRequest("Signal.OBD.RPM");
+  json req = setRequest("Vehicle.OBD.EngineSpeed");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
@@ -118,13 +118,13 @@ string setVehicleSpeed() {
     return "Error";
   }
 
-  int A = stoi(string(tokens[2]), nullptr, 16);
+  int A = stoi (string(tokens[2]),nullptr,16);
 
   Int32 value = A;
 #ifdef DEBUG
   cout << "Vehicle speed read from the vehicle = " << value << endl;
 #endif
-  json req = setRequest("Signal.OBD.Speed");
+  json req = setRequest("Vehicle.OBD.Speed");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
@@ -165,7 +165,7 @@ string setFuelLevel() {
 #ifdef DEBUG
   cout << "Fuel level read from the vehicle = " << value << endl;
 #endif
-  json req = setRequest("Signal.OBD.FuelLevel");
+  json req = setRequest("Vehicle.OBD.FuelLevel");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
