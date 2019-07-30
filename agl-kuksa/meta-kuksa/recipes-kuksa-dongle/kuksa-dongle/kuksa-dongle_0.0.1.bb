@@ -22,7 +22,7 @@ SRCREV = "${AUTOREV}"
 
 RDEPENDS_${PN} += " bash python3"
 
-SRC_URI = "git://github.com/rai20/kuksa.invehicle.git;protocol=https;branch=kuksa-dongle"
+SRC_URI = "git://github.com/eclipse/kuksa.invehicle.git;protocol=https;branch=master"
 SRC_URI[sha256sum] = "0bf53c8f9c7306ec3dbc6c4c84335ca7ca758f04f93ec3bbd8e05292b3cc4344"
 EXTRA_OECMAKE += "-Dpkg_config_libdir=${libdir} -DCMAKE_BUILD_TYPE=Release"
 
@@ -33,10 +33,14 @@ do_install_append() {
   install -m 0755 ${S}/kuksa-standby.sh ${D}${bindir}/kuksa-dongle
   install -d ${D}${bindir}/kuksa-dongle
   install -m 0755 ${S}/ofono-fix.py ${D}${bindir}/kuksa-dongle
+  install -d ${D}${bindir}/kuksa-dongle
+  install -m 0755 ${S}/internet-status.py ${D}${bindir}/kuksa-dongle
   install -d ${D}${systemd_system_unitdir}
   install -m 0644 ${S}/systemd/kuksa-ofono-fix.service ${D}${systemd_system_unitdir}
   install -d ${D}${systemd_system_unitdir}
   install -m 0644 ${S}/systemd/kuksa-standby.service ${D}${systemd_system_unitdir}
+  install -d ${D}${systemd_system_unitdir}
+  install -m 0644 ${S}/systemd/kuksa-internet-status.service ${D}${systemd_system_unitdir}
 }
 
 SYSTEMD_SERVICE_${PN} = "kuksa-ofono-fix.service kuksa-standby.service"
