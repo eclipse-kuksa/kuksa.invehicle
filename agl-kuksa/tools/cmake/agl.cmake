@@ -177,6 +177,9 @@ macro(agl_build_configure)
   # Meta kuksa layer
   config_layer(meta-kuksa "${META_KUKSA_PATH}")
 
+  # Meta kuksa bsp layer
+  config_layer(meta-kuksa-bsp "${META_KUKSA_PATH}/meta-kuksa-bsp")
+
   # Added meta-virtualization layer for docker
   set(METADIRVIRT "$")
   set(METADIRVIRT "${METADIRVIRT}{METADIR}")

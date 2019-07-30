@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<CONFIG>
+  <!--Only one of the elements PID or PNAME may exist at a time-->
+  <!--When filling PID, delete the PNAME tag. Vice versa.-->
+  <PID>1</PID>
+  <WINDOW_SIZE>3</WINDOW_SIZE>
+  <DB_HOST>../Traces.sqlite</DB_HOST>
+  <BROKER_IP>localhost</BROKER_IP>
+  <STORAGE_MODE>True</STORAGE_MODE>
+  <LOGGINGLEVEL>WARNING</LOGGINGLEVEL>
+</CONFIG>

@@ -255,6 +255,7 @@ string setFuelLevel() {
  
   value = (value * 100) / 254;
 
+#ifdef DEBUG 
   cout << "Fuel level read from the vehicle = "<< value << endl;
 
   json req = setRequest("Signal.OBD.FuelLevel"); 
