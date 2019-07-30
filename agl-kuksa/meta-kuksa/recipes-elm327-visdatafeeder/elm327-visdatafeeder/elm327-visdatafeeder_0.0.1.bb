@@ -31,9 +31,6 @@ S = "${WORKDIR}/git/elm327-visdatafeeder"
 do_install_append() {
   install -d ${D}${systemd_system_unitdir}
   install -m 0644 ${S}/systemd/elm327-visdatafeeder.service ${D}${systemd_system_unitdir}
-
-  install -d ${D}${bindir}/elm327-visdatafeeder
-  install -m 0755 ${WORKDIR}/bt_setup.sh ${D}${bindir}/elm327-visdatafeeder
 }
 
 SYSTEMD_SERVICE_${PN} = "elm327-visdatafeeder.service"
