@@ -14,12 +14,14 @@
 cmake_minimum_required(VERSION 2.8)
 project(w3c-visserver)
 
-set(UNIT_TEST OFF)
+set(UNIT_TEST ON)
 # Set this variable to ON build an exe
 set(BUILD_EXE ON)
 
 #set this variable to ON to build the testclient
 set(BUILD_TEST_CLIENT ON)
+
+set(BOOST_TEST_COLOR_OUTPUT ON)
 
 if(UNIT_TEST)
    add_definitions(-DUNIT_TEST)
@@ -76,10 +78,11 @@ if(UNIT_TEST)
          ${CMAKE_CURRENT_SOURCE_DIR}/src/vsscommandprocessor.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/accesschecker.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/authenticator.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/signing.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/subscriptionhandler.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/wsserver.cpp
        )
-   add_executable(w3c-unit-test ${TEST_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/w3c-viss-test.cpp)
+   add_executable(w3c-unit-test ${TEST_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/w3cunittest.cpp)
    target_include_directories(simple-websocket-server INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/Simple-WebSocket-Server ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jsoncons ${CMAKE_CURRENT_SOURCE_DIR}/../3rd-party-libs/jwt-cpp)
    target_link_libraries(w3c-unit-test simple-websocket-server)
 endif(UNIT_TEST)
