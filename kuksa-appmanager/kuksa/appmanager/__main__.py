@@ -10,6 +10,8 @@
 
 import logging
 import os
+import signal
+import sys
 
 from . import hawkbit
 from . import hono
@@ -18,6 +20,10 @@ from .utils import ConfigurationError
 logging.basicConfig(format='%(asctime)s - %(threadName)s - %(levelname)s - %(name)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger('kuksa.appmanager')
 
+def shutdownSignalReceived(signalNumber, frame):
+    logger.info('Shutdown signal received. Terminating.')
+    sys.exit(0)
+    
 
 def __get_config_value(name):
     value = os.getenv(name)
@@ -25,6 +31,11 @@ def __get_config_value(name):
         raise ConfigurationError("Missing environment variable: {}".format(name))
     return value
 
+
+#Connect signals
+signal.signal(signal.SIGTERM, shutdownSignalReceived)
+signal.signal(signal.SIGINT, shutdownSignalReceived)
+signal.signal(signal.SIGQUIT, shutdownSignalReceived)
 
 try:
     HAWKBIT_CONFIG = hawkbit.Config(

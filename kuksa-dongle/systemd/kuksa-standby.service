@@ -1,0 +1,13 @@
+[Unit]
+Description=Service to enable dongle standby mode
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/kuksa-dongle
+ExecStart=/usr/bin/kuksa-dongle/kuksa-standby.sh
+RestartSec=5
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

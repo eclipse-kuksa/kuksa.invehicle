@@ -21,7 +21,7 @@ Contributors:
 
 
 ## Projects
-
+* *kuksa-obd-dongle* - Kuksa Aftermarket solution hardware. 
 * *agl-kuksa* - Scripts to automate AGL build system with the meta-kuksa layers.
 * *elm327-visdatafeeder* - ELM 327 app that reads OBDII data from the vehicle and feeds data to the w3c-visserver.
 * *kuksa-hawkbit* - Barebone API for connecting with Hawkbit. Will be shortly replaced with kuksa-appmanager.
@@ -33,6 +33,10 @@ Contributors:
 * *kuksa-appmanager* - Hawkbit appmanager which deploys in-vehicle apps as docker conatiners and more..
 * *email-notifier* - Example app that talks to an email-server and sends e-mails to the configured email address. Used at the moment only for internal demos.
 * *app-ids* - Proof-of-Concept implementation of a modular Host-based Intrusion Detection System
+
+## How to build and run AGL-Kuksa for kuksa-obd-dongle
+
+Click [here](https://github.com/eclipse/kuksa.invehicle/tree/master/kuksa-obd-dongle) to learn more.
 
 ## How to build and run AGL-Kuksa on Raspberry Pi 3
 

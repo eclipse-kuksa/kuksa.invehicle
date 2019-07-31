@@ -1,7 +1,6 @@
 [Unit]
 Description = OBDII data feeder ELM 327 for w3c-visserver
-Wants=w3c-visserver network-online.target
-After=network.target network-online.target
+Wants=w3c-visserver
 
 [Service]
 WorkingDirectory=/usr/bin/elm327-visdatafeeder

@@ -1,0 +1,7 @@
+run kuksa_init
+fdt addr ${fdt_addr} && fdt get value bootargs /chosen bootargs
+run kuksa_start
+mmc dev 0
+ext4load mmc 0:${kuksa_root} ${kernel_addr_r} /boot/@@KERNEL_IMAGETYPE@@
+@@KERNEL_BOOTCMD@@ ${kernel_addr_r} - ${fdt_addr}
+run kuksa_recover

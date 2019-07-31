@@ -106,6 +106,7 @@ Append the following lines to the end of the file.
 ```
 BBLAYERS =+ " \
     ${METADIR}/meta-kuksa \
+    ${METADIR}/meta-kuksa/meta-kuksa-bsp \
     ${METADIR}/meta-virtualization \
 "
 ```

@@ -1,0 +1,14 @@
+[Unit]
+Description=GPS data feeder for W3C visserver
+After=w3c-visserver
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/gps-visfeeder
+ExecStart=/usr/bin/python3 /usr/bin/gps-visfeeder/gps-feeder.py
+RestartSec=5
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

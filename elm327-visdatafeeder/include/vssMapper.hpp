@@ -11,12 +11,20 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include <string>
 #include <list>
+#include <string>
 
 using namespace std;
 
 string setRPM();
 string setVehicleSpeed();
 string setFuelLevel();
+string setAccPedalPositionD();
+string setThrottlePosition();
+string setEngineCoolantTemp();
+string setOxygenSensor1();
+string setCatalystTempB1S1();
+
+
+
 list<string> readErrors();
