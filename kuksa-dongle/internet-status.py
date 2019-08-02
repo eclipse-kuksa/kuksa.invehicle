@@ -1,11 +1,6 @@
 #!/usr/bin/python3         
                               
-import dbus,time,os,sys     
-import wiringpi                                           
-                              
-wiringpi.wiringPiSetupGpio()                                                      
-wiringpi.pinMode(5, 1)                                              
-wiringpi.digitalWrite(5, 1)                                                       
+import dbus,time,os,sys                                                      
                                                                                   
 status = "unregistered"                                             
 current_tech = ""                                      
@@ -44,10 +39,7 @@ def main():
                                                                         status = str(properties[key])                                                                
                                                                 elif status == "registered" and key == "Strength" :                                                                                         
                                                                         val = properties[key]                                                                                                               
-                                                                        print("Network registered with %s = %d" % (key, val))                                        
-                                                                                                                   
-                                                                        for x in range(25):                        
-                                                                                toggle(val)                        
+                                                                        print("Network registered with %s = %d" % (key, val))                       
                                                                 elif key == "Technology" :                         
                                                                         if current_tech == "" :                                                                                                             
                                                                                 current_tech = str(properties[key])                                                                                         
@@ -65,16 +57,6 @@ def main():
                 sys.stdout.flush() 
                 time.sleep(4)      
 
-
-
-def toggle (strength):
-        delay = float(strength) + 1
-        delay = 3/delay
-#       print(delay)
-        time.sleep(delay)
-        wiringpi.digitalWrite(5, 0)
-        time.sleep(delay)
-        wiringpi.digitalWrite(5, 1)
 
 if __name__ == "__main__":                                                                                                                                                                                  
         main()

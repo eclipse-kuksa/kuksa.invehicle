@@ -14,7 +14,7 @@ SUMMARY = "GPS data feeder for W3C VIS server"
 DESCRIPTION = "Feeds GPS data into w3c visserver"
 HOMEPAGE = "https://www.w3.org/TR/vehicle-information-api/"
 LICENSE = "EPL-2.0"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=d9fc0efef5228704e7f5b37f27192723"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=c7cc8aa73fb5717f8291fcec5ce9ed6c"
 
 inherit pkgconfig systemd
 SRCREV = "${AUTOREV}"
