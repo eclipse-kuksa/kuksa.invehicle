@@ -25,3 +25,7 @@ Currently, only the `docker-configuration.json` artifact is supported. The AppMa
 - [Build](wiki/build.md)
 - [FOTA](wiki/fota.md)
 - [AGL Recipe](wiki/agl.md)
+
+### Note
+
+If you can not see your target in the [Appstore](https://github.com/eclipse/kuksa.cloud/tree/master/kuksa-appstore), make sure that your `AppstoreUsername` is included in the Description box of your target in Eclipse HawkBit. This is intended to be automated in the future (https://github.com/eclipse/kuksa.invehicle/issues/92).
