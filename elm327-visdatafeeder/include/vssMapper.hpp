@@ -15,7 +15,9 @@
 #include <string>
 
 using namespace std;
-
+int getRPM();
+int getVehicleSpeed();
+int getFuelLevel();
 string setRPM();
 string setVehicleSpeed();
 string setFuelLevel();
