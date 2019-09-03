@@ -29,7 +29,7 @@ def createW3Csocket():
 
     # Bind the socket to the address
     print('starting up on {}'.format(server_address))
-    #sock.close()
+    # sock.close()
     sock.bind(server_address)
 
     # Listen for incoming connections
@@ -59,3 +59,7 @@ def createW3Csocket():
         finally:
             # Clean up the connection
             connection.close()
+
+
+if __name__ == '__main__':
+    createW3Csocket()

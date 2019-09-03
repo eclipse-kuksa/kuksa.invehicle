@@ -50,15 +50,15 @@ def processRequest(request):
     # check if a valid token is available in the store
     token = None
     isvalid = False
-    '''try:
-        token = store.getToken(appID, user, api)
+    try:
+        token = store.getToken(appID, api)
         # Validate the token
-        isvalid = validator.isTokenValid(appID, user, token)
+        isvalid = validator.isTokenValid(appID, token)
     except FileNotFoundError as error:
         print("No token was found for the appID and user combo. SO will try to fetch it from the authorization server.")
     except RuntimeError as rError:
         print("Runtime error occurred while retrieving tokens from token store")
-        raise'''
+        raise
 
     if isvalid:
         response = preparePositiveResponse(appID, token)
@@ -69,6 +69,7 @@ def processRequest(request):
         isvalid = validator.isTokenValid(appID, token)
         if isvalid:
             response = preparePositiveResponse(appID, token)
+            store.storeToken(appID, api, token)
             return response
         else:
             response = prepareNegativeResponse(appID,  token)
