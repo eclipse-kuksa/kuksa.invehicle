@@ -7,6 +7,8 @@ Type = simple
 EnvironmentFile = /etc/kuksa-appmanager.conf
 WorkingDirectory = /usr/bin
 ExecStart = /usr/bin/python3 -m kuksa.appmanager
+Restart = on-failure
+RestartSec = 60
 
 [Install]
 WantedBy = multi-user.target
