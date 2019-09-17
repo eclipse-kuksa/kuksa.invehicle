@@ -12,5 +12,5 @@
 
 
 def isTokenValid(appID, token):
-    return True
+    return False
 

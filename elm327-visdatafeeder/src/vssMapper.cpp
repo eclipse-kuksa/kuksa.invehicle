@@ -170,7 +170,7 @@ string setRPM() {
   cout << "RPMread from the vehicle = " << value << endl;
 #endif
 
-  json req = setRequest("Signal.OBD.RPM");
+  json req = setRequest("Vehicle.OBD.EngineSpeed");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
@@ -186,7 +186,7 @@ string setVehicleSpeed() {
 #ifdef DEBUG
   cout << "Vehicle speed read from the vehicle = " << value << endl;
 #endif
-  json req = setRequest("Signal.OBD.Speed");
+  json req = setRequest("Vehicle.OBD.Speed");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
@@ -203,7 +203,7 @@ string setFuelLevel() {
 #ifdef DEBUG
   cout << "Fuel level read from the vehicle = " << value << endl;
 #endif
-  json req = setRequest("Signal.OBD.FuelLevel");
+  json req = setRequest("Vehicle.OBD.FuelLevel");
   req["value"] = value;
   stringstream ss;
   ss << pretty_print(req);
@@ -216,22 +216,22 @@ string setFuelLevel() {
 string createDTCJson(string dtcCode) {
   json req;
   if (dtcCode == "0104") {
-    req = setRequest("Signal.OBD.DTC1");
+    req = setRequest("Vehicle.OBD.DTC1");
     req["value"] = true;
   } else if (dtcCode == "0105") {
-    req = setRequest("Signal.OBD.DTC2");
+    req = setRequest("Vehicle.OBD.DTC2");
     req["value"] = true;
   } else if (dtcCode == "0106") {
-    req = setRequest("Signal.OBD.DTC3");
+    req = setRequest("Vehicle.OBD.DTC3");
     req["value"] = true;
   } else if (dtcCode == "0107") {
-    req = setRequest("Signal.OBD.DTC4");
+    req = setRequest("Vehicle.OBD.DTC4");
     req["value"] = true;
   } else if (dtcCode == "0108") {
-    req = setRequest("Signal.OBD.DTC5");
+    req = setRequest("Vehicle.OBD.DTC5");
     req["value"] = true;
   } else if (dtcCode == "0109") {
-    req = setRequest("Signal.OBD.DTC6");
+    req = setRequest("Vehicle.OBD.DTC6");
     req["value"] = true;
   }
   stringstream ss;
@@ -284,7 +284,7 @@ list<string> readErrors() {
   } else if (dtcNos == 0) {
     // clear all errors.
     json req;
-    req = setRequest("Signal.OBD.*");
+    req = setRequest("Vehicle.OBD.*");
     json array = json::array();
     json dtc1;
     dtc1["DTC1"] = false;

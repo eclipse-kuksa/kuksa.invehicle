@@ -204,18 +204,15 @@ void *startLoop(void *arg) {
       
       int rpm = getRPM();
       if (rpm > -1)
-         publishDouble("Signal.OBD.RPM",rpm);
+         publishDouble("Vehicle.OBD.EngineSpeed",rpm);
 
       usleep(AVTHREADSLEEP);
       
       int speed = getVehicleSpeed();
       if (speed > -1)
-         publishInt("Signal.OBD.Speed",speed);
+         publishInt("Vehicle.OBD.Speed",speed);
 
       usleep(AVTHREADSLEEP);
-
-         publishString("Signal.Body.Windshield.Front.Wiper.Status" , "Test String");
-    
       
   }
 }
