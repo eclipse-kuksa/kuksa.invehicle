@@ -112,7 +112,6 @@ int getVehicleSpeed() {
   }
 
   int A = stoi(tokens[2], nullptr, 16);
-
   Int32 value = A;
 #ifdef DEBUG
   cout << "Vehicle speed read from the vehicle = " << value << endl;

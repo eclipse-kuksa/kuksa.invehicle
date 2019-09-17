@@ -73,7 +73,7 @@ void* elmActualValuesRun(void* arg) {
   subscibeReq["requestId"] = rand() % 99999;
   subscibeReq["action"] = "subscribe";
   subscibeReq["path"] =
-      "Signal.Drivetrain.InternalCombustionEngine.ThrottleTest";
+      "Vehicle.Drivetrain.InternalCombustionEngine.ThrottleTest";
   stringstream sstream;
   sstream << pretty_print(subscibeReq);
   sendRequest(sstream.str());
