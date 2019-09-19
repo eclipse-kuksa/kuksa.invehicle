@@ -19,7 +19,7 @@ class TestKeycloakMethods(unittest.TestCase):
         pass
 
     def test_get_token(self):
-        test_secret = '807cc5c6-da4b-43b7-a77f-d957145fc049'
+        test_secret = 'c27a7296-586b-4116-95ec-caf06e6b9854'
         test_client = 'Kuksa-dashboard'
         auth_url = 'http://localhost:8080/auth/'
         realm = 'Kuksa'
@@ -27,6 +27,16 @@ class TestKeycloakMethods(unittest.TestCase):
         keyclkconn = keycloakconnector.Keycloakconnector(auth_url, realm, test_client, test_secret)
         token = keyclkconn.getToken("", "")
         tokenStore.storeToken("Kuksa-dashboard", "w3c-vss", token)
+
+    def test_get_certs(self):
+        test_secret = 'c27a7296-586b-4116-95ec-caf06e6b9854'
+        test_client = 'Kuksa-dashboard'
+        auth_url = 'http://localhost:8080/auth/'
+        realm = 'Kuksa'
+
+        keyclkconn = keycloakconnector.Keycloakconnector(auth_url, realm, test_client, test_secret)
+        cert = keyclkconn.getJWTPublickey()
+        print(cert)
 
 
 if __name__ == '__main__':

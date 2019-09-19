@@ -10,7 +10,18 @@
 
 # This file validates the token.
 
+from jose import jwt
+import logging
 
-def isTokenValid(appID, token):
-    return False
 
+def isTokenValid(token, rsa_key):
+    try:
+        jwt.decode(
+            token,
+            rsa_key,
+            algorithms=["RS256"]
+        )
+    except jwt.ExpiredSignatureError:
+        logging.error("Token has expired")
+        return False
+    return True

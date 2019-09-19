@@ -22,7 +22,7 @@ def getToken(appid, api):
     f = open(path, "r")
     token = f.read()
     f.close()
-    logging.info("Token retrieved in storage for " + appid)
+    logging.info("Token retrieved from storage for " + appid)
     return token
 
 
@@ -34,3 +34,24 @@ def storeToken(appid, api, token):
     f.write(token)
     f.close()
     logging.info("Token stored in storage for " + appid)
+
+
+def getPubKey(appid):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    path = directory + '/' + appid + 'pubkey'
+    f = open(path, "r")
+    pubkey = f.read()
+    f.close()
+    logging.info("Pubkey retrieved from storage for " + appid)
+    return pubkey
+
+
+def storePubKey(appid, pubkey):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    path = directory + '/' + appid + 'pubkey'
+    f = open(path, "w")
+    f.write(pubkey)
+    f.close()
+    logging.info("Pubkey stored in storage for " + appid)
