@@ -14,10 +14,11 @@ import tokenStore
 import tokenValidator
 import keycloakconnector
 import json
+import configuration
 
 store = tokenStore
-auth_url = "http://localhost:8080/auth/"
-realm = "Kuksa"
+auth_url = configuration.getProperty('keycloak', 'url')
+realm = configuration.getProperty('keycloak', 'realm')
 
 validator = tokenValidator
 
@@ -76,7 +77,7 @@ def processRequest(request):
             return response
         else:
             # Get token from keycloak
-            print('Token form local store is invalid and hence retrieving it from the keycloak server')
+            print('Token form local store is invalid and hence retrieving it from the keycloak server = ' + auth_url)
             keycloak = keycloakconnector.Keycloakconnector(auth_url, realm, appID, secret)
             token = keycloak.getToken(appID, api)
             pubkey = keycloak.getJWTPublickey()

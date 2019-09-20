@@ -12,10 +12,11 @@
 import socket
 import os
 import requestHandler
+import configuration
 
 socket_owner = 'kuksa w3c-visserver'
-server_address = '/home/pratheek/socket/kuksa_w3c_perm_management'
-message_bytes = 1024
+server_address = configuration.getProperty('socket', 'address')
+message_bytes = 2048
 
 
 def createW3Csocket():
