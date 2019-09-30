@@ -55,6 +55,8 @@ class DockerSession:
             self.__start_services(services)
 
             self.__commit_deployment()
+
+            self.__clean_unused_containers()
         except Exception as error:
             self.__revert()
 
@@ -62,6 +64,8 @@ class DockerSession:
 
     def undeploy_all_services(self):
         self.__stop_and_remove_existing_services()
+        self.__clean_unused_containers()
+
 
     def __revert(self):
         try:
@@ -149,6 +153,18 @@ class DockerSession:
             service_version = container.labels.get('kuksa.appmanager.service.version')
             logger.info("Stopping service: {name}:{version}".format(name=container.name, version=service_version))
             container.remove(force=True)
+
+    def __clean_unused_containers(self, cancellable=True):
+        if cancellable:
+            self.cancelled_check()
+
+        logger.info("Cleanup: Pruning unused containers...")
+        deleted=self.docker.containers.prune(filters=dict(label='kuksa.appmanager.service=yes'))
+        if deleted['ContainersDeleted'] is not None:
+            logger.debug("Cleanup: Deleted containers: {hashes}".format(hashes=str(deleted['ContainersDeleted'])))
+            logger.debug("Cleanup: Reclaimed space: {reclaimedbytes}".format(reclaimedbytes=str(deleted['SpaceReclaimed'])))
+        else:
+            logger.debug("Cleanup: Nothing to delete")
 
     def __start_services(self, services):
         for index, (name, service) in enumerate(services.items()):
