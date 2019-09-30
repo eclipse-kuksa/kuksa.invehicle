@@ -39,7 +39,7 @@ signal.signal(signal.SIGQUIT, shutdownSignalReceived)
 
 try:
     HAWKBIT_CONFIG = hawkbit.Config(
-        server=__get_config_value('HAWKBIT_SERVER'),
+        server=__get_config_value('HAWKBIT_SERVER').rstrip("/"), # see https://github.com/eclipse/hawkbit/issues/892
         tenant=__get_config_value('HAWKBIT_TENANT'),
         device=__get_config_value('HAWKBIT_DEVICE'),
         token=__get_config_value('HAWKBIT_TOKEN'),
@@ -47,6 +47,14 @@ try:
 except ConfigurationError as error:
     logger.error(error)
     exit(1)
+
+logging.info("Hawkbit Server: {server}".format(server=HAWKBIT_CONFIG.server))
+logging.info("Hawkbit Tenant: {tenant}".format(tenant=HAWKBIT_CONFIG.tenant))
+logging.info("Hawkbit Device: {device}".format(device=HAWKBIT_CONFIG.device))
+# We will not (un)conditionally print auth token, because we have no control about what happens to our logs
+# Uncomment for debug
+# logging.info("Hawkbit Token : {token}".format(token=HAWKBIT_CONFIG.token))
+
 
 try:
     HONO_CONFIG = hono.Config(
