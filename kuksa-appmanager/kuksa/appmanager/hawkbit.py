@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import os
+import shutil
 import subprocess
 import time
 from queue import Queue
@@ -270,12 +271,22 @@ class DeploymentJob:
                 self.logger.error(error)
                 # TODO: forward error message to HawkBit
                 self.__send_feedback('closed', 'failure')
+
+            self.__cleanup_downloaded_chunks(deployment_chunks)
+
         except self.__class__.CancelledException:
             self.logger.warning("Deployment {} was cancelled".format(self.action_id))
         except Exception as error:
             self.logger.exception(error)
         finally:
             self.active = False
+
+    def __cleanup_downloaded_chunks(self, deployment_chunks):
+        chunk_downloads_base = os.path.join(os.getcwd(), 'downloads')
+        for chunk in deployment_chunks.values():
+            dir_to_delete = os.path.join(chunk_downloads_base, chunk['name'])
+            self.logger.debug("CLEANUP: Will delete downloaded artifacts: {}".format(dir_to_delete))
+            shutil.rmtree(dir_to_delete, ignore_errors=True)
 
     def __cancelled_check(self):
         if self.cancelled:
