@@ -23,6 +23,7 @@ from requests import Session
 from . import __version__
 from .services import DockerSession
 from .utils import ConfigurationError
+from .widgets import WidgetManager
 
 
 class Config:
@@ -261,10 +262,21 @@ class DeploymentJob:
                         self.__send_feedback('closed', 'success')
 
                     else:
-                        deployment_docker_apps = self.__get_docker_apps(deployment_apps)
+                        deployment_apps = self.__get_apps(deployment_apps)
 
+                        deployment_docker_apps = {key:value for (key,value) in deployment_apps.items() if value['app_type'] == 'docker'}
                         with DockerSession(self.__cancelled_check) as docker:
-                            docker.deploy(deployment_docker_apps)
+                            if deployment_docker_apps:
+                                docker.deploy(deployment_docker_apps)
+                            else:
+                                docker.undeploy_all_services()
+
+                        deployment_widgets = [widget for widget in deployment_apps.values() if widget['app_type'] == 'widget']
+                        widget_manager = WidgetManager()
+                        if deployment_widgets:
+                            widget_manager.deploy_widgets(deployment_widgets)
+                        else:
+                            widget_manager.undeploy_all_widgets()
 
                         self.__send_feedback('closed', 'success')
             except ConfigurationError as error:
@@ -336,36 +348,51 @@ class DeploymentJob:
             if flash_firmware_call.returncode == 0:
                 self.logger.debug('kuksa-firmware-flash response: {}'.format(flash_firmware_call.stdout.read()))
 
-    def __get_docker_apps(self, deployment_apps):
-        docker_apps = {}
+
+    def __get_apps(self, deployment_apps):
+        apps = {}
         for app_name, app in deployment_apps.items():
-            docker_app_config = app['artifacts'].get('docker-container.json')
-            if not docker_app_config:
-                # this is not a docker app
-                raise ConfigurationError("App {name} has no config-file with name docker-container.json".format(name=app_name))
+            app_added = False
 
-            app_version = app['version']
-            self.logger.debug("Provisioning app: {name}:{version}".format(name=app_name, version=app_version))
+            for artifact_name, artifact in app['artifacts'].items():
+                if artifact_name == 'docker-container.json':
+                    # this is a docker app
+                    app_version = app['version']
+                    self.logger.debug("Provisioning app: {name}:{version}".format(name=app_name, version=app_version))
 
-            docker_app = dict()
-            docker_apps[app_name] = docker_app
+                    docker_app = dict()
+                    docker_app['app_type'] = 'docker'
+                    apps[app_name] = docker_app
+                    app_added = True
 
-            self.__cancelled_check()
+                    self.__cancelled_check()
 
-            with open(docker_app_config['path'], 'r') as f:
-                docker_app_config = json.load(f)
+                    with open(artifact['path'], 'r') as f:
+                        docker_app_config = json.load(f)
 
-            docker_app.update(docker_app_config)
-            docker_app.update(dict(
-                name=app_name,
-                version=app['version'],
-            ))
+                        docker_app.update(docker_app_config)
+                        docker_app.update(dict(
+                            name=app_name,
+                            version=app['version'],
+                        ))
 
-            docker_app_image = app['artifacts'].get('docker-image.tar.bz2')
-            if docker_app_image:
-                docker_app['image-tarball'] = docker_app_image['path']
+                        docker_app_image = app['artifacts'].get('docker-image.tar.bz2')
+                        if docker_app_image:
+                            docker_app['image-tarball'] = docker_app_image['path']
 
-        return docker_apps
+                elif artifact_name.lower().endswith('.wgt'):
+                    # this is a widget
+                    widget_app = dict()
+                    widget_app['app_type'] = 'widget'
+                    apps[app_name] = widget_app
+                    app_added = True
+
+                    widget_app['path'] = artifact['path']
+
+            if not app_added:
+                raise ConfigurationError("App {name} has no config-file with name docker-container.json or a *.wgt file".format(name=app_name))
+
+        return apps
 
     def __download_chunks(self, deployment):
         chunks = {}
