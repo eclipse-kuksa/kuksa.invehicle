@@ -6,7 +6,7 @@ Once started, the AppManager will check regularly with HawkBit for required acti
 to Hono is used to receive `configuration change` events that trigger deployment actions.
 
 Currently, two types of app artifacts are supported. Docker containers and AGL widgets.
-A Docker container must contain a `docker-configuration.json` artifact.
+A Docker container must contain a `docker-container.json` artifact.
 The AppManager uses this JSON file to to pull images from a Docker registry and create containers.
 An AGL widget must have an artifact with the `*.wgt` file extension.
 
