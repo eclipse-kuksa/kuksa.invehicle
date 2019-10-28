@@ -5,7 +5,7 @@ This is a simple data feeder to w3c-visserver service that reads OBD II data for
 # Builing with CMake
 * Go to the folder elm327-visdatafeeder and create a new directory build using `mkdir build`
 * Change directory using `cd build`
-* Execure cmake using `cmake ..`
+* Execure cmake using `cmake .. -DCOMMTYPE=dbus` to build feeder with D-Bus connection. As default the connection will be secure websocket and this can be built by using `cmake ..` command.
 * Build using the command `make`
 * Execute using command `.start.sh`. This will start the app using demo certificates and JWT Token found in the example/demo-certificates folder.
 

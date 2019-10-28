@@ -43,12 +43,14 @@ class vsscommandprocessor {
   std::string processGetMetaData(uint32_t request_id, std::string path);
   std::string processAuthorize(wschannel& channel, uint32_t request_id,
                           std::string token);
+  std::string processAuthorizeWithPermManager(wschannel &channel, uint32_t request_id,
+                                 std::string client, std::string clientSecret);
+  
 
  public:
   vsscommandprocessor(vssdatabase* database, authenticator* vdator,
                       subscriptionhandler* subhandler);
   ~vsscommandprocessor();
-
   std::string processQuery(std::string req_json, wschannel& channel);
 };
 

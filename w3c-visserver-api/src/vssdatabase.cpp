@@ -472,6 +472,16 @@ void checkTypeAndBound(string value_type, jsoncons::json val) {
   }
 }
 
+void vssdatabase::checkSetPermission(wschannel& channel, jsoncons::json valueJson) {
+    // check if all the paths have write access.
+    bool haveAccess = accessValidator->checkPathWriteAccess(channel, valueJson);
+    if (!haveAccess) {
+       stringstream msg;
+       msg << "Path(s) in set request do not have write access or is invalid";
+       throw noPermissionException(msg.str());
+    }
+}
+
 // Method for setting values to signals.
 void vssdatabase::setSignal(wschannel& channel, string path,
                             jsoncons::json valueJson) {
@@ -484,14 +494,8 @@ void vssdatabase::setSignal(wschannel& channel, string path,
   rwMutex.unlock();
 
   if (setValues.is_array()) {
-    // check if all the paths have write access.
-    bool haveAccess = accessValidator->checkPathWriteAccess(channel, setValues);
-    if (!haveAccess) {
-      stringstream msg;
-      msg << "Path(s) in set request do not have write access or is invalid";
-      throw noPermissionException(msg.str());
-    }
 
+    checkSetPermission(channel, setValues);
     for (size_t i = 0; i < setValues.size(); i++) {
       jsoncons::json item = setValues[i];
       string jPath = item["path"].as<string>();
@@ -544,6 +548,76 @@ void vssdatabase::setSignal(wschannel& channel, string path,
     throw genException(msg);
   }
 }
+
+
+// Method for setting values to signals.
+void vssdatabase::setSignal(string path,
+                            jsoncons::json valueJson) {
+  if (path == "") {
+    string msg = "Path is empty while setting";
+    throw genException(msg);
+  }
+  rwMutex.lock();
+  jsoncons::json setValues = getPathForSet(path, valueJson);
+  rwMutex.unlock();
+
+  if (setValues.is_array()) {
+    for (size_t i = 0; i < setValues.size(); i++) {
+      jsoncons::json item = setValues[i];
+      string jPath = item["path"].as<string>();
+#ifdef DEBUG
+      cout << "vssdatabase::setSignal: path found = " << jPath << endl;
+      cout << "value to set asstring = " << item["value"].as<string>() << endl;
+#endif
+      rwMutex.lock();
+      jsoncons::json resArray = json_query(data_tree, jPath);
+      rwMutex.unlock();
+      if (resArray.is_array() && resArray.size() == 1) {
+        jsoncons::json resJson = resArray[0];
+
+        if (resJson.has_key("datatype")) {
+          string value_type = resJson["datatype"].as<string>();
+          json val = item["value"];
+          checkTypeAndBound(value_type, val);
+
+          resJson.insert_or_assign("value", val);
+
+          rwMutex.lock();
+          json_replace(data_tree, jPath, resJson);
+          rwMutex.unlock();
+#ifdef DEBUG
+          cout << "vssdatabase::setSignal: new value set at path " << jPath
+               << endl;
+#endif
+
+          string uuid = resJson["uuid"].as<string>();
+
+          jsoncons::json value = resJson["value"];
+          subHandler->updateByUUID(uuid, value);
+
+        } else {
+          stringstream msg;
+          msg << "Type key not found for " << jPath;
+          throw genException(msg.str());
+        }
+
+      } else if (resArray.is_array()) {
+        cout << "vssdatabase::setSignal : Path " << jPath << " has "
+             << resArray.size() << " signals, the path needs refinement"
+             << endl;
+        stringstream msg;
+        msg << "Path " << jPath << " has " << resArray.size()
+            << " signals, the path needs refinement";
+        throw genException(msg.str());
+      }
+    }
+  } else {
+    string msg = "Exception occured while setting data for " + path;
+    throw genException(msg);
+  }
+}
+
+
 
 // Utility method for setting values to JSON.
 void setJsonValue(jsoncons::json& dest, jsoncons::json& source, string key) {

@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- * Copyright (c) 2018 Robert Bosch GmbH and others.
+ * Copyright (c) 2019 Robert Bosch GmbH.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -11,14 +11,17 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include <list>
-#include <string>
+
+#ifndef __PERMMCLIENT_H__
+#define __PERMMCLIENT_H__
+
+#include <jsoncons/json.hpp>
 
 using namespace std;
-int getRPM();
-int getVehicleSpeed();
-int getFuelLevel();
-string setRPM();
-string setVehicleSpeed();
-string setFuelLevel();
-list<string> readErrors();
+using namespace jsoncons;
+
+json getPermToken(string clientName, string clientSecret);
+
+
+
+#endif
