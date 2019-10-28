@@ -1,11 +1,14 @@
 # Kuksa AppManager
 
-The AppManager is a python client that uses HawkBit artifacts to launch apps as Docker containers.
+The AppManager is a python client that uses HawkBit artifacts to launch apps as Docker containers or AGL widgets.
 
 Once started, the AppManager will check regularly with HawkBit for required actions, covering deployment and configuration data. Additionally a MQTT connection
 to Hono is used to receive `configuration change` events that trigger deployment actions.
 
-Currently, only the `docker-configuration.json` artifact is supported. The AppManager uses this JSON file to to pull images from a Docker registry and create containers.
+Currently, two types of app artifacts are supported. Docker containers and AGL widgets.
+A Docker container must contain a `docker-container.json` artifact.
+The AppManager uses this JSON file to to pull images from a Docker registry and create containers.
+An AGL widget must have an artifact with the `*.wgt` file extension.
 
 #### Hello world app
 
@@ -24,6 +27,7 @@ Currently, only the `docker-configuration.json` artifact is supported. The AppMa
 - [Development](wiki/development.md)
 - [Build](wiki/build.md)
 - [FOTA](wiki/fota.md)
+- [AGL Widgets](wiki/widgets.md)
 - [AGL Recipe](wiki/agl.md)
 
 ### Note
