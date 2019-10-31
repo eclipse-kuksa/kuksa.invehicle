@@ -21,7 +21,7 @@
 
 #include "permmclient.hpp"
 #include "exception.hpp"
-#include "server_ws.hpp"
+#include "WsChannel.hpp"
 
 #include "JsonResponses.hpp"
 #include "visconf.hpp"
@@ -394,11 +394,11 @@ string VssCommandProcessor::processQuery(const string &req_json,
         logger->Log(LogLevel::INFO, "VssCommandProcessor::processQuery: Unknown action " + action);
       }
     }
-  } catch (jsoncons::json_parse_exception e) {
+  } catch (jsoncons::json_parse_exception &e) {
     return JsonResponses::malFormedRequest(e.what());
-  } catch (jsoncons::key_not_found e) {
+  } catch (jsoncons::key_not_found &e) {
     return JsonResponses::malFormedRequest(e.what());
-  } catch (jsoncons::not_an_object e) {
+  } catch (jsoncons::not_an_object &e) {
     return JsonResponses::malFormedRequest(e.what());
   }
 
