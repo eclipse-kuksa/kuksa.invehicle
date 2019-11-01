@@ -17,17 +17,20 @@
 
 #include "server_wss.hpp"
 
+
 class vsscommandprocessor;
 class vsscommandprocessor;
 class subscriptionhandler;
 class authenticator;
 class vssdatabase;
 class accesschecker;
+class ILogger;
 
 class wsserver {
  private:
   SimpleWeb::SocketServer<SimpleWeb::WSS> *secureServer_;
   SimpleWeb::SocketServer<SimpleWeb::WS> *insecureServer_;
+  std::shared_ptr<ILogger> logger;
   bool isSecure_;
   std::string configFileName_;
 
@@ -38,7 +41,7 @@ class wsserver {
   vssdatabase* database;
   accesschecker* accessCheck;
 
-  wsserver(int port, std::string configFileName, bool secure);
+  wsserver(std::shared_ptr<ILogger> loggerUtil, int port, std::string configFileName, bool secure);
   ~wsserver();
   void startServer(std::string endpointName);
   void sendToConnection(uint32_t connID, std::string message);

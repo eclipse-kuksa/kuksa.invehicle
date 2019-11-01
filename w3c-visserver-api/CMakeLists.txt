@@ -34,7 +34,7 @@ add_compile_options(-std=c++11 -pthread -Wall -Wextra -Werror)
 
 if ("${ADDRESS_SAN}" STREQUAL "ON" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-g -fsanitize=address -fno-omit-frame-pointer)
-  add_link_options(-g -fsanitize=address)
+  add_link_options(-g -fsanitize=address -ldl)
 endif()
 
 
@@ -61,7 +61,7 @@ set(Boost_USE_STATIC_LIBS ON)
 include_directories(${Boost_INCLUDE_DIRS})
 message(STATUS " boost includes ${Boost_INCLUDE_DIRS} ")
 
-find_package(Boost 1.58.0 COMPONENTS system thread program_options REQUIRED)
+find_package(Boost 1.64.0 COMPONENTS system thread program_options REQUIRED)
 
 target_link_libraries(simple-websocket-server INTERFACE ${Boost_LIBRARIES})
 target_include_directories(simple-websocket-server INTERFACE ${Boost_INCLUDE_DIR})
@@ -114,6 +114,7 @@ if(UNIT_TEST)
          ${CMAKE_CURRENT_SOURCE_DIR}/src/subscriptionhandler.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/signing.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/wsserver.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/BasicLogger.cpp
          # ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/vssdatabase_test.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/w3cunittest.cpp
        )

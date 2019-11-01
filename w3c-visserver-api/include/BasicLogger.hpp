@@ -12,19 +12,33 @@
  * *****************************************************************************
  */
 
-#ifndef __PERMMCLIENT_H__
-#define __PERMMCLIENT_H__
 
-#include <jsoncons/json.hpp>
-#include <memory>
+#ifndef __LOGGER_H__
+#define __LOGGER_H__
 
-using namespace std;
-using namespace jsoncons;
+#include "ILogger.hpp"
 
-class ILogger;
-
-json getPermToken(std::shared_ptr<ILogger> logger, string clientName, string clientSecret);
+#include <mutex>
 
 
+/**
+ * \class Logger
+ * \brief Implementation class of logging utility
+ *
+ * Logger shall provide standardized way to put logging information
+ * to standard output (stdout)
+ *
+ */
+class BasicLogger : public ILogger {
+  private:
+    std::mutex    accessMutex;
+    const uint8_t logLevels;
 
-#endif
+  public:
+    BasicLogger(uint8_t logEventsEnabled);
+    ~BasicLogger();
+
+    void Log(LogLevel level, std::string logString);
+};
+
+#endif /* __LOGGER_H__ */
