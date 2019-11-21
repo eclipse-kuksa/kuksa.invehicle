@@ -14,7 +14,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(w3c-visserver)
 
-set(UNIT_TEST OFF CACHE STRING "Build unit tests")
+set(UNIT_TEST ON CACHE STRING "Build unit tests")
 # Set this variable to ON build an exe
 set(BUILD_EXE ON)
 
@@ -29,7 +29,6 @@ if(UNIT_TEST)
    add_definitions(-DUNIT_TEST)
 endif(UNIT_TEST)
 
-add_definitions(-DDEBUG)
 add_compile_options(-std=c++11 -pthread -Wall -Wextra -Werror)
 
 if ("${ADDRESS_SAN}" STREQUAL "ON" AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
@@ -61,7 +60,7 @@ set(Boost_USE_STATIC_LIBS ON)
 include_directories(${Boost_INCLUDE_DIRS})
 message(STATUS " boost includes ${Boost_INCLUDE_DIRS} ")
 
-find_package(Boost 1.64.0 COMPONENTS system thread program_options REQUIRED)
+find_package(Boost 1.67.0 COMPONENTS system thread program_options REQUIRED)
 
 target_link_libraries(simple-websocket-server INTERFACE ${Boost_LIBRARIES})
 target_include_directories(simple-websocket-server INTERFACE ${Boost_INCLUDE_DIR})
@@ -107,15 +106,17 @@ target_link_libraries(${PROJECT_NAME} -lgobject-2.0 -lglib-2.0 -lgio-2.0)
 if(UNIT_TEST)
 
    set(TEST_FILES
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/vssdatabase.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/vsscommandprocessor.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/accesschecker.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/authenticator.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/subscriptionhandler.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/signing.cpp
-         ${CMAKE_CURRENT_SOURCE_DIR}/src/wsserver.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/VssDatabase.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/VssCommandProcessor.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/AccessChecker.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/Authenticator.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/SubscriptionHandler.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/SigningHandler.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/WsServer.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/src/BasicLogger.cpp
-         # ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/vssdatabase_test.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/permmclient.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/src/JsonResponses.cpp
+         # ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/VssDatabase_test.cpp
          ${CMAKE_CURRENT_SOURCE_DIR}/unit-test/w3cunittest.cpp
        )
    add_executable(w3c-unit-test ${TEST_FILES})
@@ -140,12 +141,12 @@ target_include_directories(w3c-unit-test INTERFACE ${OPENSSL_INCLUDE_DIR})
 target_link_libraries(w3c-unit-test INTERFACE ${OPENSSL_LIBRARIES})
 endif(UNIT_TEST)
 
-
-
 if(BUILD_TEST_CLIENT)
    add_executable(testclient ${CMAKE_CURRENT_SOURCE_DIR}/test/testclient.cpp)
    target_link_libraries(testclient  simple-websocket-server)
    target_include_directories(testclient PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/jsoncons)
+   target_include_directories(testclient INTERFACE ${Boost_INCLUDE_DIR})
+   target_link_libraries(testclient ${Boost_LIBRARIES} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/Client.key  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../examples/demo-certificates/CA.pem  ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)

@@ -14,24 +14,20 @@
 #ifndef __ACCESSCHECKER_H__
 #define __ACCESSCHECKER_H__
 
-#include <jsoncons/json.hpp>
-#include <string>
-#include "authenticator.hpp"
-#include "wschannel.hpp"
+#include "IAccessChecker.hpp"
 
-using namespace std;
-using namespace jsoncons;
-using jsoncons::json;
+class IAuthenticator;
 
-class accesschecker {
+
+class AccessChecker : public IAccessChecker {
  private:
-  authenticator *tokenValidator;
+  std::shared_ptr<IAuthenticator> tokenValidator;
 
  public:
-  accesschecker(authenticator *vdator);
-  bool checkReadAccess(wschannel &channel, string path);
-  bool checkWriteAccess(wschannel &channel, string path);
-  bool checkPathWriteAccess(wschannel &channel, json paths);
+  AccessChecker(std::shared_ptr<IAuthenticator> vdator);
+  bool checkReadAccess(WsChannel &channel, const std::string &path);
+  bool checkWriteAccess(WsChannel &channel, const std::string &path);
+  bool checkPathWriteAccess(WsChannel &channel, const jsoncons::json &paths);
 };
 
 #endif

@@ -15,36 +15,40 @@
 #ifndef __WSSERVER_H__
 #define __WSSERVER_H__
 
+#include <memory>
+
 #include "server_wss.hpp"
 
+#include "IServer.hpp"
 
-class vsscommandprocessor;
-class vsscommandprocessor;
-class subscriptionhandler;
-class authenticator;
-class vssdatabase;
-class accesschecker;
+
+class IVssCommandProcessor;
 class ILogger;
 
-class wsserver {
+class WsServer : public IServer {
  private:
   SimpleWeb::SocketServer<SimpleWeb::WSS> *secureServer_;
   SimpleWeb::SocketServer<SimpleWeb::WS> *insecureServer_;
   std::shared_ptr<ILogger> logger;
   bool isSecure_;
-  std::string configFileName_;
+  bool isInitialized_;
 
  public:
-  vsscommandprocessor* cmdProcessor;
-  subscriptionhandler* subHandler;
-  authenticator* tokenValidator;
-  vssdatabase* database;
-  accesschecker* accessCheck;
+  std::shared_ptr<IVssCommandProcessor> cmdProcessor;
 
-  wsserver(std::shared_ptr<ILogger> loggerUtil, int port, std::string configFileName, bool secure);
-  ~wsserver();
-  void startServer(std::string endpointName);
-  void sendToConnection(uint32_t connID, std::string message);
-   vssdatabase* start();
+  WsServer();
+  bool Initialize(std::shared_ptr<ILogger> loggerUtil,
+                  std::shared_ptr<IVssCommandProcessor> processor,
+                  bool secure,
+                  int port);
+  ~WsServer();
+  void startServer(const std::string &endpointName);
+  bool start();
+
+  // IServer
+
+  void AddListener(ObserverType, std::shared_ptr<IVssCommandProcessor>);
+  void RemoveListener(ObserverType, std::shared_ptr<IVssCommandProcessor>);
+  void SendToConnection(uint64_t connID, const std::string &message);
 };
 #endif

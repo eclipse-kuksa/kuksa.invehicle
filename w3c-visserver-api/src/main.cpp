@@ -15,15 +15,25 @@
 #include <gio/gio.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <exception>
+
 #include <boost/program_options.hpp>
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/jsonpath/json_query.hpp>
 
-#include "wsserver.hpp"
-#include "vssdatabase.hpp"
+#include "WsServer.hpp"
 #include "exception.hpp"
-
+#include "RestV1ApiHandler.hpp"
 #include "BasicLogger.hpp"
+#include "Authenticator.hpp"
+#include "AccessChecker.hpp"
+#include "SubscriptionHandler.hpp"
+#include "VssCommandProcessor.hpp"
+#include "VssDatabase.hpp"
+#include "WebSockHttpFlexServer.hpp"
 
 
 using namespace std;
@@ -36,7 +46,7 @@ using jsoncons::json;
 // Websocket port
 #define PORT 8090
 
-vssdatabase* database = NULL;
+static VssDatabase* gDatabase = NULL;
 
 static GDBusNodeInfo *introspection_data = NULL;
 
@@ -86,9 +96,9 @@ handle_method_call (GDBusConnection       *connection,
   (void) sender;
   
   json jsonVal;
-  const gchar *vss_path;
+  const gchar *vss_path = NULL;
    
-   if (database == NULL) {
+   if (gDatabase == NULL) {
       g_dbus_method_invocation_return_error (invocation,
                                                  G_IO_ERROR,
                                                  G_IO_ERROR_FAILED_HANDLED,
@@ -146,7 +156,7 @@ handle_method_call (GDBusConnection       *connection,
       // set the data in the db.
       try {
         string pathStr(vss_path);
-        database->setSignal(pathStr, jsonVal);
+        gDatabase->setSignal(pathStr, jsonVal);
       } catch (genException &e) {
         g_dbus_method_invocation_return_error (invocation,
                                                  G_IO_ERROR,
@@ -166,15 +176,7 @@ static const GDBusInterfaceVTable interface_vtable =
   NULL,
   NULL,
   /* Padding for future expansion */
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-  
+  {NULL}
 };
 
 static void
@@ -218,77 +220,177 @@ on_name_lost (GDBusConnection *connection,
 
 
 static void print_usage(const char *prog_name,
-                        program_options::options_description desc) {
+                        program_options::options_description& desc) {
   cerr << "Usage: " << prog_name << " OPTIONS" << endl;
   cerr << desc << std::endl;
 }
 
 int main(int argc, const char *argv[]) {
+  string configFile;
+  vector<string> logLevels{"NONE"};
+  uint8_t logLevelsActive = static_cast<uint8_t>(LogLevel::NONE);
+
   program_options::options_description desc{"Options"};
   desc.add_options()
     ("help,h", "Help screen")
+    ("config-file,cfg", program_options::value<string>(&configFile),
+        "Configuration file path for program parameters. "
+        "Can be provided instead of command line options")
     ("vss", program_options::value<string>(), "vss_rel*.json file")
-    ("insecure", "Run insecure")
+    ("cert-path", program_options::value<string>()->default_value("."),
+        "Path to directory where 'Server.pem' and 'Server.key' are located")
+    ("insecure", "Accept plain (no-SSL) connections")
+    ("use-keycloak", "Use KeyCloak for permission management")
+    ("wss-server", "Run old WSS server handler instead of Boost.Beast. Note: No REST API support")
+    ("address", program_options::value<string>()->default_value("localhost"), "Address")
     ("port", program_options::value<int>()->default_value(8090), "Port")
-    ("address", program_options::value<string>()->default_value("localhost"), "Address");
+    ("log-level", program_options::value<vector<string>>(&logLevels)->composing(),
+        "Log level event type to be enabled. "
+        "To enable different log levels, provide this option multiple times with required log levels. \n"
+        "Supported log levels: NONE, VERBOSE, INFO, WARNING, ERROR, ALL");
 
   try {
     program_options::variables_map variables;
     program_options::store(parse_command_line(argc, argv, desc), variables);
     program_options::notify(variables);
+    // if config file passed, get configuration from it
+    if (configFile.size()) {
+      cout << configFile << std::endl;
+      std::ifstream ifs(configFile.c_str());
+      if(!ifs)
+      {
+        std::cerr << "Could not open config file: " << configFile << std::endl;
+        return -1;
+      }
+      program_options::store(parse_config_file(ifs, desc), variables);
+    }
+    program_options::notify(variables);
+
+    // verify parameters
 
     if (!variables.count("vss")) {
       print_usage(argv[0], desc);
-      cerr << "vss file (--vss) must be specified" << std::endl;
+      cerr << "the option '--vss' is required but missing" << std::endl;
       return -1;
     }
-
+    if (!variables.count("cert-path")) {
+      cerr << "the option '--cert-path' is required but missing" << std::endl;
+      print_usage(argv[0], desc);
+      return -1;
+    }
     if (variables.count("help")) {
       print_usage(argv[0], desc);
       return -1;
     }
+
+    for (auto const& token : logLevels) {
+      if (token == "NONE")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::NONE);
+      else if (token == "VERBOSE")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::VERBOSE);
+      else if (token == "INFO")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::INFO);
+      else if (token == "WARNING")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::WARNING);
+      else if (token == "ERROR")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::ERROR);
+      else if (token == "ALL")
+        logLevelsActive |= static_cast<uint8_t>(LogLevel::ALL);
+      else {
+        cerr << "Invalid input parameter for LogLevel" << std::endl;
+        return -1;
+      }
+    }
+
+    // initialize server
+
     auto port = variables["port"].as<int>();
     auto secure = !variables.count("insecure");
     auto vss_filename = variables["vss"].as<string>();
+    auto useNewServer = !variables.count("wss-server");
 
-    // Start D-Bus backend connection.
-    guint owner_id;
-    GMainLoop *loop;
+    if (variables.count("use-keycloak")) {
+      // Start D-Bus backend connection.
+      guint owner_id;
+      GMainLoop *loop;
 
-    introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
-    g_assert (introspection_data != NULL);
+      introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
+      g_assert (introspection_data != NULL);
+
+      owner_id = g_bus_own_name (G_BUS_TYPE_SYSTEM,
+                                 "org.eclipse.kuksa.w3cbackend",
+                                 G_BUS_NAME_OWNER_FLAGS_NONE,
+                                 on_bus_acquired,
+                                 on_name_acquired,
+                                 on_name_lost,
+                                 NULL,
+                                 NULL);
   
+      loop = g_main_loop_new (NULL, FALSE);
+      g_main_loop_run (loop);
+      g_bus_unown_name (owner_id);
+      g_dbus_node_info_unref (introspection_data);
+    }
 
-    owner_id = g_bus_own_name (G_BUS_TYPE_SYSTEM,
-                               "org.eclipse.kuksa.w3cbackend",
-                               G_BUS_NAME_OWNER_FLAGS_NONE,
-                               on_bus_acquired,
-                               on_name_acquired,
-                               on_name_lost,
-                               NULL,
-                               NULL);
+    // initialize pseudo random number generator
+    std::srand(std::time(nullptr));
 
+    auto logger = std::make_shared<BasicLogger>(logLevelsActive);
 
-    loop = g_main_loop_new (NULL, FALSE);
-    g_main_loop_run (loop);
-    g_bus_unown_name (owner_id);
-    g_dbus_node_info_unref (introspection_data);
+    // define doc root path for server..
+    // for now also add 'v1' to designate version 1 of REST API as default
+    // in future, we can add/update REST API with new versions but also support older
+    // by having API versioning through URIs
+    std::string docRoot{"/vss/api/v1/"};
 
-    uint8_t logLevelsActive;
-#ifdef DEBUG
-    logLevelsActive = static_cast<uint8_t>(LogLevel::ALL);
-#else
-    logLevelsActive = static_cast<uint8_t>(LogLevel::INFO & LogLevel::WARNING & LogLevel::ERROR);
-#endif
-    std::shared_ptr<ILogger> logger = std::make_shared<BasicLogger>(logLevelsActive);
+    // TODO: refactor out old server when we can remove it
+    auto oldServer = std::make_shared<WsServer>();
 
-    wsserver server(logger, port, vss_filename, secure);
-    server.start();
+    auto rest2JsonConverter = std::make_shared<RestV1ApiHandler>(logger, docRoot);
+    auto newServer = std::make_shared<WebSockHttpFlexServer>(logger, std::move(rest2JsonConverter));
+
+    std::shared_ptr<IServer> server;
+    if (!useNewServer) {
+      server = std::static_pointer_cast<IServer>(oldServer);
+    }
+    else {
+      server = std::static_pointer_cast<IServer>(newServer);
+    }
+
+    auto tokenValidator = std::make_shared<Authenticator>(logger, "appstacle", "RS256");
+    auto accessCheck = std::make_shared<AccessChecker>(tokenValidator);
+    auto subHandler = std::make_shared<SubscriptionHandler>(logger, server, tokenValidator, accessCheck);
+    auto database = std::make_shared<VssDatabase>(logger, subHandler, accessCheck);
+    auto cmdProcessor = std::make_shared<VssCommandProcessor>(logger, database, tokenValidator, subHandler);
+
+    gDatabase = database.get();
+    database->initJsonTree(vss_filename);
+
+    if (!useNewServer) {
+      oldServer->Initialize(logger, cmdProcessor, secure, port);
+      oldServer->start();
+    }
+    else {
+      newServer->AddListener(ObserverType::ALL, cmdProcessor);
+      newServer->Initialize(variables["address"].as<string>(),
+                            port,
+                            std::move(docRoot),
+                            variables["cert-path"].as<string>(),
+                            !secure);
+      newServer->Start();
+    }
+
+    while (1) {
+      usleep(1000000);
+    }
 
   } catch (const program_options::error &ex) {
     print_usage(argv[0], desc);
     cerr << ex.what() << std::endl;
     return -1;
+  } catch (const std::runtime_error &ex) {
+    cerr << ex.what() << std::endl;
+        return -1;
   }
   return 0;
 }

@@ -11,30 +11,29 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include "subscriptionhandler.hpp"
+#include "SubscriptionHandler.hpp"
 
 #include <unistd.h> // usleep
 #include <string>
 
 #include <jsoncons_ext/jsonpath/json_query.hpp>
 
-#include "accesschecker.hpp"
-#include "authenticator.hpp"
+#include "AccessChecker.hpp"
+#include "Authenticator.hpp"
 #include "exception.hpp"
 #include "visconf.hpp"
-#include "vssdatabase.hpp"
-#include "wsserver.hpp"
+#include "WsChannel.hpp"
+#include "VssDatabase.hpp"
 #include "ILogger.hpp"
 
 using namespace std;
-// using namespace jsoncons;
 using namespace jsoncons::jsonpath;
-// using jsoncons::jsoncons::jsoncons::json;
+using jsoncons::json;
 
-subscriptionhandler::subscriptionhandler(std::shared_ptr<ILogger> loggerUtil,
-                                         wsserver* wserver,
-                                         authenticator* authenticate,
-                                         accesschecker* checkAcc) {
+SubscriptionHandler::SubscriptionHandler(std::shared_ptr<ILogger> loggerUtil,
+                                         std::shared_ptr<IServer> wserver,
+                                         std::shared_ptr<IAuthenticator> authenticate,
+                                         std::shared_ptr<IAccessChecker> checkAcc) {
   logger = loggerUtil;
   server = wserver;
   validator = authenticate;
@@ -42,17 +41,17 @@ subscriptionhandler::subscriptionhandler(std::shared_ptr<ILogger> loggerUtil,
   startThread();
 }
 
-subscriptionhandler::~subscriptionhandler() {
+SubscriptionHandler::~SubscriptionHandler() {
   stopThread();
 }
 
-uint32_t subscriptionhandler::subscribe(wschannel& channel,
-                                        vssdatabase* db,
-                                        uint32_t channelID, string path) {
+uint64_t SubscriptionHandler::subscribe(WsChannel& channel,
+                                        std::shared_ptr<IVssDatabase> db,
+                                        const string &path) {
   // generate subscribe ID "randomly".
-  uint32_t subId = rand() % 9999999;
+  uint64_t subId = rand() % 9999999;
   // embed connection ID into subID.
-  subId = channelID + subId;
+  subId = channel.getConnID() + subId;
 
   bool isBranch = false;
   string jPath = db->getVSSSpecificPath(path, isBranch, db->data_tree);
@@ -65,7 +64,6 @@ uint32_t subscriptionhandler::subscribe(wschannel& channel,
     throw noPermissionException(msg.str());
   }
 
-  int clientID = channelID / CLIENT_MASK;
   jsoncons::json resArray = jsonpath::json_query(db->data_tree, jPath);
 
   if (resArray.is_array() && resArray.size() == 1) {
@@ -74,15 +72,15 @@ uint32_t subscriptionhandler::subscribe(wschannel& channel,
     auto handle = subscribeHandle.find(sigUUID);
 
     if (handle != subscribeHandle.end()) {
-      logger->Log(LogLevel::VERBOSE, string("subscriptionhandler::subscribe: Updating the previous subscribe ")
+      logger->Log(LogLevel::VERBOSE, string("SubscriptionHandler::subscribe: Updating the previous subscribe ")
                   + string("ID with a new one"));
     }
 
-    subscribeHandle[sigUUID][subId] = clientID;
+    subscribeHandle[sigUUID][subId] = channel.getConnID();
 
     return subId;
   } else if (resArray.is_array()) {
-    logger->Log(LogLevel::INFO, "subscriptionhandler::subscribe :signals found in path" + path
+    logger->Log(LogLevel::INFO, "SubscriptionHandler::subscribe :signals found in path" + path
                 + "Array size: " + to_string(resArray.size())
                 + ". Subscribe works for 1 signal at a time");
     stringstream msg;
@@ -90,7 +88,7 @@ uint32_t subscriptionhandler::subscribe(wschannel& channel,
         << ". Subscribe works for 1 signal at a time";
     throw noPathFoundonTree(msg.str());
   } else {
-    logger->Log(LogLevel::ERROR, string("subscriptionhandler::subscribe: some error occurred while adding ")
+    logger->Log(LogLevel::ERROR, string("SubscriptionHandler::subscribe: some error occurred while adding ")
                 + string("subscription"));
     stringstream msg;
     msg << "some error occured while adding subscription for path = " << path;
@@ -98,7 +96,7 @@ uint32_t subscriptionhandler::subscribe(wschannel& channel,
   }
 }
 
-int subscriptionhandler::unsubscribe(uint32_t subscribeID) {
+int SubscriptionHandler::unsubscribe(uint32_t subscribeID) {
   for (auto& uuid : subscribeHandle) {
     auto subscriptions = &(uuid.second);
     auto subscription = subscriptions->find(subscribeID);
@@ -109,11 +107,11 @@ int subscriptionhandler::unsubscribe(uint32_t subscribeID) {
   return 0;
 }
 
-int subscriptionhandler::unsubscribeAll(uint32_t connectionID) {
+int SubscriptionHandler::unsubscribeAll(uint32_t connectionID) {
   for (auto& uuid : subscribeHandle) {
     auto subscriptions = &(uuid.second);
     for (auto& subscription : *subscriptions) {
-      if (subscription.second == (connectionID / CLIENT_MASK)) {
+      if (subscription.second == (connectionID)) {
         subscriptions->erase(subscription.first);
       }
     }
@@ -121,29 +119,29 @@ int subscriptionhandler::unsubscribeAll(uint32_t connectionID) {
   return 0;
 }
 
-int subscriptionhandler::updateByUUID(string UUID, jsoncons::json value) {
-  auto handle = subscribeHandle.find(UUID);
+int SubscriptionHandler::updateByUUID(const string &signalUUID,
+                                      const jsoncons::json &value) {
+  auto handle = subscribeHandle.find(signalUUID);
   if (handle == subscribeHandle.end()) {
     // UUID not found
     return 0;
   }
 
   for (auto subID : handle->second) {
-    subMutex.lock();
-    pair<uint32_t, json> newSub;
-    newSub = std::make_pair(subID.first, value);
+    std::lock_guard<std::mutex> lock(subMutex);
+    tuple<SubscriptionId, SubConnId, json> newSub;
+    newSub = std::make_tuple(subID.first, subID.second, value);
     buffer.push(newSub);
-    subMutex.unlock();
   }
 
   return 0;
 }
 
-wsserver* subscriptionhandler::getServer() {
+std::shared_ptr<IServer> SubscriptionHandler::getServer() {
   return server;
 }
 
-int subscriptionhandler::updateByPath(string path, json value) {
+int SubscriptionHandler::updateByPath(const string &path, const json &value) {
   /* TODO: Implement */
   (void) path;
   (void) value;
@@ -151,23 +149,21 @@ int subscriptionhandler::updateByPath(string path, json value) {
   return 0;
 }
 
-void* subscriptionhandler::subThreadRunner() {
-  // subscriptionhandler* handler = (subscriptionhandler*)instance;
-
+void* SubscriptionHandler::subThreadRunner() {
   logger->Log(LogLevel::VERBOSE, "SubscribeThread: Started Subscription Thread!");
 
   while (isThreadRunning()) {
-    subMutex.lock();
     if (buffer.size() > 0) {
-      pair<uint32_t, jsoncons::json> newSub = buffer.front();
+      std::lock_guard<std::mutex> lock(subMutex);
+      auto newSub = buffer.front();
       buffer.pop();
 
-      uint32_t subID = newSub.first;
-      jsoncons::json value = newSub.second;
+      auto connId = std::get<1>(newSub);
+      jsoncons::json value = std::get<2>(newSub);
 
       jsoncons::json answer;
       answer["action"] = "subscribe";
-      answer["subscriptionId"] = subID;
+      answer["subscriptionId"] = std::get<0>(newSub);
       answer.insert_or_assign("value", value);
       answer["timestamp"] = time(NULL);
 
@@ -175,10 +171,8 @@ void* subscriptionhandler::subThreadRunner() {
       ss << pretty_print(answer);
       string message = ss.str();
 
-      uint32_t connectionID = (subID / CLIENT_MASK) * CLIENT_MASK;
-      getServer()->sendToConnection(connectionID, message);
+      getServer()->SendToConnection(connId, message);
     }
-    subMutex.unlock();
     // sleep 10 ms
     usleep(10000);
   }
@@ -187,25 +181,17 @@ void* subscriptionhandler::subThreadRunner() {
   return NULL;
 }
 
-int subscriptionhandler::startThread() {
-  subThread = thread(&subscriptionhandler::subThreadRunner, this);
-  /*
-  if (pthread_create(&subscription_thread, NULL, &subThread, this)) {
-    logger->Log(LogLevel::ERROR, "subscriptionhandler::startThread: Error creating subscription "
-                + "handler thread");
-    return 1;
-  }
-  */
+int SubscriptionHandler::startThread() {
+  subThread = thread(&SubscriptionHandler::subThreadRunner, this);
   threadRun = true;
   return 0;
 }
 
-int subscriptionhandler::stopThread() {
-  subMutex.lock();
+int SubscriptionHandler::stopThread() {
+  std::lock_guard<std::mutex> lock(subMutex);
   threadRun = false;
   subThread.join();
-  subMutex.unlock();
   return 0;
 }
 
-bool subscriptionhandler::isThreadRunning() { return threadRun; }
+bool SubscriptionHandler::isThreadRunning() const { return threadRun; }

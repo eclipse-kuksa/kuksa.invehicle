@@ -19,12 +19,12 @@
 
 #include <jsoncons/json.hpp>
 
-// #include "vssdatabase.hpp"
-// #include "wsserver.hpp"
-// #include "subscriptionhandler.hpp"
-// #include "authenticator.hpp"
-// #include "accesschecker.hpp"
-// #include "signing.hpp"
+// #include "VssDatabase.hpp"
+// #include "WsServer.hpp"
+// #include "SubscriptionHandler.hpp"
+// #include "Authenticator.hpp"
+// #include "AccessChecker.hpp"
+// #include "SigningHandler.hpp"
 
 // using namespace std;
 // using namespace jsoncons;

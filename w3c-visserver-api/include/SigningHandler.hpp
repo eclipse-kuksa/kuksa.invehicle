@@ -22,13 +22,15 @@
 
 #include <memory>
 
+#include "ISigningHandler.hpp"
+
 using namespace std;
 using namespace jsoncons;
 using namespace jwt;
 
 class ILogger;
 
-class signing {
+class SigningHandler : public ISigningHandler {
  private:
   std::shared_ptr<ILogger> logger;
   string key = "";
@@ -36,11 +38,11 @@ class signing {
   string algorithm = "RS256";
 
  public:
-  signing(std::shared_ptr<ILogger> loggerUtil);
-  string getKey(string fileName);
-  string getPublicKey(string fileName);
-  string sign(json data);
-  string sign(string data);
+  SigningHandler(std::shared_ptr<ILogger> loggerUtil);
+  string getKey(const string &fileName);
+  string getPublicKey(const string &fileName);
+  string sign(const json &data);
+  string sign(const string &data);
 #ifdef UNIT_TEST
   string decode(string signedData);
 #endif

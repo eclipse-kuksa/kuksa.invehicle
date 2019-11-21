@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-#include "vsscommandprocessor.hpp"
+#include "VssCommandProcessor.hpp"
 
 #include <stdint.h>
 #include <iostream>
@@ -22,116 +22,48 @@
 #include "permmclient.hpp"
 #include "exception.hpp"
 #include "server_ws.hpp"
+
+#include "JsonResponses.hpp"
 #include "visconf.hpp"
-#include "vssdatabase.hpp"
-#include "accesschecker.hpp"
-#include "subscriptionhandler.hpp"
+#include "VssDatabase.hpp"
+#include "AccessChecker.hpp"
+#include "SubscriptionHandler.hpp"
 #include "ILogger.hpp"
+#include "IVssDatabase.hpp"
+#include "IAuthenticator.hpp"
+#include "ISubscriptionHandler.hpp"
 
 #ifdef JSON_SIGNING_ON
-#include "signing.hpp"
+#include "SigningHandler.hpp"
 #endif
 
 using namespace std;
 
-string malFormedRequestResponse(uint32_t request_id, const string action, string message) {
-  jsoncons::json answer;
-  answer["action"] = action;
-  answer["requestId"] = request_id;
-  jsoncons::json error;
-  error["number"] = 400;
-  error["reason"] = "Bad Request";
-  error["message"] = message;
-  answer["error"] = error;
-  answer["timestamp"] = time(NULL);
-  stringstream ss;
-  ss << pretty_print(answer);
-  return ss.str();
-}
-
-string malFormedRequestResponse(string message) {
-  jsoncons::json answer;
-  jsoncons::json error;
-
-  error["number"] = 400;
-  error["reason"] = "Bad Request";
-  error["message"] = message;
-  answer["error"] = error;
-  answer["timestamp"] = time(NULL);
-  stringstream ss;
-  ss << pretty_print(answer);
-  return ss.str();
-}
-
-/** A API call requested a non-existant path */
-string pathNotFoundResponse(uint32_t request_id, const string action,
-                            const string path) {
-  jsoncons::json answer;
-  answer["action"] = action;
-  answer["requestId"] = request_id;
-  jsoncons::json error;
-  error["number"] = 404;
-  error["reason"] = "Path not found";
-  error["message"] = "I can not find " + path + " in my db";
-  answer["error"] = error;
-  answer["timestamp"] = time(NULL);
-  stringstream ss;
-  ss << pretty_print(answer);
-  return ss.str();
-}
-
-string noAccessResponse(uint32_t request_id, const string action,
-                        string message) {
-  jsoncons::json result;
-  jsoncons::json error;
-  result["action"] = action;
-  result["requestId"] = request_id;
-  error["number"] = 403;
-  error["reason"] = "Forbidden";
-  error["message"] = message;
-  result["error"] = error;
-  result["timestamp"] = time(NULL);
-  std::stringstream ss;
-  ss << pretty_print(result);
-  return ss.str();
-}
-
-string valueOutOfBoundsResponse(uint32_t request_id, const string action,
-                                const string message) {
-  jsoncons::json answer;
-  answer["action"] = action;
-  answer["requestId"] = request_id;
-  jsoncons::json error;
-  error["number"] = 400;
-  error["reason"] = "Value passed is out of bounds";
-  error["message"] = message;
-  answer["error"] = error;
-  answer["timestamp"] = time(NULL);
-  stringstream ss;
-  ss << pretty_print(answer);
-  return ss.str();
-}
-
-vsscommandprocessor::vsscommandprocessor(
+VssCommandProcessor::VssCommandProcessor(
     std::shared_ptr<ILogger> loggerUtil,
-    vssdatabase *dbase,
-    authenticator *vdator,
-    subscriptionhandler *subhandler) {
+    std::shared_ptr<IVssDatabase> dbase,
+    std::shared_ptr<IAuthenticator> vdator,
+    std::shared_ptr<ISubscriptionHandler> subhandler) {
   logger = loggerUtil;
   database = dbase;
   tokenValidator = vdator;
   subHandler = subhandler;
-  accessValidator = new accesschecker(tokenValidator);
+  // TODO: add accessValidator as dependency
+  accessValidator = std::make_shared<AccessChecker>(tokenValidator);
 #ifdef JSON_SIGNING_ON
-  signer = new signing();
+  // TODO: add signer as dependency
+  signer = std::make_shared<SigningHandler>();
 #endif
 }
 
-vsscommandprocessor::~vsscommandprocessor() {
-  delete accessValidator;
+VssCommandProcessor::~VssCommandProcessor() {
+  accessValidator.reset();
+#ifdef JSON_SIGNING_ON
+  signer.reset();
+#endif
 }
 
-string vsscommandprocessor::processGet(wschannel &channel,
+string VssCommandProcessor::processGet(WsChannel &channel,
                                        uint32_t request_id, string path) {
   logger->Log(LogLevel::VERBOSE, "GET :: path received from client = " + path);
   jsoncons::json res;
@@ -139,10 +71,10 @@ string vsscommandprocessor::processGet(wschannel &channel,
     res = database->getSignal(channel, path);
   } catch (noPermissionException &nopermission) {
     logger->Log(LogLevel::ERROR, string(nopermission.what()));
-    return noAccessResponse(request_id, "get", nopermission.what());
+    return JsonResponses::noAccess(request_id, "get", nopermission.what());
   }
   if (!res.has_key("value")) {
-    return pathNotFoundResponse(request_id, "get", path);
+    return JsonResponses::pathNotFound(request_id, "get", path);
   } else {
     res["action"] = "get";
     res["requestId"] = request_id;
@@ -153,10 +85,10 @@ string vsscommandprocessor::processGet(wschannel &channel,
   }
 }
 
-string vsscommandprocessor::processSet(wschannel &channel,
+string VssCommandProcessor::processSet(WsChannel &channel,
                                        uint32_t request_id, string path,
                                        jsoncons::json value) {
-  logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processSet: path received from client" + path);
+  logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processSet: path received from client" + path);
 
   try {
     database->setSignal(channel, path, value);
@@ -180,13 +112,13 @@ string vsscommandprocessor::processSet(wschannel &channel,
     return ss.str();
   } catch (noPathFoundonTree &e) {
     logger->Log(LogLevel::ERROR, string(e.what()));
-    return pathNotFoundResponse(request_id, "set", path);
+    return JsonResponses::pathNotFound(request_id, "set", path);
   } catch (outOfBoundException &outofboundExp) {
     logger->Log(LogLevel::ERROR, string(outofboundExp.what()));
-    return valueOutOfBoundsResponse(request_id, "set", outofboundExp.what());
+    return JsonResponses::valueOutOfBounds(request_id, "set", outofboundExp.what());
   } catch (noPermissionException &nopermission) {
     logger->Log(LogLevel::ERROR, string(nopermission.what()));
-    return noAccessResponse(request_id, "set", nopermission.what());
+    return JsonResponses::noAccess(request_id, "set", nopermission.what());
   }
 
   jsoncons::json answer;
@@ -199,25 +131,24 @@ string vsscommandprocessor::processSet(wschannel &channel,
   return ss.str();
 }
 
-string vsscommandprocessor::processSubscribe(wschannel &channel,
-                                             uint32_t request_id, string path,
-                                             uint32_t connectionID) {
-  logger->Log(LogLevel::VERBOSE, string("vsscommandprocessor::processSubscribe: path received from client ")
+string VssCommandProcessor::processSubscribe(WsChannel &channel,
+                                             uint32_t request_id, string path) {
+  logger->Log(LogLevel::VERBOSE, string("VssCommandProcessor::processSubscribe: path received from client ")
               + string("for subscription"));
 
   uint32_t subId = -1;
   try {
-    subId = subHandler->subscribe(channel, database, connectionID, path);
+    subId = subHandler->subscribe(channel, database, path);
   } catch (noPathFoundonTree &noPathFound) {
     logger->Log(LogLevel::ERROR, string(noPathFound.what()));
-    return pathNotFoundResponse(request_id, "subscribe", path);
+    return JsonResponses::pathNotFound(request_id, "subscribe", path);
   } catch (genException &outofboundExp) {
     logger->Log(LogLevel::ERROR, string(outofboundExp.what()));
-    return valueOutOfBoundsResponse(request_id, "subscribe",
+    return JsonResponses::valueOutOfBounds(request_id, "subscribe",
                                     outofboundExp.what());
   } catch (noPermissionException &nopermission) {
     logger->Log(LogLevel::ERROR, string(nopermission.what()));
-    return noAccessResponse(request_id, "subscribe", nopermission.what());
+    return JsonResponses::noAccess(request_id, "subscribe", nopermission.what());
   }
 
   if (subId > 0) {
@@ -251,7 +182,7 @@ string vsscommandprocessor::processSubscribe(wschannel &channel,
   }
 }
 
-string vsscommandprocessor::processUnsubscribe(uint32_t request_id,
+string VssCommandProcessor::processUnsubscribe(uint32_t request_id,
                                                uint32_t subscribeID) {
   int res = subHandler->unsubscribe(subscribeID);
   if (res == 0) {
@@ -284,7 +215,7 @@ string vsscommandprocessor::processUnsubscribe(uint32_t request_id,
   }
 }
 
-string vsscommandprocessor::processGetMetaData(uint32_t request_id,
+string VssCommandProcessor::processGetMetaData(uint32_t request_id,
                                                string path) {
   jsoncons::json st = database->getMetaData(path);
 
@@ -300,10 +231,10 @@ string vsscommandprocessor::processGetMetaData(uint32_t request_id,
   return ss.str();
 }
 
-// Talks to the permission managent daemon and processes the token received.
-string vsscommandprocessor::processAuthorizeWithPermManager(wschannel &channel,
-                                             uint32_t request_id,
-                                             string client, string clientSecret) {
+// Talks to the permission management daemon and processes the token received.
+string VssCommandProcessor::processAuthorizeWithPermManager(WsChannel &channel,
+                                                            uint32_t request_id,
+                                                            string client, string clientSecret) {
 
   jsoncons::json response;
   // Get Token from permission management daemon.
@@ -366,8 +297,7 @@ string vsscommandprocessor::processAuthorizeWithPermManager(wschannel &channel,
   }
 }
 
-
-string vsscommandprocessor::processAuthorize(wschannel &channel,
+string VssCommandProcessor::processAuthorize(WsChannel &channel,
                                              uint32_t request_id,
                                              string token) {
   tokenValidator->updatePubKey("");
@@ -402,8 +332,8 @@ string vsscommandprocessor::processAuthorize(wschannel &channel,
   }
 }
 
-string vsscommandprocessor::processQuery(string req_json,
-                                         wschannel &channel) {
+string VssCommandProcessor::processQuery(const string &req_json,
+                                         WsChannel &channel) {
   jsoncons::json root;
   string response;
   try {
@@ -413,14 +343,14 @@ string vsscommandprocessor::processQuery(string req_json,
     if (action == "authorize") {
       string token = root["tokens"].as<string>();
       uint32_t request_id = root["requestId"].as<int>();
-      logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: authorize query with token = "
+      logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: authorize query with token = "
            + token + " with request id " + to_string(request_id));
 
       response = processAuthorize(channel, request_id, token);
     } else if (action == "unsubscribe") {
       uint32_t request_id = root["requestId"].as<int>();
       uint32_t subscribeID = root["subscriptionId"].as<int>();
-      logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: unsubscribe query  for sub ID = "
+      logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: unsubscribe query  for sub ID = "
               + to_string(subscribeID) + " with request id " + to_string(request_id));
 
       response = processUnsubscribe(request_id, subscribeID);
@@ -438,7 +368,7 @@ string vsscommandprocessor::processQuery(string req_json,
       uint32_t request_id = root["requestId"].as<int>();
 
       if (action == "get") {
-        logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: get query  for " + path
+        logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: get query  for " + path
                     + " with request id " + to_string(request_id));
 
         response = processGet(channel, request_id, path);
@@ -448,28 +378,28 @@ string vsscommandprocessor::processQuery(string req_json,
       } else if (action == "set") {
         jsoncons::json value = root["value"];
 
-        logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: set query  for " + path
+        logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: set query  for " + path
              + " with request id " + to_string(request_id) + " value " + value.as_string());
         response = processSet(channel, request_id, path, value);
       } else if (action == "subscribe") {
-        logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: subscribe query  for "
+        logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: subscribe query  for "
              + path + " with request id " + to_string(request_id));
         response =
-            processSubscribe(channel, request_id, path, channel.getConnID());
+            processSubscribe(channel, request_id, path);
       } else if (action == "getMetadata") {
-        logger->Log(LogLevel::VERBOSE, "vsscommandprocessor::processQuery: metadata query  for "
+        logger->Log(LogLevel::VERBOSE, "VssCommandProcessor::processQuery: metadata query  for "
              + path + " with request id " + to_string(request_id));
         response = processGetMetaData(request_id, path);
       } else {
-        logger->Log(LogLevel::INFO, "vsscommandprocessor::processQuery: Unknown action " + action);
+        logger->Log(LogLevel::INFO, "VssCommandProcessor::processQuery: Unknown action " + action);
       }
     }
   } catch (jsoncons::json_parse_exception e) {
-    return malFormedRequestResponse(e.what());
+    return JsonResponses::malFormedRequest(e.what());
   } catch (jsoncons::key_not_found e) {
-    return malFormedRequestResponse(e.what());
+    return JsonResponses::malFormedRequest(e.what());
   } catch (jsoncons::not_an_object e) {
-    return malFormedRequestResponse(e.what());
+    return JsonResponses::malFormedRequest(e.what());
   }
 
 

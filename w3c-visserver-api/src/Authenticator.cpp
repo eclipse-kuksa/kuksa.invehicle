@@ -11,7 +11,7 @@
  *      Robert Bosch GmbH - initial API and functionality
  * *****************************************************************************
  */
-#include "authenticator.hpp"
+#include "Authenticator.hpp"
 #include "ILogger.hpp"
 #include <fstream>
 #include <iostream>
@@ -20,8 +20,8 @@
 
 #include <jwt-cpp/jwt.h>
 #include <jsoncons/json.hpp>
-#include "vssdatabase.hpp"
-#include "wschannel.hpp"
+#include "VssDatabase.hpp"
+#include "WsChannel.hpp"
 
 using namespace std;
 
@@ -38,40 +38,47 @@ namespace {
   }
 }
 
-
-void authenticator::updatePubKey(string key) {
+void Authenticator::updatePubKey(string key) {
    pubkey = key;
    if(pubkey == "")
       pubkey = getPublicKeyFromFile("jwt.pub.key");
 }
 
 // utility method to validate token.
-int authenticator::validateToken(wschannel& channel, string authToken) {
-  auto decoded = jwt::decode(authToken);
+int Authenticator::validateToken(WsChannel& channel, string authToken) {
   json claims;
-  (void) channel;
-  for (auto& e : decoded.get_payload_claims()) {
-    logger->Log(LogLevel::INFO, e.first + " = " + e.second.as_string());
-    claims[e.first] = e.second.to_json().to_str();
-  }
-  
-  auto verifier = jwt::verify().allow_algorithm(
-      jwt::algorithm::rs256(pubkey, "", "", ""));
-  try {
-    verifier.verify(decoded);
-  } catch (const std::runtime_error& e) {
-    logger->Log(LogLevel::ERROR, "authenticator::validate: " + string(e.what())
-         + " Exception occured while authentication. Token is not valid!");
-    return -1;
-  }
+  int ttl = -1;
 
-  int ttl = claims["exp"].as<int>();
-  channel.setAuthorized(true);
-  channel.setAuthToken(authToken);
+  try {
+    auto decoded = jwt::decode(authToken);
+
+    for (auto& e : decoded.get_payload_claims()) {
+      logger->Log(LogLevel::INFO, e.first + " = " + e.second.to_json().to_str());
+      claims[e.first] = e.second.to_json().to_str();
+    }
+
+    auto verifier = jwt::verify().allow_algorithm(
+        jwt::algorithm::rs256(pubkey, "", "", ""));
+    try {
+      verifier.verify(decoded);
+    } catch (const std::runtime_error& e) {
+      logger->Log(LogLevel::ERROR, "Authenticator::validate: " + string(e.what())
+                  + " Exception occurred while authentication. Token is not valid!");
+      return -1;
+    }
+
+    channel.setAuthorized(true);
+    channel.setAuthToken(authToken);
+    ttl = claims["exp"].as<int>();
+  }
+  catch (std::exception &e) {
+    logger->Log(LogLevel::ERROR, "Authenticator::validate: " + string(e.what())
+                + " Exception occurred while decoding token!");
+  }
   return ttl;
 }
 
-authenticator::authenticator(std::shared_ptr<ILogger> loggerUtil, string secretkey, string algo) {
+Authenticator::Authenticator(std::shared_ptr<ILogger> loggerUtil, string secretkey, string algo) {
   logger = loggerUtil;
   algorithm = algo;
   pubkey = secretkey;
@@ -79,7 +86,7 @@ authenticator::authenticator(std::shared_ptr<ILogger> loggerUtil, string secretk
 
 // validates the token against expiry date/time. should be extended to check
 // some other claims.
-int authenticator::validate(wschannel& channel, vssdatabase* db,
+int Authenticator::validate(WsChannel& channel, std::shared_ptr<IVssDatabase> db,
                             string authToken) {
   int ttl = validateToken(channel, authToken);
   if (ttl > 0) {
@@ -92,7 +99,7 @@ int authenticator::validate(wschannel& channel, vssdatabase* db,
 // Checks if the token is still valid for the requests from the channel(client).
 // Internally check this before publishing messages for previously subscribed
 // signals.
-bool authenticator::isStillValid(wschannel& channel) {
+bool Authenticator::isStillValid(WsChannel& channel) {
   string token = channel.getAuthToken();
   int ret = validateToken(channel, token);
 
@@ -106,9 +113,9 @@ bool authenticator::isStillValid(wschannel& channel) {
 
 // **Do this only once for authenticate request**
 // resolves the permission in the JWT token and store the absolute path to the
-// signals in permissions JSON in wschannel.
-void authenticator::resolvePermissions(wschannel& channel,
-                                       vssdatabase* database) {
+// signals in permissions JSON in WsChannel.
+void Authenticator::resolvePermissions(WsChannel& channel,
+                                       std::shared_ptr<IVssDatabase> database) {
   string authToken = channel.getAuthToken();
   auto decoded = jwt::decode(authToken);
   json claims;
