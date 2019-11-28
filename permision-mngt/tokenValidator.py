@@ -24,4 +24,23 @@ def isTokenValid(token, rsa_key):
     except jwt.ExpiredSignatureError:
         logging.error("Token has expired")
         return False
+    except Exception as exp:
+        logging.error("Exception occurred when trying to decode jwt token:", exp)
+        return False
+    return True
+
+
+def isTokenValidAud(token, rsa_key, audience):
+    try:
+        jwt.decode(
+            token,
+            rsa_key,
+            algorithms=["RS256"], audience=audience
+        )
+    except jwt.ExpiredSignatureError:
+        logging.error("Token has expired")
+        return False
+    except Exception as exp:
+        logging.error("Exception occurred when trying to decode jwt token with audience parameter set:", exp)
+        return False
     return True

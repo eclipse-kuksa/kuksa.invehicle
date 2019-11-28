@@ -1,17 +1,3 @@
-/*
- * ******************************************************************************
- * Copyright (c) 2019 KocSistem Bilgi ve Iletisim Hizmetleri A.S..
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/org/documents/epl-2.0/index.php
- *
- *  Contributors:
- *      Initial functionality - Ismail Burak Oksuzoglu, Erdem Ergen, Aslihan Cura (KocSistem Bilgi ve Iletisim Hizmetleri A.S.) 
- * *****************************************************************************
- */
-
 #include "vcanhandler.hpp"
 
 vcanhandler::vcanhandler() {}
@@ -160,6 +146,8 @@ e_result vcanlistener::vcan_socket_init() {
   return SUCCESS;
 }
 
+void vcanlistener::vcan_close(int can_sock) { close(can_sock); }
+
 void vcanlistener::vcan_read(string vcan_name) {
   dbmanager db;
   cout << "Starting to listen vcan bus: " << vcan_name << endl;
@@ -193,7 +181,7 @@ void vcanlistener::vcan_read(string vcan_name) {
           printf("%s -> frame sent to daa_obe\n", can_msg);
 
       } else {
-        std::cout << "no write permissions" << endl;
+        // std::cout << "no write permissions" << endl;
       }
 
       memset(&can_msg, '\0', sizeof(can_msg));
@@ -236,5 +224,71 @@ void vcanhandler::start_all_listeners() {
     }
     start_vcan_listener(vcan);
     sleep(1);
+  }
+}
+
+vcanwriter::vcanwriter() {}
+vcanwriter::~vcanwriter() {}
+
+unordered_map<string, int> vcanwriter::vcan_conn_map;
+
+e_result vcanwriter::vcan_socket_init(string vcan_name) {
+  struct sockaddr_can addr;
+  struct ifreq ifr;
+  int can_sock;
+  const char *ifname = vcan_name.c_str();
+
+  if ((can_sock = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+    perror("Error while opening vcan socket");
+    return FAILURE;
+  }
+
+  strcpy(ifr.ifr_name, ifname);
+  ioctl(can_sock, SIOCGIFINDEX, &ifr);
+
+  addr.can_family = AF_CAN;
+  addr.can_ifindex = ifr.ifr_ifindex;
+
+  printf("%s at index %d\n", ifname, ifr.ifr_ifindex);
+
+  if (bind(can_sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    perror("Error in vcan socket bind");
+    return FAILURE;
+  }
+
+  // add connection map
+  vcan_conn_map[vcan_name] = can_sock;
+
+  return SUCCESS;
+}
+
+int vcanwriter::get_connection(string vcan_name) {
+  if (vcan_conn_map.find(vcan_name) == vcan_conn_map.end()) {
+    printf("No vcan connection found for %s, creating new connection...\n",
+           vcan_name.c_str());
+    if (vcan_socket_init(vcan_name) == FAILURE) return -1;
+  }
+
+  return vcan_conn_map[vcan_name];
+}
+
+void vcanwriter::vcan_write_frame(string vcan_name, struct can_frame *frame) {
+  static int counter = 1;
+  int can_sock = get_connection(vcan_name);
+  if (write(can_sock, frame, sizeof(struct can_frame)) < 0)
+    printf("Failed to write to vcan bus = %s \n", vcan_name.c_str());
+  else {
+    // printf("Frame sent to vcan bus = %s \n", vcan_name.c_str());
+    printf("v %i\n", counter++);
+  }
+}
+
+void vcanwriter::vcan_close(string vcan_name) {
+  if (vcan_conn_map.find(vcan_name) == vcan_conn_map.end()) {
+    printf("Socket not found\n");
+  } else {
+    int can_sock = vcan_conn_map[vcan_name];
+    close(can_sock);
+    vcan_conn_map.erase(vcan_name);
   }
 }

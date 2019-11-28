@@ -1,17 +1,3 @@
-/*
- * ******************************************************************************
- * Copyright (c) 2019 KocSistem Bilgi ve Iletisim Hizmetleri A.S..
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v2.0
- * which accompanies this distribution, and is available at
- * https://www.eclipse.org/org/documents/epl-2.0/index.php
- *
- *  Contributors:
- *      Initial functionality - Ismail Burak Oksuzoglu, Erdem Ergen, Aslihan Cura (KocSistem Bilgi ve Iletisim Hizmetleri A.S.) 
- * *****************************************************************************
- */
-
 #include "dbmanager.hpp"
 
 dbmanager::dbmanager() {
@@ -37,7 +23,7 @@ void dbmanager::insert_into_read_table(string vcan_name, int canid) {
     cout << "SQL error: " << sqlite3_errmsg(db) << endl;
     sqlite3_free(zErrMsg);
   } else {
-    cout << "SQL: insert_into_vcan_table successful" << endl;
+    cout << "SQL: insert_into_read_table successful" << endl;
   }
 }
 
@@ -52,7 +38,7 @@ void dbmanager::insert_into_write_table(string vcan_name, int canid) {
     cout << "SQL error: " << sqlite3_errmsg(db) << endl;
     sqlite3_free(zErrMsg);
   } else {
-    cout << "SQL: insert_into_vcan_table successful" << endl;
+    cout << "SQL: insert_into_write_table successful" << endl;
   }
 }
 
@@ -208,15 +194,65 @@ vector<string> dbmanager::select_vcans_from_write_table(int canid) {
 }
 
 void dbmanager::store_read_rules(string vcan_name, json can_json) {
-  auto perms = can_json["read"].as<std::deque<std::string>>();
+  auto perms = can_json["can_id_read"].as<std::deque<std::string>>();
   for (auto r : perms) {
     this->insert_into_read_table(vcan_name, stoi(r));
   }
 }
 
 void dbmanager::store_write_rules(string vcan_name, json can_json) {
-  auto perms = can_json["write"].as<std::deque<std::string>>();
+  auto perms = can_json["can_id_write"].as<std::deque<std::string>>();
   for (auto r : perms) {
     this->insert_into_write_table(vcan_name, stoi(r));
   }
+}
+
+int maintest() {
+  dbmanager db;
+
+  string vcan_name = "vcan0";
+  int canid = 1;
+  vector<string> vcan_list;
+  vector<int> read_list;
+  vector<int> write_list;
+
+  /*
+    db.insert_into_read_table(vcan_name, 2);
+    db.insert_into_write_table(vcan_name, 2);
+    db.insert_into_read_table(vcan_name, 3);
+    db.insert_into_write_table(vcan_name, 3);
+    db.insert_into_read_table(vcan_name, 4);
+  */
+
+  vcan_list = db.get_vcan_names();
+
+  for (string vcan : vcan_list) {
+    cout << "vcan: " << vcan << endl;
+  }
+
+  read_list = db.get_read_rules(vcan_name);
+
+  for (int r : read_list) {
+    cout << "read: " << r << endl;
+  }
+
+  write_list = db.get_write_rules(vcan_name);
+
+  for (int w : write_list) {
+    cout << "write: " << w << endl;
+  }
+
+
+  vcan_list = db.select_vcans_from_read_table(canid);
+
+  for (string vcan : vcan_list) {
+    cout << "vcanr: " << vcan << endl;
+  }
+  vcan_list = db.select_vcans_from_write_table(canid);
+  for (string vcan : vcan_list) {
+    cout << "vcanw: " << vcan << endl;
+  }
+
+  db.delete_vcan(vcan_name);
+
 }

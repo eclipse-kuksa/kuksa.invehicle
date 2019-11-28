@@ -21,20 +21,23 @@
 #include "vcanhandler.hpp"
 #include "dbmanager.hpp"
 
+#define PERM_MNGT_BUFFER_SIZE 1000
+
 using namespace std;
 using namespace jsoncons;
 using jsoncons::json;
 
+
 class directAccessProcessor {
  private:
   string ks_token;
+  string perm_mngt_srv_address = "/home/a02482333/repo/permission-mngt/socket";
   class authenticator* tokenValidator = NULL;
   class accesschecker* accessValidator = NULL;
   class vcanhandler* vcanHandler = NULL;
 
-  string processCreate(class wschannel& channel, string rchannel);
+  string processCreate(json perm_json, string rchannel);
   string processDelete(string vchannel);
-  string processAuthorize(string token, class wschannel& channel);
 
  public:
   directAccessProcessor(class authenticator* vdator);
