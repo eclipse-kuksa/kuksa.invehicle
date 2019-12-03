@@ -53,6 +53,7 @@ You can add them to the virtualenv's `activate` script at `~/.virtualenv/kuksa-a
 
     $ python -m kuksa.appmanager
 
-Notes: 
+## Notes: 
 * python should be > v3.5. If you have mutliple versions installed, make sure you use the correct one e.g. `python3.5 -m kuksa.appmanager`.
 * the security token can be generated from hawkbit via `system config -> Allow a gateway to authenticate and manage multiple targets through a gateway security token`
+* if you encounter messages like `ERROR - kuksa.appmanager.hawkbit.DeploymentJob - ('Connection aborted.', FileNotFoundError(2, 'No such file or directory'))` you may want to check that docker is correcltly installed on your target via, e.g., `docker ps`
