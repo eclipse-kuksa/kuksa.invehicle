@@ -205,6 +205,7 @@ void *startWSServer(void *arg) { wserver->startServer(""); }
  * @return
  */
 int main(int argc, char *argv[]) {
+  cout << "Starting Direct-Access-Api app... [v20190403]" << endl;
   wsserver server(PORT, false);
 
   pthread_t startWSServer_thread;
@@ -220,8 +221,10 @@ int main(int argc, char *argv[]) {
   vcanhandler handler;
   handler.start_all_listeners();
 
-  // start obe client
-  obe_client_init();
+//  // start obe client
+//  obe_client_init();
 
-  getchar();
+  //getchar();
+  while(1)
+    sleep(1000);
 }

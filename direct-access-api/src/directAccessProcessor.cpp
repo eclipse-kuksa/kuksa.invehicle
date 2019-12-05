@@ -28,58 +28,16 @@ directAccessProcessor::directAccessProcessor(class authenticator* vdator) {
   vcanHandler = new vcanhandler();
 }
 
-string directAccessProcessor::processCreate(class wschannel& channel,
-                                            string rchannel) {
-#ifdef DEBUG
-// cout<< "Create :: path received from client = "<< rchannel <<endl;
-#endif
+string directAccessProcessor::processCreate(json perm_json, string rchannel) {
 
-  if (channel.accesses.has_key(rchannel)) {
-    string vcan = vcanHandler->createVcan();
 
-    if (vcan == "-1") {  // failed to create vcan
-      json result;
-      json error;
-      result["action"] = "create";
-      error["reason"] = "Failed to create VCAN";
-      result["error"] = error;
-      result["timestamp"] = time(NULL);
+  string vcan = vcanHandler->createVcan();
 
-      std::stringstream ss;
-      ss << pretty_print(result);
-      return ss.str();
-    }
-
-    // create vcan entry on db
-    dbmanager db;
-    db.insert_into_vcan_table(vcan);
-
-    // get read/write permissions from token
-    json can_json = tokenValidator->get_payload(this->ks_token);
-    db.store_read_rules(vcan, can_json);
-    db.store_write_rules(vcan, can_json);
-
-    // start vcan listener
-    vcanHandler->start_vcan_listener(vcan);
-
-    json res;
-    res["action"] = "create";
-    res["vcan"] = vcan;
-    res["rcan"] = rchannel;
-    res["timestamp"] = time(NULL);
-    stringstream ss;
-    ss << pretty_print(res);
-    cout << " Created VCAN Channel " << res["vcan"].as<string>()
-         << " for Real CAN " << rchannel
-         << " with access on : " << channel.accesses << endl;
-    return ss.str();
-  } else {
+  if (vcan == "-1") {  // failed to create vcan
     json result;
     json error;
     result["action"] = "create";
-
-    error["reason"] = "not authorized to create " + rchannel;
-
+    error["reason"] = "Failed to create VCAN";
     result["error"] = error;
     result["timestamp"] = time(NULL);
 
@@ -87,6 +45,33 @@ string directAccessProcessor::processCreate(class wschannel& channel,
     ss << pretty_print(result);
     return ss.str();
   }
+
+  // create vcan entry on db
+  dbmanager db;
+  db.insert_into_vcan_table(vcan);
+
+  // set read/write permissions
+  json can_json = perm_json["roles"];
+
+  db.store_read_rules(vcan, can_json);
+  db.store_write_rules(vcan, can_json);
+
+
+  // start vcan listener
+  vcanHandler->start_vcan_listener(vcan);
+
+  json res;
+  res["action"] = "create";
+  res["vcan"] = vcan;
+  res["rcan"] = rchannel;
+  res["timestamp"] = time(NULL);
+  stringstream ss;
+  ss << pretty_print(res);
+  cout << " Created VCAN Channel " << res["vcan"].as<string>()
+       << " for Real CAN " << rchannel
+       << " with access on : " << can_json << endl;
+  return ss.str();
+
 }
 
 string directAccessProcessor::processDelete(string vchannel) {
@@ -110,23 +95,75 @@ string directAccessProcessor::processDelete(string vchannel) {
   dbmanager db;
   db.delete_vcan(vchannel);
 
+  answer["vcan"] = vchannel;
+
+
   std::stringstream ss;
   ss << pretty_print(answer);
   return ss.str();
 }
 
-string directAccessProcessor::processAuthorize(string token,
-                                               class wschannel& channel) {
-  int ttl = tokenValidator->validate(channel, token);
 
-  if (ttl == -1) {
-    json result;
-    json error;
-    result["action"] = "authorize";
-    error["number"] = 401;
-    error["reason"] = "Invalid Token";
-    error["message"] = "Check the JWT token passed";
+string directAccessProcessor::processQuery(string req_json,
+                                           class wschannel& channel) {
 
+  json result;
+  json error;
+  json root;
+  root = json::parse(req_json);
+  string action = root["action"].as<string>();
+  string clientid = root["appid"].as<string>();
+  string secret = root["secret"].as<string>();
+
+  root["daaid"] = "daa_client";
+  root["daasecret"] = "5f84495a-72f0-4414-be4f-5eec082e5732";
+  root["api"] = "1";
+
+  cout << "incoming: " << root << endl;
+
+  // create socket
+  int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    printf("Failed to create AF_UNIX socket\n");
+    error["message"] = "Failed to process request.";
+    result["error"] = error;
+    result["timestamp"] = time(NULL);
+
+    std::stringstream ss;
+    ss << pretty_print(result);
+    return ss.str();
+  }
+  struct sockaddr_un addr;
+
+  memset(&addr, '0', sizeof(addr));
+  addr.sun_family = AF_UNIX;
+  strncpy(addr.sun_path, perm_mngt_srv_address.c_str(), sizeof(addr.sun_path)-1);
+
+  // connect
+  int conn_status = connect(sockfd, (struct sockaddr*)&addr, sizeof(addr));
+  if (conn_status < 0) {
+    printf("Failed to connect to permission mngt server: %d\n", conn_status);
+    error["message"] = "Failed to process request.";
+    result["error"] = error;
+    result["timestamp"] = time(NULL);
+
+    std::stringstream ss;
+    ss << pretty_print(result);
+    return ss.str();
+  }
+  printf("Connected to permission mngt server\n");
+
+  char buffer[PERM_MNGT_BUFFER_SIZE] = {};
+
+  memset(&buffer, '\0', sizeof(buffer));
+
+  string jsonstr;
+  root.dump(jsonstr);
+  char *msg = &jsonstr[0];
+
+  if (write(sockfd, msg, strlen(msg)) < 0){
+    printf("Failed to send request to permission mngt server\n");
+    error["message"] = "Failed to process request.";
     result["error"] = error;
     result["timestamp"] = time(NULL);
 
@@ -134,65 +171,52 @@ string directAccessProcessor::processAuthorize(string token,
     ss << pretty_print(result);
     return ss.str();
 
-  } else {
-    this->ks_token = token;
-    json result;
-    result["action"] = "authorize";
-    result["TTL"] = ttl;
-    result["timestamp"] = time(NULL);
+  }else{
+    printf("sent\n");
 
-    std::stringstream ss;
-    ss << pretty_print(result);
-    return ss.str();
-  }
-}
+    int r = read(sockfd, buffer, PERM_MNGT_BUFFER_SIZE);
+    if (r < 0) {
+      printf("Failed to read from permission mngt server\n");
+    } else if (r == 0) {
+      printf("Disconnected from permission mngt server \n");
+      connection_status = -1;
+    } else {
+      printf("permission mngt: %s\n", buffer);
 
-string directAccessProcessor::processQuery(string req_json,
-                                           class wschannel& channel) {
-  json root;
-  string response;
-  root = json::parse(req_json);
-  string action = root["action"].as<string>();
+      try{
+        //parse response
+        json perm_json = json::parse(buffer);
 
-  if (action == "authorize") {
-    string token = root["tokens"].as<string>();
+        if (action == "create") {
+          cout << "directAccessProcessor::processQuery: Create action: " << action << endl;
+          string can_channel = root["channel"].as<string>();
+          result = processCreate(perm_json, can_channel);
+        } else if (action == "delete") {
+          cout << "directAccessProcessor::processQuery: Delete action: " << action << endl;
+          string vcan_channel = root["vchannel"].as<string>();
+          result = processDelete(vcan_channel);
+        } else {
+           cout << "vsscommandprocessor::processQuery: Unknown action: " << action << endl;
+           error["message"] = "Unknown action";
+           result["error"] = error;
+           result["timestamp"] = time(NULL);
 
-    // cout << "vsscommandprocessor::processQuery: authorize query with token =
-    // " << token << endl;
-    response = processAuthorize(token, channel);
-  } else {
-    string can_channel = root["channel"].as<string>();
+        }
+      }
+      catch(...){
+        cout << "Exception occured trying to handle permission mngt response "<< endl;
 
-    bool hasAccess = accessValidator->checkAccess(channel, can_channel);
+        error["message"] = "Failed to process request.";
+        result["error"] = error;
+        result["timestamp"] = time(NULL);
+      }
 
-    if (!hasAccess) {
-      json result;
-      json error;
-      result["action"] = action;
-      error["number"] = 403;
-      error["reason"] = "Forbidden";
-      error["message"] = "Not authorized to access resource";
-
-      result["error"] = error;
-      result["timestamp"] = time(NULL);
-
+      memset(&buffer, '\0', sizeof(buffer));
       std::stringstream ss;
       ss << pretty_print(result);
-      response = ss.str();
-
-    } else if (action == "create") {
-      // cout << "vsscommandprocessor::processQuery: create query  for " <<
-      // can_channel << endl;
-      response = processCreate(channel, can_channel);
-    } else if (action == "delete") {
-      // cout << "vsscommandprocessor::processQuery: delete query  for " <<
-      // can_channel << endl;
-      response = processDelete(can_channel);
-    } else {
-      // cout << "vsscommandprocessor::processQuery: Unknown action " << action
-      // << endl;
+      return ss.str();
     }
+
   }
 
-  return response;
 }

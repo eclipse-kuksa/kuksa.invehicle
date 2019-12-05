@@ -34,6 +34,7 @@
 #include <thread>
 #include <linux/can.h>
 #include <linux/can/raw.h>
+#include <unordered_map>
 #include "common.hpp"
 #include "dbmanager.hpp"
 #include "obeclient.hpp"
@@ -41,7 +42,6 @@
 #define MAX_RAND_TRY_LIMIT 10
 #define MIN_VCAN_NO 0
 #define VCAN_NO_RANGE 100
-#define BUFFER_SIZE 100
 
 using namespace std;
 
@@ -74,6 +74,20 @@ class vcanlistener {
   void vcan_read(string vcan_name);
   e_result vcan_socket_init();
   void vcan_write_frame(struct can_frame* frame);
+  void vcan_close(int can_sock);
+};
+
+class vcanwriter {  // ToDo: add thread safety
+
+ private:
+  static unordered_map<string, int> vcan_conn_map;
+  static e_result vcan_socket_init(string vcan_name);
+  static int get_connection(string vcan_name);
+ public:
+  vcanwriter();
+  ~vcanwriter();
+  static void vcan_write_frame(string vcan_name, struct can_frame* frame);
+  static void vcan_close(string vcan_name);
 };
 
 #endif  // VCANHANDLER_H
