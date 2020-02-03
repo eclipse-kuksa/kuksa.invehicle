@@ -1,0 +1,4 @@
+[submodule "w3c-visserver-api"]
+	path = w3c-visserver-api
+	url = https://github.com/eclipse/kuksa.val.git
+	branch = invehicle-ref
