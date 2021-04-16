@@ -14,7 +14,6 @@ This documentation provides information about setting up the Kuksa dongle.
  4.3 [Wireless Interface and Static IP](#wireless-interface-and-static-ip)
 5. [Troubleshooting](#troubleshooting)
 
-
 ## Hardware Pre-requisits
 
 ##### Mandatory
