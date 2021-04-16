@@ -2,3 +2,6 @@
 	path = w3c-visserver-api
 	url = https://github.com/eclipse/kuksa.val.git
 	branch = invehicle-ref
+[submodule "kuksa-dongle"]
+	path = kuksa-dongle
+	url = https://github.com/eclipse/kuksa.hardware.git
