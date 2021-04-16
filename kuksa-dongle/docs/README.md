@@ -3,19 +3,19 @@
 This documentation provides information about setting up the Kuksa dongle.
 
 ## Table of Contents
-1. [Pre-requisits](#Pre-requisits)
+1. [Hardware Pre-requisits](#hardware-pre-requisits)
 2. [OS Installation](#installation-of-os)  
  2.1 [Raspbian OS](#raspbian-os)  
  2.2 [Ubuntu OS](#ubuntu-os)
 3. [OBD STN2120 Configuration](#obd-stn2120-configuration)
-4. [Configure WiFi Access Point](#configure-wireless-access-point-interface)
- 4.1 [Hostapd Configuration](#hostapd-configuration)
- 4.2 [Dnsmasq Configuration](#dnsmasq-configuration)
+4. [Configure WiFi Access Point](#configure-wireless-access-point-interface)  
+ 4.1 [Hostapd Configuration](#hostapd-configuration)  
+ 4.2 [Dnsmasq Configuration](#dnsmasq-configuration)  
  4.3 [Wireless Interface and Static IP](#wireless-interface-and-static-ip)
 5. [Troubleshooting](#troubleshooting)
 
 
-## Pre-requisits
+## Hardware Pre-requisits
 
 ##### Mandatory
 
