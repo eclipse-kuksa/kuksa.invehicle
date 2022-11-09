@@ -11,6 +11,7 @@ Contributors:
     Robert Hoettger - initial readme files added
 *****************************************************************************
 -->
+# THIS REPOSITORY HAS BEEN ARCHIVED, see [issue 131](https://github.com/eclipse/kuksa.invehicle/issues/131) for details.
 
 # Kuksa-InVehicle Repo
 
